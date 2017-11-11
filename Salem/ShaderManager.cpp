@@ -15,11 +15,13 @@ struct ShaderManager::impl {
 
 ShaderManager::ShaderManager()
 {
+	pImpl = new impl();
 }
 
 
 ShaderManager::~ShaderManager()
 {
+	delete pImpl;
 }
 
 GLuint ShaderManager::GetShader(string name)

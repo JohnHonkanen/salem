@@ -27,7 +27,7 @@ struct MeshData {
 	GLuint indexCount;
 };
 struct Material {
-	std::string shader;
+	std::string shader = "default";
 	std::string diffuseMap; //Color Map
 	std::string normalMap;
 	std::string specularMap;
@@ -74,7 +74,14 @@ Model::~Model()
 
 void Model::Render(Renderer *r)
 {
+	for (int i = 0; i < pImpl->VAO.size(); i++) {
+		glUseProgram(r->GetShader(pImpl->materials[i].shader));
 
+		glBindVertexArray(pImpl->VAO[i]);
+		glDrawElements(GL_TRIANGLES, pImpl->data[i].indexCount, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+	}
 	cout << pImpl->path << endl;
 }
 
