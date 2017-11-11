@@ -2,10 +2,11 @@
 #include "InstanceManager.h"
 #include "ShaderManager.h"
 #include <glm\gtc\matrix_transform.hpp>
+#include <memory>
 
 struct Renderer::impl {
 	InstanceManager instanceManager;
-	ShaderManager shaderManager;
+	std::unique_ptr<ShaderManager> shaderManager;
 	
 	glm::mat4 projection;
 	glm::mat4 view;
@@ -15,6 +16,7 @@ struct Renderer::impl {
 Renderer::Renderer()
 {
 	pImpl = new impl();
+	pImpl->shaderManager = std::make_unique<ShaderManager>();
 	pImpl->projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100.0f);
 	pImpl->view = glm::mat4(1.0f);
 }
@@ -32,7 +34,7 @@ Model * Renderer::GetModel(std::string path)
 
 GLuint Renderer::GetShader(std::string name)
 {
-	return pImpl->shaderManager.GetShader(name);
+	return pImpl->shaderManager->GetShader(name);
 }
 
 void Renderer::GetProjection(glm::mat4 & perspective, glm::mat4 & view)
@@ -41,7 +43,7 @@ void Renderer::GetProjection(glm::mat4 & perspective, glm::mat4 & view)
 	view = pImpl->view;
 }
 
-ShaderManager Renderer::GetShaderManager()
+ShaderManager * Renderer::GetShaderManager()
 {
-	return pImpl->shaderManager;
+	return pImpl->shaderManager.get();
 }
