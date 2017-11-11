@@ -86,7 +86,7 @@ void Application::impl::SetupRC()
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4); // Turn on x4 multisampling anti-aliasing (MSAA)
 
-													   // Create 800x600 window
+	// Create window
 	window = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
