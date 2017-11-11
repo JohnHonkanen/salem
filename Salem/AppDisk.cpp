@@ -7,13 +7,14 @@ using namespace std;
 
 
 struct AppDisk::impl {
-	Renderer renderer;
-	vector<string> objects;
+	unique_ptr<Renderer> renderer;
+	vector<Model *> objects;
 };
 
 AppDisk::AppDisk()
 {
 	pImpl = new impl();
+	pImpl->renderer = make_unique<Renderer>();
 }
 
 
@@ -29,7 +30,7 @@ void AppDisk::Update()
 void AppDisk::Render()
 {
 	for (int i = 0; i < pImpl->objects.size(); i++) {
-		pImpl->renderer.GetModel(pImpl->objects[i])->Render(pImpl->renderer);
+		pImpl->objects[i]->Render(pImpl->renderer.get());
 	}
 }
 
@@ -39,5 +40,5 @@ void AppDisk::Input()
 
 void AppDisk::addObject(std::string path)
 {
-	pImpl->objects.push_back(path);
+	pImpl->objects.push_back(pImpl->renderer->GetModel(path));
 }

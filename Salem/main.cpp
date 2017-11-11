@@ -6,7 +6,7 @@ int main() {
 	AppDisk *salem = new AppDisk();
 	salem->addObject("Assets/Cube/cube.obj");
 	
-	app.SetDisk(salem);
+	app.SetDisk(salem); 
 	app.Run();
 	return 0;
 }

@@ -72,7 +72,7 @@ Model::~Model()
 	delete pImpl;
 }
 
-void Model::Render(Renderer r)
+void Model::Render(Renderer *r)
 {
 	cout << pImpl->path << endl;
 }

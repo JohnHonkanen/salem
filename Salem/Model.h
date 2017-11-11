@@ -12,7 +12,7 @@ public:
 	Model(string path);
 	~Model();
 
-	void Render(Renderer r);
+	void Render(Renderer *r);
 private:
 	struct impl;
 
