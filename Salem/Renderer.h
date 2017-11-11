@@ -4,7 +4,7 @@
 #include <glm\glm.hpp>
 
 class Model;
-
+class ShaderManager;
 class Renderer
 {
 public:
@@ -14,7 +14,8 @@ public:
 	Model* GetModel(std::string path);
 	GLuint GetShader(std::string name);
 	void GetProjection(glm::mat4 &perspective, glm::mat4 &view);
-
+	
+	ShaderManager GetShaderManager();
 private:
 
 	struct impl;

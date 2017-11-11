@@ -7,6 +7,8 @@
 #include <vector>
 #include <GL\glew.h>
 #include <glm\glm.hpp>
+#include "ShaderManager.h"
+#include <glm\gtc\matrix_transform.hpp>
 
 using namespace glm;
 
@@ -74,8 +76,22 @@ Model::~Model()
 
 void Model::Render(Renderer *r)
 {
+	glm::mat4 projection, view;
+
+	r->GetProjection(projection, view);
+
+	ShaderManager shaderManager = r->GetShaderManager();
+	GLuint program = r->GetShader(pImpl->materials[0].shader); // <---- May need to change Material[0] when we do deferred shading.
+
 	for (int i = 0; i < pImpl->VAO.size(); i++) {
-		glUseProgram(r->GetShader(pImpl->materials[i].shader));
+		glUseProgram(program);
+
+		glm::mat4 model(1.0f);
+		model = translate(model, vec3(0.0f, 0.0f, -3.0f));
+		
+		shaderManager.SetUniformMatrix4fv(program, "projection", projection);
+		shaderManager.SetUniformMatrix4fv(program, "view", view);
+		shaderManager.SetUniformMatrix4fv(program, "model", model);
 
 		glBindVertexArray(pImpl->VAO[i]);
 		glDrawElements(GL_TRIANGLES, pImpl->data[i].indexCount, GL_UNSIGNED_INT, 0);

@@ -1,4 +1,5 @@
 #include "ShaderManager.h"
+#include <glm\gtc\type_ptr.hpp>
 #include <map>
 #include <fstream>
 #include <sstream>
@@ -16,6 +17,7 @@ struct ShaderManager::impl {
 ShaderManager::ShaderManager()
 {
 	pImpl = new impl();
+	pImpl->Init();
 }
 
 
@@ -27,6 +29,11 @@ ShaderManager::~ShaderManager()
 GLuint ShaderManager::GetShader(string name)
 {
 	return pImpl->shaders[name];
+}
+
+void ShaderManager::SetUniformMatrix4fv(GLuint program, const char * location, glm::mat4 value)
+{
+	glUniformMatrix4fv(glGetUniformLocation(program, location), 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void ShaderManager::impl::CreateShader(string name, const char * vertexPath, const char * fragmentPath)

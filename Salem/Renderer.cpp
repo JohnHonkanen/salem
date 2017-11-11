@@ -40,3 +40,8 @@ void Renderer::GetProjection(glm::mat4 & perspective, glm::mat4 & view)
 	perspective = pImpl->projection;
 	view = pImpl->view;
 }
+
+ShaderManager Renderer::GetShaderManager()
+{
+	return pImpl->shaderManager;
+}
