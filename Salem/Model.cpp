@@ -74,6 +74,7 @@ Model::~Model()
 
 void Model::Render(Renderer *r)
 {
+
 	cout << pImpl->path << endl;
 }
 

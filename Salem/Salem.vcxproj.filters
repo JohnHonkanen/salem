@@ -33,6 +33,9 @@
     <ClCompile Include="InstanceManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -50,5 +53,16 @@
     <ClInclude Include="InstanceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Shader\textured.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Assets\Shader\textured.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
