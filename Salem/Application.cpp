@@ -16,9 +16,10 @@ struct Application::impl {
 	SDL_Window *window;
 	SDL_GLContext glContext;
 
+	impl() {};
 	impl(const char * name, uint width, uint height);
-	~impl();
 	void SetupRC();
+	void Destroy();
 	//End of Window //
 
 	void Input();
@@ -26,16 +27,13 @@ struct Application::impl {
 	void Render();
 };
 
-Application::Application(const char* name, uint width, uint height)
+Application::Application()
 {
-	pImpl = new impl(name, width, height);
-	pImpl->SetupRC();
-
 }
 
-
-Application::~Application()
+Application::Application(const char* name, uint width, uint height) : pImpl( new impl(name, width, height))
 {
+	pImpl->SetupRC();
 }
 
 void Application::Run()
@@ -45,6 +43,8 @@ void Application::Run()
 		pImpl->Update();
 		pImpl->Render();
 	}
+
+	pImpl->Destroy();
 	
 }
 
@@ -52,11 +52,8 @@ Application::impl::impl(const char * name, uint width, uint height): name(name),
 {
 }
 
-Application::impl::~impl()
-{
-	SDL_GL_DeleteContext(glContext);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+Application::~Application() {
+	delete pImpl;
 }
 
 void Application::impl::SetupRC()
@@ -88,6 +85,13 @@ void Application::impl::SetupRC()
 
 	glContext = SDL_GL_CreateContext(window); // Create opengl context and attach to window
 	SDL_GL_SetSwapInterval(1); // set swap buffers to sync with monitor's vertical refresh rate
+}
+
+void Application::impl::Destroy()
+{
+	SDL_GL_DeleteContext(glContext);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
 }
 
 void Application::impl::Input()
