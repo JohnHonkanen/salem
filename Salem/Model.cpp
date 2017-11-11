@@ -72,8 +72,9 @@ Model::~Model()
 	delete pImpl;
 }
 
-void Model::Render()
+void Model::Render(Renderer r)
 {
+	cout << r.id << ": " << pImpl->path << endl;
 }
 
 void Model::impl::GenerateVAO()

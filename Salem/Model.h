@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-
+#include "Renderer.h"
 using namespace std;
 
 struct MeshData;
@@ -12,7 +12,7 @@ public:
 	Model(string path);
 	~Model();
 
-	void Render();
+	void Render(Renderer r);
 private:
 	struct impl;
 

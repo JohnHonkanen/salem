@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 class AppDisk
 {
 public:
@@ -8,5 +9,11 @@ public:
 	void Update();
 	void Render();
 	void Input();
+
+	void addObject(std::string path);
+private:
+	struct impl;
+
+	impl * pImpl;
 };
 
