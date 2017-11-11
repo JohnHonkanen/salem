@@ -74,7 +74,7 @@ Model::~Model()
 
 void Model::Render(Renderer r)
 {
-	cout << r.id << ": " << pImpl->path << endl;
+	cout << pImpl->path << endl;
 }
 
 void Model::impl::GenerateVAO()

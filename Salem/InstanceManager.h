@@ -1,19 +1,20 @@
 #pragma once
+
 #include <string>
 
 class Model;
 
-class Renderer
+class InstanceManager
 {
 public:
-	Renderer();
-	~Renderer();
+	InstanceManager();
+	~InstanceManager();
 
 	Model* GetModel(std::string path);
 
 private:
-
 	struct impl;
 	impl* pImpl;
+
 };
 

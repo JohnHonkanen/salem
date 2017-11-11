@@ -118,6 +118,7 @@
   <ItemGroup>
     <ClCompile Include="AppDisk.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="InstanceManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -125,6 +126,7 @@
   <ItemGroup>
     <ClInclude Include="AppDisk.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="InstanceManager.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
