@@ -121,6 +121,7 @@
     <ClCompile Include="InstanceManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
   </ItemGroup>
@@ -129,6 +130,7 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="InstanceManager.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ShaderManager.h" />
   </ItemGroup>

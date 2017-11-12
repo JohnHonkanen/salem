@@ -74,7 +74,7 @@ Model::~Model()
 	delete pImpl;
 }
 
-void Model::Render(Renderer *r)
+void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 {
 	glm::mat4 projection, view;
 
@@ -82,16 +82,17 @@ void Model::Render(Renderer *r)
 
 	ShaderManager * shaderManager = r->GetShaderManager();
 	GLuint program = r->GetShader(pImpl->materials[0].shader); // <---- May need to change Material[0] when we do deferred shading.
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glDisable(GL_CULL_FACE);
 
 	for (int i = 0; i < pImpl->VAO.size(); i++) {
 		glUseProgram(program);
-
-		glm::mat4 model(1.0f);
-		model = translate(model, vec3(0.0f, 0.0f, -3.0f));
 		
+		
+
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
-		shaderManager->SetUniformMatrix4fv(program, "model", model);
+		shaderManager->SetUniformMatrix4fv(program, "model", modelMatrix);
 
 		glBindVertexArray(pImpl->VAO[i]);
 		glDrawElements(GL_TRIANGLES, pImpl->data[i].indexCount, GL_UNSIGNED_INT, 0);
