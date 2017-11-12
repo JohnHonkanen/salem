@@ -37,7 +37,6 @@ void Object::Render(Renderer *r)
 void Object::Translate(vec3 translation)
 {
 	transformMatrix = translate(transformMatrix, translation);
-	transformMatrix[0][4];
 	CalculateModelMatrix();
 }
 
