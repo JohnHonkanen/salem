@@ -1,20 +1,9 @@
 #include "Object.h"
 #include "Model.h"
 #include "Renderer.h"
-#include <glm\gtx\quaternion.hpp>
-#include <glm\gtc\matrix_transform.hpp>
 
-using namespace glm;
 struct Object::impl {
 	Model *model;
-	mat4 transformMatrix;
-	quat rotationMatrix;
-	mat4 scaleMatrix;
-
-	mat4 modelMatrix;
-
-	void CalculateModelMatrix();
-
 };
 
 
@@ -34,33 +23,33 @@ Object::~Object()
 
 void Object::Render(Renderer *r)
 {
-	pImpl->model->Render(r, pImpl->modelMatrix);
+	pImpl->model->Render(r, modelMatrix);
 }
 
 void Object::Translate(vec3 translation)
 {
-	pImpl->transformMatrix = translate(pImpl->transformMatrix, translation);
-	pImpl->CalculateModelMatrix();
+	transformMatrix = translate(transformMatrix, translation);
+	CalculateModelMatrix();
 }
 
 void Object::Rotate(glm::vec3 rotation)
 {
-	pImpl->rotationMatrix = quat(rotation) * pImpl->rotationMatrix;
-	pImpl->CalculateModelMatrix();
+	rotationMatrix = quat(rotation) *rotationMatrix;
+	CalculateModelMatrix();
 }
 
 void Object::Scale(glm::vec3 scale)
 {
-	pImpl->scaleMatrix = glm::scale(pImpl->scaleMatrix, scale);
-	pImpl->CalculateModelMatrix();
+	scaleMatrix = glm::scale(scaleMatrix, scale);
+	CalculateModelMatrix();
 }
 
 glm::mat4 Object::GetModelMatrix()
 {
-	return pImpl->modelMatrix;
+	return modelMatrix;
 }
 
-void Object::impl::CalculateModelMatrix()
+void Object::CalculateModelMatrix()
 {
 	modelMatrix = transformMatrix * toMat4(rotationMatrix) * scaleMatrix;
 }
