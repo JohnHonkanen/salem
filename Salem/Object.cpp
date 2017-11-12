@@ -21,6 +21,14 @@ Object::~Object()
 	delete pImpl;
 }
 
+void Object::Update()
+{
+}
+
+void Object::Input()
+{
+}
+
 void Object::Render(Renderer *r)
 {
 	pImpl->model->Render(r, modelMatrix);
@@ -29,6 +37,7 @@ void Object::Render(Renderer *r)
 void Object::Translate(vec3 translation)
 {
 	transformMatrix = translate(transformMatrix, translation);
+	transformMatrix[0][4];
 	CalculateModelMatrix();
 }
 

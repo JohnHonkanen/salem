@@ -14,6 +14,8 @@ public:
 	Object(Model *m);
 	~Object();
 
+	virtual void Update();
+	virtual void Input();
 	virtual void Render(Renderer *r);
 	void Translate(glm::vec3 translation);
 	void Rotate(glm::vec3 rotation);
