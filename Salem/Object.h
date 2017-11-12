@@ -22,6 +22,8 @@ public:
 	void Scale(glm::vec3 scale);
 
 	vec3 Front();
+	vec3 Right();
+	vec3 Up();
 	glm::mat4 GetModelMatrix();
 
 protected:

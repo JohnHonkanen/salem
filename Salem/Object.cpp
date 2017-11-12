@@ -59,6 +59,18 @@ vec3 Object::Front()
 	return vec3(v);
 }
 
+vec3 Object::Right()
+{
+	vec4 v = rotationMatrix * vec4(1, 0, 0, 1);
+	return vec3(v);
+}
+
+vec3 Object::Up()
+{
+	vec4 v = rotationMatrix * vec4(0, 1, 0, 1);
+	return vec3(v);
+}
+
 glm::mat4 Object::GetModelMatrix()
 {
 	return modelMatrix;
