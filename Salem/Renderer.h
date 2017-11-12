@@ -2,6 +2,7 @@
 #include <string>
 #include <GL\glew.h>
 #include <glm\glm.hpp>
+#include "Camera.h"
 
 class Model;
 class ShaderManager;
@@ -16,6 +17,8 @@ public:
 	void GetProjection(glm::mat4 &perspective, glm::mat4 &view);
 	
 	ShaderManager * GetShaderManager();
+	Camera camera;
+
 private:
 
 	struct impl;

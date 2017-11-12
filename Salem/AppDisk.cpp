@@ -3,12 +3,16 @@
 #include "Renderer.h"
 #include <vector>
 #include <memory>
+
+
 using namespace std;
 typedef unique_ptr<Object> ObjectUP;
 
 struct AppDisk::impl {
 	unique_ptr<Renderer> renderer;
 	vector<ObjectUP> objects;
+
+	
 };
 
 AppDisk::AppDisk()
@@ -39,6 +43,7 @@ void AppDisk::Render()
 
 void AppDisk::Input()
 {
+	pImpl->renderer->camera.Input();
 	for (int i = 0; i < pImpl->objects.size(); i++) {
 		pImpl->objects[i]->Input();
 	}
