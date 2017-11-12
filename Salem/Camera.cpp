@@ -11,7 +11,8 @@ struct Camera::impl {
 	float near = 0.1f;
 	float far = 100.0f;
 */
-
+	glm::vec3 movement;
+	int rotate;
 };
 
 Camera::Camera()
@@ -28,32 +29,54 @@ Camera::~Camera()
 
 glm::mat4 Camera::GetView()
 {
-	return glm::lookAt(glm::vec3(transformMatrix[3]), Front(), Up());
+	return glm::lookAt(glm::vec3(transformMatrix[3]), glm::vec3(transformMatrix[3]) - Front(), Up());
 }
 
 void Camera::Input()
 {
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
 
-	// Forward in positive Z
+	glm::vec3 tempMovement = glm::vec3(0);
+	int tempRotate = 0;
+	float dt = 0.1f;
+
+	// Forward
 	if (keys[SDL_SCANCODE_W]) {
-		Translate(Front());
+		tempMovement.z -= 1;
 	}
 
-	// Backward in negative Z (Going inverse of camera front.
+	// Backward 
 	if (keys[SDL_SCANCODE_S]) {
-		Translate(-Front());
+		tempMovement.z += 1;
 	}
 
 	// Left 
 	if (keys[SDL_SCANCODE_A]) {
-		Translate(-Right());
+		tempMovement.x -= 1;
 	}
 
 	// Right
 	if (keys[SDL_SCANCODE_D]) {
-		Translate(Right());
+		tempMovement.x += 1;
 	}
 
+	// Left Rotation
+	if (keys[SDL_SCANCODE_Q]) {
+		tempRotate += 1;
+	}
 
+	// Right Rotation
+	if (keys[SDL_SCANCODE_E]) {
+		tempRotate -= 1;
+	}
+
+	pImpl->movement = tempMovement;
+	pImpl->rotate = tempRotate;
+}
+
+void Camera::Update(float dt)
+{
+	Translate(((Front() * pImpl->movement.z) + (Right() * pImpl->movement.x)) * dt);
+	
+	Rotate(glm::vec3(0.0f, 0.1f, 0.0f) * float(pImpl->rotate) * dt);
 }

@@ -18,7 +18,7 @@ Renderer::Renderer()
 {
 	pImpl = new impl();
 	pImpl->shaderManager = std::make_unique<ShaderManager>();
-	pImpl->projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100.0f);
+	pImpl->projection = glm::perspective(glm::radians(60.0f), 16.0f / 9.0f, 0.1f, 100.0f);
 }
 
 

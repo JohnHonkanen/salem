@@ -29,6 +29,7 @@ AppDisk::~AppDisk()
 
 void AppDisk::Update()
 {
+	pImpl->renderer->camera.Update(0.1);
 	for (int i = 0; i < pImpl->objects.size(); i++) {
 		pImpl->objects[i]->Update();
 	}
