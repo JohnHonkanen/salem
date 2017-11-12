@@ -44,6 +44,12 @@ void Object::Scale(glm::vec3 scale)
 	CalculateModelMatrix();
 }
 
+vec3 Object::Front()
+{
+	vec4 v = rotationMatrix * vec4(0,0,1,1);
+	return vec3(v);
+}
+
 glm::mat4 Object::GetModelMatrix()
 {
 	return modelMatrix;
