@@ -27,9 +27,9 @@ AppDisk::~AppDisk()
 	delete pImpl;
 }
 
-void AppDisk::Update()
+void AppDisk::Update(float dt)
 {
-	pImpl->renderer->camera.Update(0.1);
+	pImpl->renderer->camera.Update(dt);
 	for (int i = 0; i < pImpl->objects.size(); i++) {
 		pImpl->objects[i]->Update();
 	}

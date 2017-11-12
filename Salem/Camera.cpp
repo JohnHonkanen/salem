@@ -13,6 +13,8 @@ struct Camera::impl {
 */
 	glm::vec3 movement;
 	int rotate;
+	float cameraSpeed = 7.5f;
+	float cameraRotateSpeed = 1.5f;
 };
 
 Camera::Camera()
@@ -76,7 +78,7 @@ void Camera::Input()
 
 void Camera::Update(float dt)
 {
-	Translate(((Front() * pImpl->movement.z) + (Right() * pImpl->movement.x)) * dt);
+	Translate(((Front() * pImpl->movement.z) + (Right() * pImpl->movement.x)) * dt * pImpl->cameraSpeed);
 	
-	Rotate(glm::vec3(0.0f, 0.1f, 0.0f) * float(pImpl->rotate) * dt);
+	Rotate(glm::vec3(0.0f, 1.0f, 0.0f) * float(pImpl->rotate) * dt * pImpl->cameraRotateSpeed);
 }

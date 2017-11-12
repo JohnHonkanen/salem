@@ -6,7 +6,7 @@ public:
 	AppDisk();
 	~AppDisk();
 
-	void Update();
+	void Update(float dt);
 	void Render();
 	void Input();
 
