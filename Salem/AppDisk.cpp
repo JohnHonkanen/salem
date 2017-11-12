@@ -26,7 +26,7 @@ AppDisk::~AppDisk()
 void AppDisk::Update()
 {
 	for (int i = 0; i < pImpl->objects.size(); i++) {
-		pImpl->objects[i]->Rotate(glm::vec3(0.01f, 0.01f,0.0f));
+		pImpl->objects[i]->Update();
 	}
 }
 
@@ -39,6 +39,9 @@ void AppDisk::Render()
 
 void AppDisk::Input()
 {
+	for (int i = 0; i < pImpl->objects.size(); i++) {
+		pImpl->objects[i]->Input();
+	}
 }
 
 void AppDisk::addObject(std::string path)
