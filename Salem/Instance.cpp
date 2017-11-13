@@ -4,6 +4,7 @@
 #include <glm\glm.hpp>
 #include <vector>
 #include <string>
+#include "TextureManager.h"
 
 using namespace std;
 using namespace glm;
@@ -48,6 +49,8 @@ void Instance::Render(Renderer * r)
 	GLuint program = r->GetShader(pImpl->shader);
 	glUseProgram(program);
 
+	TextureManager textureManager = TextureManager();
+
 	for (int i = 0; i < VAOs.size(); i++) {
 		
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
@@ -77,7 +80,27 @@ void Instance::Render(Renderer * r)
 		shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
 		shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
 		shaderManager->SetUniformLocation1f(program, "material.shininess", 16.0f);
+		
+		// Bind Map textures to texture units
+		shaderManager->SetUniformLocation1i(program, "diffuseMap", 0);
+		shaderManager->SetUniformLocation1i(program, "specularMap", 1);
+		shaderManager->SetUniformLocation1i(program, "emissionMap", 2);
 
+		unsigned int diffuseMap = textureManager.GetTexture("Assets/Textures/container2.bmp");
+		unsigned int specularMap = textureManager.GetTexture("Assets/Textures/container2_specular.bmp");
+		unsigned int emissionMap = textureManager.GetTexture("Assets/Textures/lavaSplash.bmp");
+
+		// Bind diffuse map
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+		// Bind specular map
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
+
+		// Bind emission map
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, emissionMap);
 
 		glBindVertexArray(VAOs[i]);
 		glDrawElementsInstanced(GL_TRIANGLES, data[i].indexCount, GL_UNSIGNED_INT, 0, pImpl->amount);
