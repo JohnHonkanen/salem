@@ -134,6 +134,12 @@ void AppDisk::impl::RenderLightPass()
 
 	RenderQuad();
 
+	gBuffer->BindForReading();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); //Write to default
+
+	glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }
 
 void AppDisk::impl::PointLightPass()
