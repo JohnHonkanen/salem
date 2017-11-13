@@ -1,6 +1,4 @@
-// textured.vert
-// use textures, but no lighting
-#version 330
+#version 330 core
 
 layout(location = 0) in vec3 in_Position;
 layout(location = 2) in vec2 in_UV;
@@ -13,9 +11,6 @@ uniform mat4 projection;
 out vec3 FragPos; // Vertex Position 
 out vec3 ex_Normal;
 out vec2 ex_UV;
-
-//in  vec3 in_Position;
-
 
 // multiply each vertex position by the MVP matrix
 void main(void) {

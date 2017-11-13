@@ -53,6 +53,32 @@ void Instance::Render(Renderer * r)
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
 
+		// View position of camera
+		glm::vec3 cameraPosition = r->camera.GetModelMatrix()[3];
+		shaderManager->SetUniformLocation3f(program, "pointLight.position",
+			cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+		// Pointlight Uniforms + Properties
+		
+		shaderManager->SetUniformLocation3f(program, "pointLight.position", 
+			cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+		shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.05f, 0.05f, 0.05f);
+		shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.8f, 0.8f, 0.8f);
+		shaderManager->SetUniformLocation3f(program, "pointLight.specular", 1.0f, 1.0f, 1.0f);
+		
+		// Pointlight Attenuation
+		shaderManager->SetUniformLocation1f(program, "pointLight.constant", 1.0f);
+		shaderManager->SetUniformLocation1f(program, "pointLight.constant", 0.09f);
+		shaderManager->SetUniformLocation1f(program, "pointLight.constant", 0.032f);
+
+		// Material Uniforms + Properties
+
+		shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
+		shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
+		shaderManager->SetUniformLocation1f(program, "material.shininess", 1.0f);
+
+
 		glBindVertexArray(VAOs[i]);
 		glDrawElementsInstanced(GL_TRIANGLES, data[i].indexCount, GL_UNSIGNED_INT, 0, pImpl->amount);
 		glBindVertexArray(0);

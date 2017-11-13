@@ -36,6 +36,21 @@ void ShaderManager::SetUniformMatrix4fv(GLuint program, const char * location, g
 	glUniformMatrix4fv(glGetUniformLocation(program, location), 1, GL_FALSE, glm::value_ptr(value));
 }
 
+void ShaderManager::SetUniformLocation3f(GLuint program, const char * location, float x, float y, float z)
+{
+	glUniform3f(glGetUniformLocation(program, location), x, y, z);
+}
+
+void ShaderManager::SetUniformLocation1f(GLuint program, const char * location, float x)
+{
+	glUniform1f(glGetUniformLocation(program, location), x);
+}
+
+void ShaderManager::SetUniformLocation1i(GLuint program, const char * location, int x)
+{
+	glUniform1i(glGetUniformLocation(program, location), x);
+}
+
 void ShaderManager::impl::CreateShader(string name, const char * vertexPath, const char * fragmentPath)
 {
 	// 1. Retrieve the vertex/fragment source code from destination file path.
