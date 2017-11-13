@@ -15,7 +15,7 @@ uniform vec3 lightPosi;
 
 out vec3 tangentFragPos; // Vertex Position 
 out vec3 tangentViewPos;
-out vec3 tangentlightPos;
+out vec3 tangentLightPos;
 out vec2 ex_UV;
 
 // multiply each vertex position by the MVP matrix
@@ -29,13 +29,13 @@ void main(void) {
 	vec3 FragPos = vec3(ImodelMatrix * vec4(in_Position, 1.0f));
 	
 	// Calculate World Normals <----- Ideally should be done in CPU instead, less expensive. 
-	ex_Normal = mat3(transpose(inverse(ImodelMatrix))) * in_Normal; 
+	//vec3 ex_Normal = mat3(transpose(inverse(ImodelMatrix))) * in_Normal; 
     
 	// Gram/Schmidt process to orthogolize the TBN vector so that each vector is again perpendicular to the other vectors.
 	//mat3 normalMatrix = mat3(transpose(inverse(ImodelMatrix)));
 
-	vec3 T = normalize(vec3(ImodelMatrix * vec4(in_Tangent, 0.0f))));
-	vec3 N = normalize(vec3(ImodelMatrix * vec4(ex_Normal, 0.0f)));
+	vec3 T = normalize(vec3(ImodelMatrix * vec4(in_Tangent, 0.0f)));
+	vec3 N = normalize(vec3(ImodelMatrix * vec4(in_Normal, 0.0f)));
 
 	// re-orthogonalize T with respect to N
 	T = normalize(T - dot(T, N) * N);
@@ -45,8 +45,8 @@ void main(void) {
 
 	mat3 TBN = mat3(T, B, N);
 
-	TangentLightPos = TBN * lightPosi;
-	TangentViewPos = TBN * viewPosi;
-	TangentFragPos = TBN * FragPos;
+	tangentLightPos = TBN * lightPosi;
+	tangentViewPos = TBN * viewPosi;
+	tangentFragPos = TBN * FragPos;
 	
 }

@@ -63,6 +63,16 @@ void Instance::Render(Renderer * r)
 		shaderManager->SetUniformLocation3f(program, "pointLight.position",
 			cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
+		// View position to be passed into vertex shader
+		glm::vec3 viewPosition = r->camera.GetModelMatrix()[3];
+		shaderManager->SetUniformLocation3f(program, "viewPosi",
+			cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+		// Light position to be passed into vertex shader
+		glm::vec3 lightPosition = r->camera.GetModelMatrix()[3];
+		shaderManager->SetUniformLocation3f(program, "lightPosi",
+			cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
 		// Pointlight Uniforms + Properties
 		
 		shaderManager->SetUniformLocation3f(program, "pointLight.position", 
