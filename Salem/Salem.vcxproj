@@ -142,10 +142,14 @@
     <ClInclude Include="ShaderManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Shaders\instance.frag" />
-    <None Include="Assets\Shaders\instance.vert" />
-    <None Include="Assets\Shader\textured.frag" />
-    <None Include="Assets\Shader\textured.vert" />
+    <None Include="Shaders\geometryPass.frag" />
+    <None Include="Shaders\geometryPass.vert" />
+    <None Include="Shaders\instance.frag" />
+    <None Include="Shaders\instance.vert" />
+    <None Include="Shaders\lightPass.frag" />
+    <None Include="Shaders\lightPass.vert" />
+    <None Include="Shaders\textured.frag" />
+    <None Include="Shaders\textured.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "Renderer.h"
 #include "GBuffer.h"
+#include "ShaderManager.h"
 #include <vector>
 #include <memory>
 
@@ -12,18 +13,26 @@ struct AppDisk::impl {
 	unique_ptr<Renderer> renderer;
 	vector<ObjectUP> objects;
 	unique_ptr<GBuffer> gBuffer;
+
+	GLuint quadVAO;
+
+	int windowWidth = 1280;
+	int windowHeight = 720;
 	
 	void RenderGeometryPass();
 	void RenderLightPass();
+	void PointLightPass();
 
 	void RenderForward();
+
+	void RenderQuad();
 };
 
 AppDisk::AppDisk()
 {
 	pImpl = new impl();
 	pImpl->renderer = make_unique<Renderer>();
-	pImpl->gBuffer = make_unique<GBuffer>(1280, 720);
+	pImpl->gBuffer = make_unique<GBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 }
 
 
@@ -34,6 +43,13 @@ AppDisk::~AppDisk()
 
 void AppDisk::Start()
 {
+	ShaderManager *shaderManager = pImpl->renderer->GetShaderManager();
+	GLuint lightPass = pImpl->renderer->GetShader("lightPass");
+	glUseProgram(lightPass);
+	shaderManager->SetUniform1i(lightPass, "gPosition", 0);
+	shaderManager->SetUniform1i(lightPass, "gNormal", 1);
+	shaderManager->SetUniform1i(lightPass, "gAlbedoSpec", 2);
+
 	pImpl->gBuffer->Init();
 	for (int i = 0; i < pImpl->objects.size(); i++) {
 		pImpl->objects[i]->Init(pImpl->renderer->GetInstanceManager());
@@ -85,15 +101,76 @@ void AppDisk::AddObject(Object * object)
 
 void AppDisk::impl::RenderGeometryPass()
 {
+	gBuffer->BindForWriting();
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+	for (int i = 0; i < objects.size(); i++) {
+		objects[i]->Render(renderer.get());
+	}
 }
 
 void AppDisk::impl::RenderLightPass()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); //Bind Default FrameBuffer
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(renderer->GetShader("lightPass"));
+
+	gBuffer->BindForReading();
+
+	unsigned int gPosition, gNormal, gAlbedoSpec;
+
+	gBuffer->GetTextures(gPosition, gNormal, gAlbedoSpec);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, gPosition);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, gNormal);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+
+	RenderQuad();
+
+}
+
+void AppDisk::impl::PointLightPass()
 {
 }
 
 void AppDisk::impl::RenderForward()
 {
-	for (int i = 0; i < objects.size(); i++) {
+	/*for (int i = 0; i < objects.size(); i++) {
 		objects[i]->Render(renderer.get());
+	}*/
+}
+
+void AppDisk::impl::RenderQuad()
+{
+	unsigned int quadVBO;
+	if (quadVAO == 0)
+	{
+		float quadVertices[] = {
+			// positions        // texture Coords
+			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		// setup plane VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	}
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
 }

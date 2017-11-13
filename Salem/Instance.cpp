@@ -14,7 +14,7 @@ struct Instance::impl {
 	string path;
 	Model * instance;
 
-	string shader = "instance_shader";
+	string shader = "geometry";
 
 	void ConfigureInstance();
 };

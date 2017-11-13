@@ -19,6 +19,8 @@ public:
 	void BindForWriting();
 	void BindForReading();
 	void SetReadBuffer(GBUFFER_TEXTURE_TYPE TextureType);
+
+	void GetTextures(unsigned int &position, unsigned int &normal, unsigned int &albedoSpec);
 private:
 	struct impl;
 

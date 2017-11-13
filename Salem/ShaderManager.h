@@ -13,6 +13,7 @@ public:
 
 	GLuint GetShader(string name);
 	void SetUniformMatrix4fv(GLuint program, const char* location, glm::mat4 value);
+	void SetUniform1i(GLuint program, const char* location, float value);
 private:
 	struct impl;
 	impl* pImpl;

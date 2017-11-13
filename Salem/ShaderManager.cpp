@@ -36,6 +36,11 @@ void ShaderManager::SetUniformMatrix4fv(GLuint program, const char * location, g
 	glUniformMatrix4fv(glGetUniformLocation(program, location), 1, GL_FALSE, glm::value_ptr(value));
 }
 
+void ShaderManager::SetUniform1i(GLuint program, const char * location, float value)
+{
+	glUniform1i(glGetUniformLocation(program, location), value);
+}
+
 void ShaderManager::impl::CreateShader(string name, const char * vertexPath, const char * fragmentPath)
 {
 	// 1. Retrieve the vertex/fragment source code from destination file path.
@@ -131,5 +136,7 @@ void ShaderManager::impl::Init()
 {
 	CreateShader("default", "Shaders/textured.vert", "Shaders/textured.frag");
 	CreateShader("instance_shader", "Shaders/instance.vert", "Shaders/instance.frag");
+	CreateShader("lightPass", "Shaders/lightPass.vert", "Shaders/lightPass.frag");
+	CreateShader("geometry", "Shaders/geometryPass.vert", "Shaders/geometryPass.frag");
 
 }
