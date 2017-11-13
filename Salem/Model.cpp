@@ -206,6 +206,9 @@ MeshData Model::impl::LoadData(aiMesh * mesh)
 	std::vector<GLfloat> normalArray;
 	std::vector<GLfloat> uvArray;
 	std::vector<GLuint> indexArray;
+	std::vector<GLfloat> tangentArray;
+	std::vector<GLfloat> bitangentArray;
+
 
 	GLuint numVerts;
 	GLuint indexCount = 0;
@@ -233,6 +236,19 @@ MeshData Model::impl::LoadData(aiMesh * mesh)
 				normalArray.push_back(normal.z);
 			}
 
+			if (mesh->HasTangentsAndBitangents()) {
+				// Tangents
+				aiVector3D tangent = mesh->mTangents[face.mIndices[j]];
+				tangentArray.push_back(tangent.x);
+				tangentArray.push_back(tangent.y);
+				tangentArray.push_back(tangent.z);
+
+				// Bitangents
+				aiVector3D bitangent = mesh->mBitangents[face.mIndices[j]];
+				bitangentArray.push_back(bitangent.x);
+				bitangentArray.push_back(bitangent.y);
+				bitangentArray.push_back(bitangent.z);
+			}
 
 			aiVector3D pos = mesh->mVertices[face.mIndices[j]];
 			vertexArray.push_back(pos.x);
@@ -253,6 +269,8 @@ MeshData Model::impl::LoadData(aiMesh * mesh)
 	data.normalArray = normalArray;
 	data.numVerts = numVerts;
 	data.indexCount = indexArray.size();
+	data.tangentArray = tangentArray;
+	data.bitangentArray = bitangentArray;
 
 	return data;
 }
