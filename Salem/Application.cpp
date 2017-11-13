@@ -59,7 +59,6 @@ void Application::Run()
 		int current = SDL_GetTicks();
 
 		float dt = float(current - pImpl->prevTick) / 1000.0f;
-		std::cout << dt << endl;
 
 		pImpl->prevTick = current;
 
@@ -103,7 +102,7 @@ void Application::impl::SetupRC()
 		width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 	
 	// Disable Cursor from showing on window i.e creates a blank cursor.
-	SDL_ShowCursor(SDL_DISABLE);
+	//SDL_ShowCursor(SDL_DISABLE);
 
 	if (!window) {
 		std::cout << "Unable to create window" << " ";
@@ -148,7 +147,7 @@ void Application::impl::Input()
 			running = false;
 		}
 
-		program->Input();
+		program->Input(&sdlEvent);
 	}
 }
 

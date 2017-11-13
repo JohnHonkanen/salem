@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include <SDL.h>
 
 class Camera: public Object 
 
@@ -10,7 +11,7 @@ public:
 
 	glm::mat4 GetView();
 
-	void Input();
+	void Input(SDL_Event* sdlEvent);
 	void Update(float dt);
 
 private:

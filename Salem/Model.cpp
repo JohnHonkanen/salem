@@ -99,7 +99,6 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 		glBindVertexArray(0);
 
 	}
-	cout << pImpl->path << endl;
 }
 
 void Model::impl::GenerateVAO()

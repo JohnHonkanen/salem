@@ -7,11 +7,6 @@ struct Camera::impl {
 	glm::mat4 view;
 	glm::vec3 up;
 
-	/*float FOV = 90.0f;
-	float aspectRatio = float(16.0f / 9.0f);
-	float near = 0.1f;
-	float far = 100.0f;
-*/
 	glm::vec3 movement;
 	int rotate;
 	float cameraSpeed = 7.5f;
@@ -35,7 +30,7 @@ glm::mat4 Camera::GetView()
 	return glm::lookAt(glm::vec3(transformMatrix[3]), glm::vec3(transformMatrix[3]) - Front(), Up());
 }
 
-void Camera::Input()
+void Camera::Input(SDL_Event* sdlEvent)
 {
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
 
@@ -73,15 +68,15 @@ void Camera::Input()
 		tempRotate -= 1;
 	}
 
-	//if (sdlEvent->type == SDL_MOUSEMOTION || sdlEvent->type == SDL_MOUSEBUTTONDOWN || sdlEvent->type == SDL_MOUSEBUTTONUP) {
+	if (sdlEvent->type == SDL_MOUSEMOTION || sdlEvent->type == SDL_MOUSEBUTTONDOWN || sdlEvent->type == SDL_MOUSEBUTTONUP) {
 
-	//	//Get Mouse Position
+		//Get Mouse Position
 
-	//	int mouseX, mouseY;
-	//	SDL_GetMouseState(&mouseX, &mouseY);
+		int mouseX, mouseY;
+		SDL_GetMouseState(&mouseX, &mouseY);
 
-	//	std::cout << mouseX << "  , " << mouseY << std::endl;
-	//}
+		std::cout << mouseX << "  , " << mouseY << std::endl;
+	}
 
 
 	pImpl->movement = tempMovement;

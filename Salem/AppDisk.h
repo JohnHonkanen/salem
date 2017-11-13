@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <SDL.h>
 
 class AppDisk
 {
@@ -9,7 +10,7 @@ public:
 
 	void Update(float dt);
 	void Render();
-	void Input();
+	void Input(SDL_Event* sdlEvent);
 
 	void addObject(std::string path);
 private:

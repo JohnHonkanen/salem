@@ -4,7 +4,6 @@
 #include <vector>
 #include <memory>
 
-
 using namespace std;
 typedef unique_ptr<Object> ObjectUP;
 
@@ -42,9 +41,9 @@ void AppDisk::Render()
 	}
 }
 
-void AppDisk::Input()
+void AppDisk::Input(SDL_Event* sdlEvent)
 {
-	pImpl->renderer->camera.Input();
+	pImpl->renderer->camera.Input(sdlEvent);
 	for (int i = 0; i < pImpl->objects.size(); i++) {
 		pImpl->objects[i]->Input();
 	}
