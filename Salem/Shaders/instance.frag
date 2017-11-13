@@ -28,12 +28,14 @@ uniform vec3 viewPos;
 uniform vec3 diffuse;
 uniform vec3 specular;
 
+uniform sampler2D diffuseMap;
+uniform sampler2D specularMap;
+uniform sampler2D emissionMap;
 
 out vec4 out_Color; 
  
- // Function prototypes
- vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir);
-
+// Function prototypes
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir);
 
 void main(void) {
 
@@ -44,7 +46,13 @@ void main(void) {
 	// Phase 1: Calculate Point Light
 	vec3 result = calcPointLight(pointLight, normal, FragPos, viewDir);
 
-	// Phase 2: Output results
+	// Phase 2: Apply Gamma Correction
+	float gammaValue = 1 / 2.2f;
+
+	result += pow(result, vec3(gammaValue));
+
+
+	// Phase 3: Output results
     out_Color = vec4(result, 1.0); 
 }
 
@@ -73,9 +81,9 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir){
 	float attenuation = 1.0f / (light.constant + light.linear * Distance + light.quadratic * (Distance * Distance));
 
 	// Combine results
-	vec3 ambient = light.ambient; //* vec3(texture(diffuse, ex_UV));
-	vec3 diffuse = light.diffuse * diff; // * vec3(texture(diffuse, ex_UV));
-	vec3 specular = light.specular * spec; // * vec3(texture(specular, ex_UV));
+	vec3 ambient = light.ambient * vec3(texture(diffuseMap, ex_UV));
+	vec3 diffuse = light.diffuse * diff * vec3(texture(diffuseMap, ex_UV));
+	vec3 specular = light.specular * spec * vec3(texture(specularMap, ex_UV));
 
 	ambient *= attenuation;
 	diffuse *= attenuation;
