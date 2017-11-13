@@ -20,9 +20,13 @@ out vec2 ex_UV;
 // multiply each vertex position by the MVP matrix
 void main(void) {
 
-	vec3 FragPos = vec3(aInstanceMatrix * vec4(in_Position, 1.0));
 	ex_UV = in_UV;
-	ex_Normal = in_Normal; 
+	
+	// Calculate Vertex Positions
+	vec3 FragPos = vec3(aInstanceMatrix * vec4(in_Position, 1.0f));
+	
+	// Calculate World Normals <----- Ideally should be done in CPU instead, less expensive. 
+	ex_Normal = mat3(transpose(inverse(aInstanceMatrix))) * in_Normal; 
     
-    gl_Position = projection * view * vec4(FragPos, 1.0);
+	gl_Position = projection * view * vec4(FragPos, 1.0);
 }
