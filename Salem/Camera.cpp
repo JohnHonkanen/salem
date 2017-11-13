@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include "glm\glm.hpp"
 #include <SDL.h>
+#include <iostream>
 
 struct Camera::impl {
 	glm::mat4 view;
@@ -71,6 +72,17 @@ void Camera::Input()
 	if (keys[SDL_SCANCODE_E]) {
 		tempRotate -= 1;
 	}
+
+	//if (sdlEvent->type == SDL_MOUSEMOTION || sdlEvent->type == SDL_MOUSEBUTTONDOWN || sdlEvent->type == SDL_MOUSEBUTTONUP) {
+
+	//	//Get Mouse Position
+
+	//	int mouseX, mouseY;
+	//	SDL_GetMouseState(&mouseX, &mouseY);
+
+	//	std::cout << mouseX << "  , " << mouseY << std::endl;
+	//}
+
 
 	pImpl->movement = tempMovement;
 	pImpl->rotate = tempRotate;

@@ -12,6 +12,7 @@ public:
 
 	void Input();
 	void Update(float dt);
+
 private:
 	struct impl;
 	impl* pImpl;
