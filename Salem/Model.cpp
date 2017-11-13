@@ -96,7 +96,7 @@ void Model::impl::GenerateVAO()
 {
 	for (int i = 0; i < data.size(); i++) {
 		GLuint vao;
-		GLuint vertexBuffer, uvBuffer, normalBuffer, elementBuffer;
+		GLuint vertexBuffer, uvBuffer, normalBuffer, elementBuffer, tangentBuffer, bitangentBuffer;
 		GLuint* meshBuffers = new GLuint[4];
 
 		glGenVertexArrays(1, &vao);
@@ -134,10 +134,32 @@ void Model::impl::GenerateVAO()
 			glGenBuffers(1, &normalBuffer);
 			glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
 			glBufferData(GL_ARRAY_BUFFER, data[i].normalArray.size() * sizeof(GLfloat), &data[i].normalArray[0], GL_STATIC_DRAW);
-			glVertexAttribPointer(STORED_NORMAL, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0); //3 * sizeof(GLfloat)
+			glVertexAttribPointer(STORED_NORMAL, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 			glEnableVertexAttribArray(STORED_NORMAL); // Set location in shader
 			meshBuffers[STORED_NORMAL] = normalBuffer;
 		}
+
+
+		// Tangent attribute
+		if (!data[i].tangentArray.empty()) {
+			glGenBuffers(1, &tangentBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, tangentBuffer);
+			glBufferData(GL_ARRAY_BUFFER, data[i].tangentArray.size() * sizeof(GLfloat), &data[i].tangentArray[0], GL_STATIC_DRAW);
+			glVertexAttribPointer(STORED_TANGENT, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+			glEnableVertexAttribArray(STORED_TANGENT); // Set location in shader
+			meshBuffers[STORED_TANGENT] = tangentBuffer;
+		}
+
+		// Bitangent attribute
+		if (!data[i].bitangentArray.empty()) {
+			glGenBuffers(1, &bitangentBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, bitangentBuffer);
+			glBufferData(GL_ARRAY_BUFFER, data[i].bitangentArray.size() * sizeof(GLfloat), &data[i].bitangentArray, GL_STATIC_DRAW);
+			glVertexAttribPointer(STORED_BITANGENT, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0); 
+			glEnableVertexAttribArray(STORED_BITANGENT); // Set location in shader
+			meshBuffers[STORED_BITANGENT] = bitangentBuffer;
+		}
+
 
 		glBindVertexArray(0); // Unbind VAO
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

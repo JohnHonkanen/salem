@@ -3,7 +3,9 @@
 layout(location = 0) in vec3 in_Position;
 layout(location = 2) in vec2 in_UV;
 layout(location = 3) in vec3 in_Normal;
-layout (location = 4) in mat4 aInstanceMatrix; // Model Matrix of instance
+layout(location = 4) in mat4 aInstanceMatrix; // Model Matrix of instance
+layout(location = 9) in vec3 tangent;
+layout(location = 10) in vec3 bitangent;
 
 uniform mat4 view;
 uniform mat4 projection;

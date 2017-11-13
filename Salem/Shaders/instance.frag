@@ -27,6 +27,7 @@ uniform Material material;
 uniform vec3 viewPos;
 uniform vec3 diffuse;
 uniform vec3 specular;
+uniform bool normalMapping; // Check if normal mapping
 
 uniform sampler2D diffuseMap;
 uniform sampler2D specularMap;
@@ -40,7 +41,8 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir);
 void main(void) {
 
 	// Properties
-	vec3 normal = normalize(ex_Normal);
+	vec3 normal = texture(material.normalMap, ex_UV).rgb; 
+	normal = normalize(ex_Normal);
 	vec3 viewDir = normalize(viewPos - FragPos);
 
 	// Phase 1: Calculate Point Light

@@ -9,6 +9,9 @@ struct MeshData {
 	std::vector<GLfloat> vertexArray;
 	std::vector<GLfloat> normalArray;
 	std::vector<GLfloat> uvArray;
+	std::vector<GLfloat> tangentArray;
+	std::vector<GLfloat> bitangentArray;
+
 	std::vector<GLuint> indices;
 	GLuint numVerts;
 	GLuint indexCount;
