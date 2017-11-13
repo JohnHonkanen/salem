@@ -65,18 +65,18 @@ void Instance::Render(Renderer * r)
 
 		shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.05f, 0.05f, 0.05f);
 		shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.8f, 0.8f, 0.8f);
-		shaderManager->SetUniformLocation3f(program, "pointLight.specular", 1.0f, 1.0f, 1.0f);
+		shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.3f, 0.3f, 0.3f);
 		
 		// Pointlight Attenuation
 		shaderManager->SetUniformLocation1f(program, "pointLight.constant", 1.0f);
-		shaderManager->SetUniformLocation1f(program, "pointLight.constant", 0.09f);
-		shaderManager->SetUniformLocation1f(program, "pointLight.constant", 0.032f);
+		shaderManager->SetUniformLocation1f(program, "pointLight.linear", 0.09f);
+		shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 0.032f);
 
 		// Material Uniforms + Properties
 
 		shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
 		shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
-		shaderManager->SetUniformLocation1f(program, "material.shininess", 1.0f);
+		shaderManager->SetUniformLocation1f(program, "material.shininess", 16.0f);
 
 
 		glBindVertexArray(VAOs[i]);

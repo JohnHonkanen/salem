@@ -45,8 +45,6 @@ void main(void) {
 	vec3 result = calcPointLight(pointLight, normal, FragPos, viewDir);
 
 	// Phase 2: Output results
-	result += vec3(0.0, 1.0, 0.3);
-
     out_Color = vec4(result, 1.0); 
 }
 
@@ -55,22 +53,34 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir){
 	// Normalize the resulting direction vector
 	vec3 lightDir = normalize(light.position.xyz - FragPos.xyz);
 
+	// Get the halfway vector based on the Blinn-Phong shading model 
+	vec3 halfwayDir = normalize(lightDir + viewDir);
+
 	// Diffuse
 	float diff = max(dot(normal, lightDir), 0.0f); // <--- Use max to  avoid dot product going negative when greater than 90 degree's.
 
 	// Specular
-	vec3 reflectDir = reflect(-lightDir, normal); // <---- calculate the reflection of the light
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	spec = max(dot(viewDir, reflectDir), 0.0);
+	
+	// Old depricated specular calculations
+	//vec3 reflectDir = reflect(-lightDir, normal); // <---- calculate the reflection of the light
+	//spec = max(dot(viewDir, reflectDir), 0.0);
+
+	// Blinn-Phong specular shading model
+	float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
 
 	// Attenuation
-	//float Distance = length(light.position - FragPos);
-	//float attenuation = 1.0f / (light.constant + light.linear * Distance + light.quadratic * (Distance * Distance));
+	float Distance = length(light.position - FragPos);
+	float attenuation = 1.0f / (light.constant + light.linear * Distance + light.quadratic * (Distance * Distance));
 
 	// Combine results
 	vec3 ambient = light.ambient; //* vec3(texture(diffuse, ex_UV));
 	vec3 diffuse = light.diffuse * diff; // * vec3(texture(diffuse, ex_UV));
 	vec3 specular = light.specular * spec; // * vec3(texture(specular, ex_UV));
+
+	ambient *= attenuation;
+	diffuse *= attenuation;
+	specular *= attenuation;
+
 
 	return (ambient + diffuse + specular);
 }
