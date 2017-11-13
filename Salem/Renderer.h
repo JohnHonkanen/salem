@@ -7,6 +7,7 @@
 class Model;
 class ShaderManager;
 class InstanceManager;
+class TextureManager;
 
 class Renderer
 {
@@ -20,6 +21,7 @@ public:
 	
 	ShaderManager * GetShaderManager();
 	InstanceManager * GetInstanceManager();
+	TextureManager* GetTextureManager();
 	Camera camera;
 
 private:

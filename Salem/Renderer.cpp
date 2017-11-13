@@ -4,11 +4,12 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <memory>
 #include "Camera.h"
+#include "TextureManager.h"
 
 struct Renderer::impl {
 	std::unique_ptr<InstanceManager> instanceManager;
 	std::unique_ptr<ShaderManager> shaderManager;
-	
+	std::unique_ptr<TextureManager> textureManager;
 	glm::mat4 projection;
 	
 
@@ -20,6 +21,7 @@ Renderer::Renderer()
 	pImpl->shaderManager = std::make_unique<ShaderManager>();
 	pImpl->instanceManager = std::make_unique<InstanceManager>();
 	pImpl->projection = glm::perspective(glm::radians(60.0f), 16.0f / 9.0f, 0.1f, 100.0f);
+	pImpl->textureManager = std::make_unique<TextureManager>();
 }
 
 
@@ -52,4 +54,9 @@ ShaderManager * Renderer::GetShaderManager()
 InstanceManager * Renderer::GetInstanceManager()
 {
 	return pImpl->instanceManager.get();
+}
+
+TextureManager * Renderer::GetTextureManager()
+{
+	return pImpl->textureManager.get();
 }
