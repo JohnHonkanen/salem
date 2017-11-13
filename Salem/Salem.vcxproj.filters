@@ -24,22 +24,22 @@
     <ClInclude Include="ShaderManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Shaders\instance.vert">
-      <Filter>Resource</Filter>
-    </None>
-    <None Include="Assets\Shaders\instance.frag">
-      <Filter>Resource</Filter>
-    </None>
-    <None Include="Assets\Shader\textured.frag">
-      <Filter>Resource</Filter>
-    </None>
-    <None Include="Assets\Shader\textured.vert">
-      <Filter>Resource</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Resource">
       <UniqueIdentifier>{af47611a-8022-4984-b55f-b9695b9b85ff}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\instance.vert">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Shaders\textured.frag">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Shaders\textured.vert">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Shaders\instance.frag">
+      <Filter>Resource</Filter>
+    </None>
   </ItemGroup>
 </Project>
