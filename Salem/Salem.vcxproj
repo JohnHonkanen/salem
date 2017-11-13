@@ -120,6 +120,7 @@
     <ClCompile Include="AppDisk.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="InstanceManager.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="main.cpp" />
@@ -132,6 +133,7 @@
     <ClInclude Include="AppDisk.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="GBuffer.h" />
     <ClInclude Include="InstanceManager.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Model.h" />

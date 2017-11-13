@@ -124,12 +124,19 @@ void Application::impl::Destroy()
 
 void Application::impl::IntializeOpenGL()
 {
+
+	// Initialize GLEW to setup the OpenGL Function pointers
+
+	GLenum err = glewInit();
+
 	// Set this to true so GLEW knows to use a modern approach to retreiving function pointers and extensions
 	glewExperimental = GL_TRUE;
 
-	// Initialize GLEW to setup the OpenGL Function pointers
-	glewInit();
-
+	if (GLEW_OK != err) { // glewInit failed, something is seriously wrong
+		std::cout << "glewInit failed, aborting." << endl;
+		exit(1);
+	}
+	cout << glGetString(GL_VERSION) << endl;
 	// Setup OpenGL options
 
 	glEnable(GL_CULL_FACE);
