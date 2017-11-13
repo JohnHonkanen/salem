@@ -37,7 +37,7 @@ Instance::~Instance()
 
 void Instance::Render(Renderer * r)
 {
-	glm::mat4 projection, view;
+	glm::mat4 projection, view, model;
 
 	r->GetProjection(projection, view);
 
@@ -52,6 +52,7 @@ void Instance::Render(Renderer * r)
 		
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
+		shaderManager->SetUniformMatrix4fv(program, "model", model);
 
 		glBindVertexArray(VAOs[i]);
 		glDrawElementsInstanced(GL_TRIANGLES, data[i].indexCount, GL_UNSIGNED_INT, 0, pImpl->amount);
