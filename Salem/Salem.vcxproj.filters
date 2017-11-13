@@ -39,6 +39,9 @@
     <ClCompile Include="Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Instance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -62,12 +65,21 @@
     <ClInclude Include="Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Instance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shader\textured.vert">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Assets\Shader\textured.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Assets\Shaders\instance.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Assets\Shaders\instance.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

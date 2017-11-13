@@ -4,7 +4,6 @@
 #include <assimp\postprocess.h>
 #include <fstream>
 #include <iostream>
-#include <vector>
 #include <GL\glew.h>
 #include <glm\glm.hpp>
 #include "ShaderManager.h"
@@ -19,29 +18,6 @@ using namespace glm;
 #define STORED_INDEX		4
 #define STORED_TANGENT		5
 #define STORED_BITANGENT	6
-
-struct MeshData {
-	std::vector<GLfloat> vertexArray;
-	std::vector<GLfloat> normalArray;
-	std::vector<GLfloat> uvArray;
-	std::vector<GLuint> indices;
-	GLuint numVerts;
-	GLuint indexCount;
-};
-struct Material {
-	std::string shader = "default";
-	std::string diffuseMap; //Color Map
-	std::string normalMap;
-	std::string specularMap;
-	std::string occulusionMap;
-	std::string emissionMap;
-	std::string alphaMap;
-
-	glm::vec4 color;
-	glm::vec4 specular;
-	glm::vec4 diffuse;
-	float shininess;
-};
 
 struct Model::impl {
 	string directory;
@@ -100,6 +76,21 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 
 	}
 	cout << pImpl->path << endl;
+}
+
+vector<MeshData> Model::GetData()
+{
+	return pImpl->data;
+}
+
+vector<Material> Model::GetMaterial()
+{
+	return pImpl->materials;
+}
+
+vector<GLuint> Model::GetVAO()
+{
+	return pImpl->VAO;
 }
 
 void Model::impl::GenerateVAO()

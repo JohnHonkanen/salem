@@ -5,7 +5,7 @@
 #include <memory>
 
 struct Renderer::impl {
-	InstanceManager instanceManager;
+	std::unique_ptr<InstanceManager> instanceManager;
 	std::unique_ptr<ShaderManager> shaderManager;
 	
 	glm::mat4 projection;
@@ -17,6 +17,7 @@ Renderer::Renderer()
 {
 	pImpl = new impl();
 	pImpl->shaderManager = std::make_unique<ShaderManager>();
+	pImpl->instanceManager = std::make_unique<InstanceManager>();
 	pImpl->projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100.0f);
 	pImpl->view = glm::mat4(1.0f);
 }
@@ -29,7 +30,7 @@ Renderer::~Renderer()
 
 Model * Renderer::GetModel(std::string path)
 {
-	return pImpl->instanceManager.GetModel(path);
+	return pImpl->instanceManager->GetModel(path);
 }
 
 GLuint Renderer::GetShader(std::string name)
@@ -46,4 +47,9 @@ void Renderer::GetProjection(glm::mat4 & perspective, glm::mat4 & view)
 ShaderManager * Renderer::GetShaderManager()
 {
 	return pImpl->shaderManager.get();
+}
+
+InstanceManager * Renderer::GetInstanceManager()
+{
+	return pImpl->instanceManager.get();
 }

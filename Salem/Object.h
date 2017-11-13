@@ -7,6 +7,7 @@ using namespace glm;
 
 class Renderer;
 class Model;
+class InstanceManager;
 class Object
 {
 public:
@@ -14,6 +15,7 @@ public:
 	Object(Model *m);
 	~Object();
 
+	virtual void Init(InstanceManager *manager);
 	virtual void Update();
 	virtual void Input();
 	virtual void Render(Renderer *r);

@@ -5,6 +5,8 @@
 
 class Model;
 class ShaderManager;
+class InstanceManager;
+
 class Renderer
 {
 public:
@@ -16,6 +18,7 @@ public:
 	void GetProjection(glm::mat4 &perspective, glm::mat4 &view);
 	
 	ShaderManager * GetShaderManager();
+	InstanceManager * GetInstanceManager();
 private:
 
 	struct impl;

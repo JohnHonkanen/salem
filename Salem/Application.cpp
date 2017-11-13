@@ -28,6 +28,7 @@ struct Application::impl {
 
 	void IntializeOpenGL();
 
+	void Start();
 	void Input();
 	void Update();
 	void Render();
@@ -50,6 +51,7 @@ void Application::SetDisk(AppDisk *program)
 
 void Application::Run()
 {
+	pImpl->Start();
 	while (pImpl->running) {
 		pImpl->Input();
 		pImpl->Update();
@@ -122,6 +124,11 @@ void Application::impl::IntializeOpenGL()
 	glEnable(GL_DEPTH_TEST); // Enable Z Buffer
 	glEnable(GL_BLEND); // Enable Blending
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void Application::impl::Start()
+{
+	program->Start();
 }
 
 void Application::impl::Input()

@@ -23,6 +23,13 @@ AppDisk::~AppDisk()
 	delete pImpl;
 }
 
+void AppDisk::Start()
+{
+	for (int i = 0; i < pImpl->objects.size(); i++) {
+		pImpl->objects[i]->Init(pImpl->renderer->GetInstanceManager());
+	}
+}
+
 void AppDisk::Update()
 {
 	for (int i = 0; i < pImpl->objects.size(); i++) {
@@ -44,9 +51,15 @@ void AppDisk::Input()
 	}
 }
 
-void AppDisk::addObject(std::string path)
+void AppDisk::AddObject(std::string path)
 {
 	ObjectUP object = make_unique<Object>(pImpl->renderer->GetModel(path));
 	object->Translate(glm::vec3(0.0f, 0.0f, -3.00f));
 	pImpl->objects.push_back(std::move(object));
+}
+
+void AppDisk::AddObject(Object * object)
+{
+	ObjectUP o = ObjectUP(object);
+	pImpl->objects.push_back(std::move(o));
 }

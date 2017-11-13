@@ -1,6 +1,7 @@
 #include "Object.h"
 #include "Model.h"
 #include "Renderer.h"
+#include "InstanceManager.h"
 
 struct Object::impl {
 	Model *model;
@@ -19,6 +20,10 @@ Object::Object(Model * m): pImpl{ new impl{m}}
 Object::~Object()
 {
 	delete pImpl;
+}
+
+void Object::Init(InstanceManager *manager)
+{
 }
 
 void Object::Update()

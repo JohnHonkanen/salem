@@ -130,5 +130,6 @@ void ShaderManager::impl::CreateShader(string name, const char * vertexPath, con
 void ShaderManager::impl::Init()
 {
 	CreateShader("default", "Assets/Shaders/textured.vert", "Assets/Shaders/textured.frag");
+	CreateShader("instance_shader", "Assets/Shaders/instance.vert", "Assets/Shaders/instance.frag");
 
 }
