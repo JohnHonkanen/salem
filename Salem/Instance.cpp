@@ -47,8 +47,6 @@ void Instance::Render(Renderer * r)
 	ShaderManager * shaderManager = r->GetShaderManager();
 	GLuint program = r->GetShader(pImpl->shader);
 	glUseProgram(program);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glDisable(GL_CULL_FACE);
 
 	for (int i = 0; i < VAOs.size(); i++) {
 		
