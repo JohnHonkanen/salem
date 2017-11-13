@@ -90,6 +90,7 @@ void Instance::Render(Renderer * r)
 
 		unsigned int diffuseMap = textureManager->GetTexture(materials[i].diffuseMap);
 		unsigned int specularMap = textureManager->GetTexture(materials[i].specularMap);
+		unsigned int normalMap = textureManager->GetTexture(materials[i].normalMap);
 		//unsigned int emissionMap = textureManager.GetTexture(materials[i].emissionMap);
 
 		// Bind diffuse map
