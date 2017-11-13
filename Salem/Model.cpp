@@ -58,8 +58,8 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 
 	ShaderManager * shaderManager = r->GetShaderManager();
 	GLuint program = r->GetShader(pImpl->materials[0].shader); // <---- May need to change Material[0] when we do deferred shading.
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glDisable(GL_CULL_FACE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glDisable(GL_CULL_FACE);
 
 	for (int i = 0; i < pImpl->VAO.size(); i++) {
 		glUseProgram(program);
@@ -75,7 +75,6 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 		glBindVertexArray(0);
 
 	}
-	cout << pImpl->path << endl;
 }
 
 vector<MeshData> Model::GetData()

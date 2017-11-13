@@ -22,7 +22,8 @@ public:
 	void Translate(glm::vec3 translation);
 	void Rotate(glm::vec3 rotation);
 	void Scale(glm::vec3 scale);
-
+	void SetRotation(glm::vec3 rotation);
+	
 	vec3 Front();
 	vec3 Right();
 	vec3 Up();

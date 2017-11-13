@@ -87,6 +87,7 @@
     <Link>
       <AdditionalLibraryDirectories>..\..\dev\SDL2-2.0.6\lib\Debug\x64;..\..\dev\glew-2.1.0\lib\Debug\x64;..\..\dev\DevIL-1.8.0\lib\x64\Release;..\..\dev\assimp-3.3.1\lib\Debug\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2d.lib;SDL2maind.lib;glew32d.lib;opengl32.lib;DevIL.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -118,6 +119,7 @@
   <ItemGroup>
     <ClCompile Include="AppDisk.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="InstanceManager.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="main.cpp" />
@@ -129,6 +131,7 @@
   <ItemGroup>
     <ClInclude Include="AppDisk.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="InstanceManager.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Model.h" />

@@ -2,6 +2,7 @@
 #include <string>
 #include <GL\glew.h>
 #include <glm\glm.hpp>
+#include "Camera.h"
 
 class Model;
 class ShaderManager;
@@ -19,6 +20,8 @@ public:
 	
 	ShaderManager * GetShaderManager();
 	InstanceManager * GetInstanceManager();
+	Camera camera;
+
 private:
 
 	struct impl;

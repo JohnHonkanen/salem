@@ -7,6 +7,8 @@
 using namespace std;
 
 struct Application::impl {
+	int prevTick;
+
 	bool running = true;
 
 	unique_ptr<AppDisk> program;
@@ -30,8 +32,9 @@ struct Application::impl {
 
 	void Start();
 	void Input();
-	void Update();
+	void Update(float dt);
 	void Render();
+
 };
 
 Application::Application()
@@ -52,9 +55,17 @@ void Application::SetDisk(AppDisk *program)
 void Application::Run()
 {
 	pImpl->Start();
+
 	while (pImpl->running) {
+		
+		int current = SDL_GetTicks();
+
+		float dt = float(current - pImpl->prevTick) / 1000.0f;
+
+		pImpl->prevTick = current;
+
 		pImpl->Input();
-		pImpl->Update();
+		pImpl->Update(dt);
 		pImpl->Render();
 	}
 
@@ -91,6 +102,9 @@ void Application::impl::SetupRC()
 	// Create window
 	window = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	
+	// Disable Cursor from showing on window i.e creates a blank cursor.
+	SDL_ShowCursor(SDL_DISABLE);
 
 	if (!window) {
 		std::cout << "Unable to create window" << " ";
@@ -139,14 +153,23 @@ void Application::impl::Input()
 		if (sdlEvent.type == SDL_QUIT) {
 			running = false;
 		}
-
-		program->Input();
+		switch (sdlEvent.type) {
+		case SDL_KEYDOWN:
+			switch (sdlEvent.key.keysym.sym) {
+			case SDLK_ESCAPE:
+				running = false;
+				break;
+			}
+		}
+		program->Input(&sdlEvent);
+		SDL_WarpMouseInWindow(window, 640, 360);
 	}
 }
 
-void Application::impl::Update()
+void Application::impl::Update(float dt)
 {
-	program->Update();
+
+	program->Update(dt);
 }
 
 void Application::impl::Render()
