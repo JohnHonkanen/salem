@@ -102,7 +102,7 @@ void Application::impl::SetupRC()
 		width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 	
 	// Disable Cursor from showing on window i.e creates a blank cursor.
-	//SDL_ShowCursor(SDL_DISABLE);
+	SDL_ShowCursor(SDL_DISABLE);
 
 	if (!window) {
 		std::cout << "Unable to create window" << " ";
@@ -146,8 +146,16 @@ void Application::impl::Input()
 		if (sdlEvent.type == SDL_QUIT) {
 			running = false;
 		}
-
+		switch (sdlEvent.type) {
+		case SDL_KEYDOWN:
+			switch (sdlEvent.key.keysym.sym) {
+			case SDLK_ESCAPE:
+				running = false;
+				break;
+			}
+		}
 		program->Input(&sdlEvent);
+		SDL_WarpMouseInWindow(window, 640, 360);
 	}
 }
 

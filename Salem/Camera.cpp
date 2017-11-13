@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "glm\glm.hpp"
+#include "glm\gtx\compatibility.hpp"
 #include <SDL.h>
 #include <iostream>
 
@@ -11,6 +12,13 @@ struct Camera::impl {
 	int rotate;
 	float cameraSpeed = 7.5f;
 	float cameraRotateSpeed = 1.5f;
+
+	float lastX = 640.0f;
+	float lastY = 360.0f;
+
+	float yaw;
+	float pitch;
+
 };
 
 Camera::Camera()
@@ -68,6 +76,7 @@ void Camera::Input(SDL_Event* sdlEvent)
 		tempRotate -= 1;
 	}
 
+
 	if (sdlEvent->type == SDL_MOUSEMOTION || sdlEvent->type == SDL_MOUSEBUTTONDOWN || sdlEvent->type == SDL_MOUSEBUTTONUP) {
 
 		//Get Mouse Position
@@ -75,7 +84,50 @@ void Camera::Input(SDL_Event* sdlEvent)
 		int mouseX, mouseY;
 		SDL_GetMouseState(&mouseX, &mouseY);
 
-		std::cout << mouseX << "  , " << mouseY << std::endl;
+		//std::cout << mouseX << "  , " << mouseY << std::endl;
+
+		float xoffset = mouseX - pImpl->lastX;
+		float yoffset = pImpl->lastY - mouseY; // Reversed since y-coordinate range from bottom to top.
+
+		glm::vec2 mouseDir(xoffset, yoffset);
+
+		pImpl->lastX = mouseX;
+		pImpl->lastY = mouseY;
+
+		float mouseSensitivity = 0.1f;
+		float smoothing = 2.0f;
+
+		mouseDir = mouseDir * vec2(mouseSensitivity * smoothing);
+		glm::vec2 smoothV;
+
+		smoothV.x = glm::lerp(smoothV.x, mouseDir.x, 1.0f / smoothing);
+		smoothV.y = glm::lerp(smoothV.y, mouseDir.y, 1.0f / smoothing);
+
+		//xoffset *= mouseSensitivity;
+		//yoffset *= mouseSensitivity;
+
+		pImpl->yaw -= smoothV.x;
+		pImpl->pitch += smoothV.y;
+
+		pImpl->pitch = glm::clamp(pImpl->pitch, -91.0f, 91.0f);
+		SetRotation(glm::vec3(glm::radians(pImpl->pitch), glm::radians(pImpl->yaw), 0.0f));
+		//Rotate(glm::vec3(xoffset, yoffset, 0.0f));
+
+		pImpl->lastX = 640.0f;
+		pImpl->lastY = 360.0f;
+
+		
+
+		//if (pImpl->pitch > 89.0f) {
+		//	pImpl->pitch = 89.0f;
+		//}
+
+		//if (pImpl->pitch < -89.0f) {
+		//	pImpl->pitch = -89.0f;
+		//}
+
+		//std::cout << pImpl->yaw << "  , " << pImpl->pitch << std::endl;
+
 	}
 
 
