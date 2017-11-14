@@ -5,7 +5,7 @@
 layout(location = 0) in vec3 position;
 layout(location = 2) in vec2 uv;
 layout(location = 3) in vec3 normal;
-layout (location = 4) in mat4 aInstanceMatrix;
+layout (location = 7) in mat4 aInstanceMatrix;
 
 uniform mat4 view;
 uniform mat4 projection;

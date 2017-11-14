@@ -16,8 +16,8 @@ using namespace glm;
 #define STORED_UV           2
 #define STORED_NORMAL		3
 #define STORED_INDEX		4
-#define STORED_TANGENT		9
-#define STORED_BITANGENT	10
+#define STORED_TANGENT		5
+#define STORED_BITANGENT	6
 
 struct Model::impl {
 	string directory;
@@ -97,7 +97,7 @@ void Model::impl::GenerateVAO()
 	for (int i = 0; i < data.size(); i++) {
 		GLuint vao;
 		GLuint vertexBuffer, uvBuffer, normalBuffer, elementBuffer, tangentBuffer, bitangentBuffer;
-		GLuint* meshBuffers = new GLuint[4];
+		GLuint* meshBuffers = new GLuint[6];
 
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vertexBuffer);
@@ -154,7 +154,7 @@ void Model::impl::GenerateVAO()
 		if (!data[i].bitangentArray.empty()) {
 			glGenBuffers(1, &bitangentBuffer);
 			glBindBuffer(GL_ARRAY_BUFFER, bitangentBuffer);
-			glBufferData(GL_ARRAY_BUFFER, data[i].bitangentArray.size() * sizeof(GLfloat), &data[i].bitangentArray, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, data[i].bitangentArray.size() * sizeof(GLfloat), &data[i].bitangentArray[0], GL_STATIC_DRAW);
 			glVertexAttribPointer(STORED_BITANGENT, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0); 
 			glEnableVertexAttribArray(STORED_BITANGENT); // Set location in shader
 			meshBuffers[STORED_BITANGENT] = bitangentBuffer;
