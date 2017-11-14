@@ -4,6 +4,7 @@
 #include <glm\glm.hpp>
 #include <vector>
 #include <string>
+#include "TextureManager.h"
 
 using namespace std;
 using namespace glm;
@@ -44,14 +45,80 @@ void Instance::Render(Renderer * r)
 	vector<MeshData> data = pImpl->instance->GetData();
 	vector<GLuint> VAOs = pImpl->instance->GetVAO();
 
+	vector<Material> materials = pImpl->instance->GetMaterial();
+
 	ShaderManager * shaderManager = r->GetShaderManager();
 	GLuint program = r->GetShader(pImpl->shader);
 	glUseProgram(program);
+
+	TextureManager* textureManager = r->GetTextureManager();
 
 	for (int i = 0; i < VAOs.size(); i++) {
 		
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
+
+		// View position of camera
+		glm::vec3 cameraPosition = r->camera.GetModelMatrix()[3];
+		shaderManager->SetUniformLocation3f(program, "pointLight.position",
+			cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+		// View position to be passed into vertex shader
+		glm::vec3 viewPosition = r->camera.GetModelMatrix()[3];
+		shaderManager->SetUniformLocation3f(program, "viewPosi",
+			cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+		// Light position to be passed into vertex shader
+		glm::vec3 lightPosition = r->camera.GetModelMatrix()[3];
+		shaderManager->SetUniformLocation3f(program, "lightPosi",
+			cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+		// Pointlight Uniforms + Properties
+		
+		shaderManager->SetUniformLocation3f(program, "pointLight.position", 
+			cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+		shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.05f, 0.05f, 0.05f);
+		shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.8f, 0.8f, 0.8f);
+		shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.3f, 0.3f, 0.3f);
+		
+		// Pointlight Attenuation
+		shaderManager->SetUniformLocation1f(program, "pointLight.constant", 1.0f);
+		shaderManager->SetUniformLocation1f(program, "pointLight.linear", 0.09f);
+		shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 0.032f);
+
+		// Material Uniforms + Properties
+
+		shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
+		shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
+		shaderManager->SetUniformLocation1f(program, "material.shininess", 16.0f);
+		
+		// Bind Map textures to texture units
+		shaderManager->SetUniformLocation1i(program, "diffuseMap", 0);
+		shaderManager->SetUniformLocation1i(program, "specularMap", 1);
+		shaderManager->SetUniformLocation1i(program, "emissionMap", 2);
+		shaderManager->SetUniformLocation1i(program, "normalMap", 3);
+
+		unsigned int diffuseMap = textureManager->GetTexture(materials[i].diffuseMap);
+		unsigned int specularMap = textureManager->GetTexture(materials[i].specularMap);
+		//unsigned int emissionMap = textureManager.GetTexture(materials[i].emissionMap);
+		unsigned int normalMap = textureManager->GetTexture(materials[i].normalMap);
+
+		// Bind diffuse map
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+		// Bind specular map
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
+
+		//// Bind emission map
+		//glActiveTexture(GL_TEXTURE2);
+		//glBindTexture(GL_TEXTURE_2D, emissionMap);
+
+		// Bind specular map
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, normalMap);
 
 		glBindVertexArray(VAOs[i]);
 		glDrawElementsInstanced(GL_TRIANGLES, data[i].indexCount, GL_UNSIGNED_INT, 0, pImpl->amount);

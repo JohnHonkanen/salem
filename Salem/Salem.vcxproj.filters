@@ -12,6 +12,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="GBuffer.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppDisk.h" />
@@ -24,6 +25,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="GBuffer.h" />
+    <ClInclude Include="TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resource">
@@ -31,18 +33,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\instance.frag">
-      <Filter>Resource</Filter>
-    </None>
-    <None Include="Shaders\instance.vert">
-      <Filter>Resource</Filter>
-    </None>
-    <None Include="Shaders\textured.frag">
-      <Filter>Resource</Filter>
-    </None>
-    <None Include="Shaders\textured.vert">
-      <Filter>Resource</Filter>
-    </None>
     <None Include="Shaders\lightPass.frag">
       <Filter>Resource</Filter>
     </None>
@@ -53,6 +43,16 @@
       <Filter>Resource</Filter>
     </None>
     <None Include="Shaders\geometryPass.vert">
+    <None Include="Shaders\instance.vert">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Shaders\textured.frag">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Shaders\textured.vert">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Shaders\instance.frag">
       <Filter>Resource</Filter>
     </None>
   </ItemGroup>

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <GL\glew.h>
 #include <memory>
+#include <IL\il.h>
+
 using namespace std;
 
 struct Application::impl {
@@ -126,6 +128,9 @@ void Application::impl::IntializeOpenGL()
 {
 
 	// Initialize GLEW to setup the OpenGL Function pointers
+	glewInit();
+	ilInit();
+
 
 	GLenum err = glewInit();
 

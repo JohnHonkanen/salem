@@ -46,9 +46,9 @@ void AppDisk::Start()
 	ShaderManager *shaderManager = pImpl->renderer->GetShaderManager();
 	GLuint lightPass = pImpl->renderer->GetShader("lightPass");
 	glUseProgram(lightPass);
-	shaderManager->SetUniform1i(lightPass, "gPosition", 0);
-	shaderManager->SetUniform1i(lightPass, "gNormal", 1);
-	shaderManager->SetUniform1i(lightPass, "gAlbedoSpec", 2);
+	shaderManager->SetUniformLocation1i(lightPass, "gPosition", 0);
+	shaderManager->SetUniformLocation1i(lightPass, "gNormal", 1);
+	shaderManager->SetUniformLocation1i(lightPass, "gAlbedoSpec", 2);
 
 	pImpl->gBuffer->Init();
 	for (int i = 0; i < pImpl->objects.size(); i++) {
