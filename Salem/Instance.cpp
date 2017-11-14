@@ -97,11 +97,12 @@ void Instance::Render(Renderer * r)
 		shaderManager->SetUniformLocation1i(program, "diffuseMap", 0);
 		shaderManager->SetUniformLocation1i(program, "specularMap", 1);
 		shaderManager->SetUniformLocation1i(program, "emissionMap", 2);
+		shaderManager->SetUniformLocation1i(program, "normalMap", 3);
 
 		unsigned int diffuseMap = textureManager->GetTexture(materials[i].diffuseMap);
 		unsigned int specularMap = textureManager->GetTexture(materials[i].specularMap);
-		unsigned int normalMap = textureManager->GetTexture(materials[i].normalMap);
 		//unsigned int emissionMap = textureManager.GetTexture(materials[i].emissionMap);
+		unsigned int normalMap = textureManager->GetTexture(materials[i].normalMap);
 
 		// Bind diffuse map
 		glActiveTexture(GL_TEXTURE0);
@@ -114,6 +115,10 @@ void Instance::Render(Renderer * r)
 		//// Bind emission map
 		//glActiveTexture(GL_TEXTURE2);
 		//glBindTexture(GL_TEXTURE_2D, emissionMap);
+
+		// Bind specular map
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, normalMap);
 
 		glBindVertexArray(VAOs[i]);
 		glDrawElementsInstanced(GL_TRIANGLES, data[i].indexCount, GL_UNSIGNED_INT, 0, pImpl->amount);

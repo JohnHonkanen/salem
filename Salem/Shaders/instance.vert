@@ -13,7 +13,8 @@ uniform mat4 projection;
 uniform vec3 viewPosi;
 uniform vec3 lightPosi;
 
-out vec3 tangentFragPos; // Vertex Position 
+out vec3 FragPos; // Vertex Position
+out vec3 tangentFragPos; // Tangent Space Vertex Position 
 out vec3 tangentViewPos;
 out vec3 tangentLightPos;
 out vec2 ex_UV;
@@ -26,7 +27,7 @@ void main(void) {
 	ex_UV = in_UV;
 	
 	// Calculate Vertex Positions
-	vec3 FragPos = vec3(ImodelMatrix * vec4(in_Position, 1.0f));
+	FragPos = vec3(ImodelMatrix * vec4(in_Position, 1.0f));
 	
 	// Calculate World Normals <----- Ideally should be done in CPU instead, less expensive. 
 	//vec3 ex_Normal = mat3(transpose(inverse(ImodelMatrix))) * in_Normal; 
