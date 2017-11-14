@@ -15,12 +15,6 @@ struct AppDisk::impl {
 	vector<ObjectUP> objects;
 	unique_ptr<GBuffer> gBuffer;
 
-	unique_ptr<FrameBuffer> positionBuffer;
-	unique_ptr<FrameBuffer> diffuseBuffer;
-	unique_ptr<FrameBuffer> normalBuffer;
-	
-	
-
 	GLuint quadVAO;
 
 	int windowWidth = 1280;
@@ -82,14 +76,8 @@ void AppDisk::Render()
 {
 	/* Do Deferred Rendering Passes */
 	/* Do Geometry Pass*/
-	pImpl->positionBuffer->BindForWriting();
-	pImpl->RenderGeometryPass("gPosition");
-
-	pImpl->diffuseBuffer->BindForWriting();
-	pImpl->RenderGeometryPass("gDiffuse");
-
-	pImpl->normalBuffer->BindForWriting();
-	pImpl->RenderGeometryPass("gNormal");
+	pImpl->gBuffer->BindForWriting();
+	pImpl->RenderGeometryPass("geometry");
 	/* Do Light Pass */
 	pImpl->RenderLightPass();
 	/*-------------------------------*/
@@ -140,14 +128,9 @@ void AppDisk::impl::RenderLightPass()
 
 	unsigned int gPosition, gNormal, gAlbedoSpec;
 
-	positionBuffer->BindForReading();
-	gPosition = positionBuffer->GetTexture();
+	gBuffer->BindForReading();
 
-	normalBuffer->BindForReading();
-	gNormal = normalBuffer->GetTexture();
-
-	diffuseBuffer->BindForReading();
-	gAlbedoSpec = diffuseBuffer->GetTexture();
+	gBuffer->GetTextures(gPosition, gNormal, gAlbedoSpec);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gPosition);
