@@ -34,9 +34,6 @@ AppDisk::AppDisk()
 	pImpl = new impl();
 	pImpl->renderer = make_unique<Renderer>();
 	pImpl->gBuffer = make_unique<GBuffer>(pImpl->windowWidth, pImpl->windowHeight);
-	pImpl->positionBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
-	pImpl->diffuseBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
-	pImpl->normalBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 }
 
 
@@ -55,9 +52,6 @@ void AppDisk::Start()
 	shaderManager->SetUniformLocation1i(lightPass, "gAlbedoSpec", 2);
 
 	pImpl->gBuffer->Init();
-	pImpl->positionBuffer->Init();
-	pImpl->diffuseBuffer->Init();
-	pImpl->normalBuffer->Init();
 
 	for (int i = 0; i < pImpl->objects.size(); i++) {
 		pImpl->objects[i]->Init(pImpl->renderer->GetInstanceManager());
