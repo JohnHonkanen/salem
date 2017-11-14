@@ -11,5 +11,5 @@ uniform sampler2D gAlbedoSpec;
  
 void main(void) {
 
-	FragColor = vec4(texture(gNormal, TexCoords).rgb , 1.0);
+	FragColor = vec4(texture(gAlbedoSpec, TexCoords).rgb , 1.0);
 }

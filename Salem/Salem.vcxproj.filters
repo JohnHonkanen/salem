@@ -54,6 +54,24 @@
     <None Include="Shaders\textured.frag">
       <Filter>Resources</Filter>
     </None>
+    <None Include="Shaders\gPosition.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\gPosition.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\gDiffuse.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\gDiffuse.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\gNormal.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\gNormal.vert">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">

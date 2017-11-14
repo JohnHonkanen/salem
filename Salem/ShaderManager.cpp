@@ -148,5 +148,8 @@ void ShaderManager::impl::Init()
 	CreateShader("instance_shader", "Shaders/instance.vert", "Shaders/instance.frag");
 	CreateShader("lightPass", "Shaders/lightPass.vert", "Shaders/lightPass.frag");
 	CreateShader("geometry", "Shaders/geometryPass.vert", "Shaders/geometryPass.frag");
+	CreateShader("gPosition", "Shaders/gPosition.vert", "Shaders/gPosition.frag");
+	CreateShader("gNormal", "Shaders/gNormal.vert", "Shaders/gNormal.frag");
+	CreateShader("gDiffuse", "Shaders/gDiffuse.vert", "Shaders/gDiffuse.frag");
 
 }
