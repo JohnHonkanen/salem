@@ -39,7 +39,7 @@ public:
 	Model(string path);
 	~Model();
 
-	void Render(Renderer *r, glm::mat4 modelMatrix);
+	void Render(Renderer *r, glm::mat4 modelMatrix, const char * shader);
 
 	vector<MeshData> GetData();
 	vector<Material> GetMaterial();

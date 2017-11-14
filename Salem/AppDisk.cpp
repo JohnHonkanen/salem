@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "Renderer.h"
 #include "GBuffer.h"
+#include "FrameBuffer.h"
 #include "ShaderManager.h"
 #include <vector>
 #include <memory>
@@ -14,12 +15,18 @@ struct AppDisk::impl {
 	vector<ObjectUP> objects;
 	unique_ptr<GBuffer> gBuffer;
 
+	unique_ptr<FrameBuffer> positionBuffer;
+	unique_ptr<FrameBuffer> diffuseBuffer;
+	unique_ptr<FrameBuffer> normalBuffer;
+	
+	
+
 	GLuint quadVAO;
 
 	int windowWidth = 1280;
 	int windowHeight = 720;
 	
-	void RenderGeometryPass();
+	void RenderGeometryPass(const char* shader);
 	void RenderLightPass();
 	void PointLightPass();
 
@@ -33,6 +40,9 @@ AppDisk::AppDisk()
 	pImpl = new impl();
 	pImpl->renderer = make_unique<Renderer>();
 	pImpl->gBuffer = make_unique<GBuffer>(pImpl->windowWidth, pImpl->windowHeight);
+	pImpl->positionBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
+	pImpl->diffuseBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
+	pImpl->normalBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 }
 
 
@@ -51,6 +61,10 @@ void AppDisk::Start()
 	shaderManager->SetUniformLocation1i(lightPass, "gAlbedoSpec", 2);
 
 	pImpl->gBuffer->Init();
+	pImpl->positionBuffer->Init();
+	pImpl->diffuseBuffer->Init();
+	pImpl->normalBuffer->Init();
+
 	for (int i = 0; i < pImpl->objects.size(); i++) {
 		pImpl->objects[i]->Init(pImpl->renderer->GetInstanceManager());
 	}
@@ -68,7 +82,14 @@ void AppDisk::Render()
 {
 	/* Do Deferred Rendering Passes */
 	/* Do Geometry Pass*/
-	pImpl->RenderGeometryPass();
+	pImpl->positionBuffer->BindForWriting();
+	pImpl->RenderGeometryPass("gPosition");
+
+	pImpl->diffuseBuffer->BindForWriting();
+	pImpl->RenderGeometryPass("gDiffuse");
+
+	pImpl->normalBuffer->BindForWriting();
+	pImpl->RenderGeometryPass("gNormal");
 	/* Do Light Pass */
 	pImpl->RenderLightPass();
 	/*-------------------------------*/
@@ -99,15 +120,13 @@ void AppDisk::AddObject(Object * object)
 	pImpl->objects.push_back(std::move(o));
 }
 
-void AppDisk::impl::RenderGeometryPass()
+void AppDisk::impl::RenderGeometryPass(const char *shader)
 {
-	gBuffer->BindForWriting();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
 	for (int i = 0; i < objects.size(); i++) {
-		objects[i]->Render(renderer.get());
+		objects[i]->Render(renderer.get(), shader);
 	}
 }
 
@@ -119,11 +138,16 @@ void AppDisk::impl::RenderLightPass()
 
 	glUseProgram(renderer->GetShader("lightPass"));
 
-	gBuffer->BindForReading();
-
 	unsigned int gPosition, gNormal, gAlbedoSpec;
 
-	gBuffer->GetTextures(gPosition, gNormal, gAlbedoSpec);
+	positionBuffer->BindForReading();
+	gPosition = positionBuffer->GetTexture();
+
+	normalBuffer->BindForReading();
+	gNormal = normalBuffer->GetTexture();
+
+	diffuseBuffer->BindForReading();
+	gAlbedoSpec = diffuseBuffer->GetTexture();
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gPosition);

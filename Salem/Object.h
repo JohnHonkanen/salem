@@ -18,7 +18,7 @@ public:
 	virtual void Init(InstanceManager *manager);
 	virtual void Update();
 	virtual void Input();
-	virtual void Render(Renderer *r);
+	virtual void Render(Renderer *r, const char *shader);
 	void Translate(glm::vec3 translation);
 	void Rotate(glm::vec3 rotation);
 	void Scale(glm::vec3 scale);

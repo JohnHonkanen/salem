@@ -36,7 +36,7 @@ Instance::~Instance()
 	delete pImpl;
 }
 
-void Instance::Render(Renderer * r)
+void Instance::Render(Renderer * r, const char* shader)
 {
 	glm::mat4 projection, view;
 
@@ -48,7 +48,7 @@ void Instance::Render(Renderer * r)
 	vector<Material> materials = pImpl->instance->GetMaterial();
 
 	ShaderManager * shaderManager = r->GetShaderManager();
-	GLuint program = r->GetShader(pImpl->shader);
+	GLuint program = r->GetShader(shader);
 	glUseProgram(program);
 
 	TextureManager* textureManager = r->GetTextureManager();

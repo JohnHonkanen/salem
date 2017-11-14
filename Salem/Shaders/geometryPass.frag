@@ -14,6 +14,6 @@ uniform sampler2D gColorMap;
 void main(void) {
 
 	gPosition = FragPos;  
-    gNormal = Normal; 
+    gNormal = vec3(1.0); 
     gAlbedoSpec = vec4(0.0f, 1.0f, 3.0f, 1.0f);
 }
