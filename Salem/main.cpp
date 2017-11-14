@@ -12,17 +12,17 @@ int main(int argc, char* argv[]) {
 	Application app = Application("Salem", 1280, 720);
 
 	AppDisk *salem = new AppDisk();
-	Instance *instance = new Instance("Assets/Models/arissa/arissa.dae");
+	Instance *instance = new Instance("Assets/Models/Cube/cube.obj");
 	mat4 transform = mat4(1.0);
 	transform = translate(transform, vec3(2.0f ,0, -4.0f));
-	transform = scale(transform, vec3(0.05f));
 	instance->AddInstance(transform);
 	transform = glm::mat4(1.0f);
 	transform = translate(transform, vec3(-4.0f, 0, -4.0f));
-	transform = scale(transform, vec3(0.05f));
 	instance->AddInstance(transform);
 
-	salem->AddObject(instance);
+	//Shader information
+	instance->SetShader("geometry");
+	salem->AddObject(instance, true);
 	
 	app.SetDisk(salem); 
 	app.Run();

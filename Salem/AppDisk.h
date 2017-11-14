@@ -17,7 +17,7 @@ public:
 	void Input(SDL_Event* sdlEvent);
 
 	void AddObject(std::string path);
-	void AddObject(Object * object);
+	void AddObject(Object * object, bool deferred);
 private:
 	struct impl;
 

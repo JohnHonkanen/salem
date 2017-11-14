@@ -44,6 +44,8 @@ public:
 	vector<MeshData> GetData();
 	vector<Material> GetMaterial();
 	vector<GLuint> GetVAO();
+	void SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap);
+	void SetShader(const char * shader);
 private:
 	struct impl;
 

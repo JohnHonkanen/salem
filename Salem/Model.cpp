@@ -92,6 +92,18 @@ vector<GLuint> Model::GetVAO()
 	return pImpl->VAO;
 }
 
+void Model::SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap)
+{
+	pImpl->materials[0].diffuseMap = diffuseMap;
+	pImpl->materials[0].specularMap = specularMap;
+	pImpl->materials[0].normalMap = normalMap;
+}
+
+void Model::SetShader(const char * shader)
+{
+	pImpl->materials[0].shader = shader;
+}
+
 void Model::impl::GenerateVAO()
 {
 	for (int i = 0; i < data.size(); i++) {

@@ -12,6 +12,7 @@ typedef unique_ptr<Object> ObjectUP;
 struct AppDisk::impl {
 	unique_ptr<Renderer> renderer;
 	vector<ObjectUP> objects;
+	vector<ObjectUP> fObjects;
 	unique_ptr<GBuffer> gBuffer;
 
 	GLuint quadVAO;
@@ -93,10 +94,16 @@ void AppDisk::AddObject(std::string path)
 	pImpl->objects.push_back(std::move(object));
 }
 
-void AppDisk::AddObject(Object * object)
+void AppDisk::AddObject(Object * object, bool deferred)
 {
 	ObjectUP o = ObjectUP(object);
-	pImpl->objects.push_back(std::move(o));
+	if (deferred) {
+		pImpl->objects.push_back(std::move(o));
+	}
+	else {
+		pImpl->fObjects.push_back(std::move(o));
+	}
+	
 }
 
 void AppDisk::impl::RenderGeometryPass()
@@ -148,9 +155,9 @@ void AppDisk::impl::PointLightPass()
 
 void AppDisk::impl::RenderForward()
 {
-	/*for (int i = 0; i < objects.size(); i++) {
-		objects[i]->Render(renderer.get());
-	}*/
+	for (int i = 0; i < objects.size(); i++) {
+		fObjects[i]->Render(renderer.get());
+	}
 }
 
 void AppDisk::impl::RenderQuad()

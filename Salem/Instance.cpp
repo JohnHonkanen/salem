@@ -48,7 +48,7 @@ void Instance::Render(Renderer * r)
 	vector<Material> materials = pImpl->instance->GetMaterial();
 
 	ShaderManager * shaderManager = r->GetShaderManager();
-	GLuint program = r->GetShader(pImpl->shader);
+	GLuint program = r->GetShader(materials[0].shader);
 	glUseProgram(program);
 
 	TextureManager* textureManager = r->GetTextureManager();
@@ -137,6 +137,14 @@ void Instance::Init(InstanceManager * manager)
 	pImpl->instance = manager->GetModel(pImpl->path);
 	pImpl->instance->GetMaterial()[0].shader = pImpl->shader;
 	pImpl->ConfigureInstance();
+}
+void Instance::SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap)
+{
+	pImpl->instance->SetMaterialMaps(diffuseMap, specularMap, normalMap);
+}
+void Instance::SetShader(const char * shader)
+{
+	pImpl->instance->SetShader(shader);
 }
 void Instance::impl::ConfigureInstance()
 {

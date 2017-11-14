@@ -86,6 +86,16 @@ glm::mat4 Object::GetModelMatrix()
 	return modelMatrix;
 }
 
+void Object::SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap)
+{
+	pImpl->model->SetMaterialMaps(diffuseMap, specularMap, normalMap);
+}
+
+void Object::SetShader(const char * shader)
+{
+	pImpl->model->SetShader(shader);
+}
+
 void Object::CalculateModelMatrix()
 {
 	modelMatrix = transformMatrix * toMat4(rotationMatrix) * scaleMatrix;
