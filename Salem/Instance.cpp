@@ -154,7 +154,7 @@ void Instance::impl::ConfigureInstance()
 		glBindVertexArray(VAO);
 		// set attribute pointers for matrix (4 times vec4)
 		glEnableVertexAttribArray(7);
-		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0); 
 		glEnableVertexAttribArray(8);
 		glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
 		glEnableVertexAttribArray(9);
@@ -162,7 +162,7 @@ void Instance::impl::ConfigureInstance()
 		glEnableVertexAttribArray(10);
 		glVertexAttribPointer(10, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
 
-		glVertexAttribDivisor(7, 1);
+		glVertexAttribDivisor(7, 1); 
 		glVertexAttribDivisor(8, 1);
 		glVertexAttribDivisor(9, 1);
 		glVertexAttribDivisor(10, 1);

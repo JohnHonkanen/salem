@@ -1,11 +1,11 @@
 #version 330 core
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec2 aTexCoords;
+layout (location = 0) in vec3 in_Position;
+layout (location = 1) in vec2 in_UV;
 
-out vec2 TexCoords;
+out vec2 out_UV;
 
 void main()
 {
-    TexCoords = aTexCoords;
-    gl_Position = vec4(aPos, 1.0);
+    out_UV = in_UV;
+    gl_Position = vec4(in_Position, 1.0);
 }
