@@ -34,9 +34,9 @@ void Object::Input()
 {
 }
 
-void Object::Render(Renderer *r, const char *shader)
+void Object::Render(Renderer *r)
 {
-	pImpl->model->Render(r, modelMatrix, shader);
+	pImpl->model->Render(r, modelMatrix);
 }
 
 void Object::Translate(vec3 translation)

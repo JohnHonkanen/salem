@@ -21,7 +21,7 @@ struct AppDisk::impl {
 	int windowWidth = 1280;
 	int windowHeight = 720;
 	
-	void RenderGeometryPass(const char* shader);
+	void RenderGeometryPass();
 	void RenderLightPass();
 	void PointLightPass();
 
@@ -139,6 +139,7 @@ void AppDisk::impl::RenderLightPass()
 
 	gBuffer->BindForReading();
 
+	unsigned int gPosition, gNormal, gAlbedoSpec;
 	gBuffer->GetTextures(gPosition, gNormal, gAlbedoSpec);
 
 	glActiveTexture(GL_TEXTURE0);
