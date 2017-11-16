@@ -9,7 +9,7 @@ in vec2 UV;
 in vec3 Normal;  
 in vec3 FragPos;
 
-uniform sampler2D gColorMap; 
+uniform sampler2D gDiffuseMap; 
  
 void main(void) {
 

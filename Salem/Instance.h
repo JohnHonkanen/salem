@@ -15,6 +15,9 @@ public:
 	void Render(Renderer *r, const char * shader);
 	void AddInstance(glm::mat4 transform);
 	void Init(InstanceManager *manager);
+
+	void SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap);
+	void SetShader(const char * shader);
 private:
 	struct impl;
 	impl * pImpl;

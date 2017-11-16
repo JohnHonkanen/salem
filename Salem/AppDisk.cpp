@@ -13,6 +13,7 @@ typedef unique_ptr<Object> ObjectUP;
 struct AppDisk::impl {
 	unique_ptr<Renderer> renderer;
 	vector<ObjectUP> objects;
+	vector<ObjectUP> fObjects;
 	unique_ptr<GBuffer> gBuffer;
 
 	GLuint quadVAO;
@@ -52,10 +53,6 @@ void AppDisk::Start()
 	shaderManager->SetUniformLocation1i(lightPass, "gAlbedoSpec", 2);
 
 	pImpl->gBuffer->Init();
-
-	for (int i = 0; i < pImpl->objects.size(); i++) {
-		pImpl->objects[i]->Init(pImpl->renderer->GetInstanceManager());
-	}
 }
 
 void AppDisk::Update(float dt)
@@ -70,8 +67,7 @@ void AppDisk::Render()
 {
 	/* Do Deferred Rendering Passes */
 	/* Do Geometry Pass*/
-	pImpl->gBuffer->BindForWriting();
-	pImpl->RenderGeometryPass("geometry");
+	pImpl->RenderGeometryPass();
 	/* Do Light Pass */
 	pImpl->RenderLightPass();
 	/*-------------------------------*/
@@ -89,26 +85,47 @@ void AppDisk::Input(SDL_Event* sdlEvent)
 	}
 }
 
-void AppDisk::AddObject(std::string path)
+Object * AppDisk::AddObject(std::string path, bool deferred, const char* shader)
 {
 	ObjectUP object = make_unique<Object>(pImpl->renderer->GetModel(path));
-	object->Translate(glm::vec3(0.0f, 0.0f, -3.00f));
-	pImpl->objects.push_back(std::move(object));
+	object->SetShader(shader);
+	if (deferred) {
+		pImpl->objects.push_back(std::move(object));
+		return pImpl->objects.back().get();
+	}
+	else {
+		pImpl->fObjects.push_back(std::move(object));
+		return pImpl->fObjects.back().get();
+	}
+
+	
 }
 
-void AppDisk::AddObject(Object * object)
+Object * AppDisk::AddObject(Object * object, bool deferred, const char* shader)
 {
 	ObjectUP o = ObjectUP(object);
-	pImpl->objects.push_back(std::move(o));
+	o->Init(pImpl->renderer->GetInstanceManager());
+	o->SetShader(shader);
+	if (deferred) {
+		pImpl->objects.push_back(std::move(o));
+		return pImpl->objects.back().get();
+	}
+	else {
+		pImpl->fObjects.push_back(std::move(o));
+		return pImpl->fObjects.back().get();
+	}
+	
 }
 
-void AppDisk::impl::RenderGeometryPass(const char *shader)
+void AppDisk::impl::RenderGeometryPass()
 {
+	gBuffer->BindForWriting();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
 	for (int i = 0; i < objects.size(); i++) {
-		objects[i]->Render(renderer.get(), shader);
+		objects[i]->Render(renderer.get());
 	}
 }
 
@@ -119,8 +136,6 @@ void AppDisk::impl::RenderLightPass()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(renderer->GetShader("lightPass"));
-
-	unsigned int gPosition, gNormal, gAlbedoSpec;
 
 	gBuffer->BindForReading();
 
@@ -149,9 +164,9 @@ void AppDisk::impl::PointLightPass()
 
 void AppDisk::impl::RenderForward()
 {
-	/*for (int i = 0; i < objects.size(); i++) {
-		objects[i]->Render(renderer.get());
-	}*/
+	for (int i = 0; i < fObjects.size(); i++) {
+		fObjects[i]->Render(renderer.get());
+	}
 }
 
 void AppDisk::impl::RenderQuad()

@@ -36,7 +36,7 @@ Instance::~Instance()
 	delete pImpl;
 }
 
-void Instance::Render(Renderer * r, const char* shader)
+void Instance::Render(Renderer * r)
 {
 	glm::mat4 projection, view;
 
@@ -48,7 +48,7 @@ void Instance::Render(Renderer * r, const char* shader)
 	vector<Material> materials = pImpl->instance->GetMaterial();
 
 	ShaderManager * shaderManager = r->GetShaderManager();
-	GLuint program = r->GetShader(shader);
+	GLuint program = r->GetShader(materials[0].shader);
 	glUseProgram(program);
 
 	TextureManager* textureManager = r->GetTextureManager();
@@ -57,6 +57,7 @@ void Instance::Render(Renderer * r, const char* shader)
 		
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
+		shaderManager->SetUniformMatrix4fv(program, "model", mat4(1.0));
 
 		// View position of camera
 		glm::vec3 cameraPosition = r->camera.GetModelMatrix()[3];
@@ -123,6 +124,8 @@ void Instance::Render(Renderer * r, const char* shader)
 		glBindVertexArray(VAOs[i]);
 		glDrawElementsInstanced(GL_TRIANGLES, data[i].indexCount, GL_UNSIGNED_INT, 0, pImpl->amount);
 		glBindVertexArray(0);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }
 
@@ -137,6 +140,14 @@ void Instance::Init(InstanceManager * manager)
 	pImpl->instance = manager->GetModel(pImpl->path);
 	pImpl->instance->GetMaterial()[0].shader = pImpl->shader;
 	pImpl->ConfigureInstance();
+}
+void Instance::SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap)
+{
+	pImpl->instance->SetMaterialMaps(diffuseMap, specularMap, normalMap);
+}
+void Instance::SetShader(const char * shader)
+{
+	pImpl->instance->SetShader(shader);
 }
 void Instance::impl::ConfigureInstance()
 {

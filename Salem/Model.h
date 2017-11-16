@@ -18,6 +18,7 @@ struct MeshData {
 };
 
 struct Material {
+	std::string textureDirectory;
 	std::string shader = "default";
 	std::string diffuseMap; //Color Map
 	std::string normalMap;
@@ -44,6 +45,8 @@ public:
 	vector<MeshData> GetData();
 	vector<Material> GetMaterial();
 	vector<GLuint> GetVAO();
+	void SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap);
+	void SetShader(const char * shader);
 private:
 	struct impl;
 

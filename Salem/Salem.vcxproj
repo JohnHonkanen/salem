@@ -150,6 +150,7 @@
     <None Include="Shaders\gDiffuse.vert" />
     <None Include="Shaders\geometryPass.frag" />
     <None Include="Shaders\geometryPass.vert" />
+    <None Include="Shaders\geometryPassNormal.vert" />
     <None Include="Shaders\gNormal.frag" />
     <None Include="Shaders\gNormal.vert" />
     <None Include="Shaders\gPosition.frag" />

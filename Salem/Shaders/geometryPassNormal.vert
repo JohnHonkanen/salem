@@ -5,7 +5,6 @@
 layout(location = 0) in vec3 position;
 layout(location = 2) in vec2 uv;
 layout(location = 3) in vec3 normal;
-layout (location = 7) in mat4 aInstanceMatrix;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -18,8 +17,8 @@ out vec2 UV;
 // multiply each vertex position by the MVP matrix
 void main(void) {
 
-	vec3 FragPos = vec3(aInstanceMatrix * model * vec4(position, 1.0));
+	vec3 FragPos = vec3(model * vec4(position, 1.0));
 	UV = uv;
-	Normal = normal;//(transpose(inverse(mat4(aInstanceMatrix))) * vec4(normal, 0.0)).xyz;
+	Normal = normal;//(transpose(inverse(mat4(model))) * vec4(normal, 0.0)).xyz;
     gl_Position = projection * view * vec4(FragPos, 1.0);
 }

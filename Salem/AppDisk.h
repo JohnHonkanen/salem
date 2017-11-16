@@ -16,8 +16,8 @@ public:
 	void Render();
 	void Input(SDL_Event* sdlEvent);
 
-	void AddObject(std::string path);
-	void AddObject(Object * object);
+	Object * AddObject(std::string path, bool deferred, const char* shader);
+	Object * AddObject(Object * object, bool deferred, const char* shader);
 private:
 	struct impl;
 

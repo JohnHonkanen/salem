@@ -1,7 +1,7 @@
 // textured.frag
 #version 330
 
-out vec4 FragColor;
+out vec4 out_Color;
 
 in vec2 TexCoords;
 
@@ -11,5 +11,5 @@ uniform sampler2D gAlbedoSpec;
  
 void main(void) {
 
-	FragColor = vec4(texture(gNormal, TexCoords).rgb , 1.0);
+	out_Color = vec4(texture(gAlbedoSpec, TexCoords).rgb , 1.0);
 }

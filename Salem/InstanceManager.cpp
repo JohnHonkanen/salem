@@ -37,7 +37,7 @@ Model * InstanceManager::GetModel(std::string path)
 
 	Model* model = new Model(path);
 	
-	pImpl->models.insert(pair<string, ModelUP>("", ModelUP(model)));
+	pImpl->models.insert(pair<string, ModelUP>(path, ModelUP(model)));
 	return model;
 }
 

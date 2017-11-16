@@ -7,6 +7,7 @@
 #include <GL\glew.h>
 #include <glm\glm.hpp>
 #include "ShaderManager.h"
+#include "TextureManager.h"
 #include <glm\gtc\matrix_transform.hpp>
 
 using namespace glm;
@@ -20,6 +21,11 @@ using namespace glm;
 #define STORED_BITANGENT	6
 
 struct Model::impl {
+	string pathToDirectory = "Assets/Models/";
+
+	int formatsAllowed = 2;
+
+	string formats[2] = {"obj", "dae"};
 	string directory;
 	string path;
 
@@ -60,9 +66,12 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix, const char* shader)
 	GLuint program = r->GetShader(shader); // <---- May need to change Material[0] when we do deferred shading.
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//glDisable(GL_CULL_FACE);
+	TextureManager* textureManager = r->GetTextureManager();
+
+	glUseProgram(program);
 
 	for (int i = 0; i < pImpl->VAO.size(); i++) {
-		glUseProgram(program);
+		
 		
 		
 
@@ -70,9 +79,38 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix, const char* shader)
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
 		shaderManager->SetUniformMatrix4fv(program, "model", modelMatrix);
 
+		// Bind Map textures to texture units
+		shaderManager->SetUniformLocation1i(program, "diffuseMap", 0);
+		shaderManager->SetUniformLocation1i(program, "specularMap", 1);
+		shaderManager->SetUniformLocation1i(program, "emissionMap", 2);
+		shaderManager->SetUniformLocation1i(program, "normalMap", 3);
+
+		unsigned int diffuseMap = textureManager->GetTexture(pImpl->materials[i].diffuseMap);
+		unsigned int specularMap = textureManager->GetTexture(pImpl->materials[i].specularMap);
+		//unsigned int emissionMap = textureManager.GetTexture(materials[i].emissionMap);
+		unsigned int normalMap = textureManager->GetTexture(pImpl->materials[i].normalMap);
+
+		// Bind diffuse map
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+		// Bind specular map
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
+
+		//// Bind emission map
+		//glActiveTexture(GL_TEXTURE2);
+		//glBindTexture(GL_TEXTURE_2D, emissionMap);
+
+		// Bind specular map
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, normalMap);
+
 		glBindVertexArray(pImpl->VAO[i]);
 		glDrawElements(GL_TRIANGLES, pImpl->data[i].indexCount, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 	}
 }
@@ -90,6 +128,19 @@ vector<Material> Model::GetMaterial()
 vector<GLuint> Model::GetVAO()
 {
 	return pImpl->VAO;
+}
+
+void Model::SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap)
+{
+	pImpl->materials[0].textureDirectory = "Assets/Textures/";
+	pImpl->materials[0].diffuseMap = diffuseMap;
+	pImpl->materials[0].specularMap = specularMap;
+	pImpl->materials[0].normalMap = normalMap;
+}
+
+void Model::SetShader(const char * shader)
+{
+	pImpl->materials[0].shader = shader;
 }
 
 void Model::impl::GenerateVAO()
@@ -173,20 +224,31 @@ void Model::impl::GenerateVAO()
 void Model::impl::LoadModel()
 {
 	Assimp::Importer importer;
+	string pathToModel;
+	bool foundFormat = false;
+	int i = 0;
+	if (!foundFormat) {
+		pathToModel = pathToDirectory + path + "/" + path + "." + formats[i];
 
-	//check if file exists
-	std::ifstream fin(path.c_str());
-	if (!fin.fail()) {
-		fin.close();
-	}
-	else {
-		printf("Couldn't open file: %s\n", path.c_str());
-		printf("%s\n", importer.GetErrorString());
-		return;
-	}
+		//check if file exists
+		std::ifstream fin(pathToModel.c_str());
+		if (!fin.fail()) {
+			fin.close();
+			foundFormat = true;
+		}
 
-	const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
-	directory = path.substr(0, path.find_last_of('/'));
+		i++;
+
+		if(i > formatsAllowed){
+			printf("Couldn't open file: %s\n", pathToModel.c_str());
+			printf("%s\n", importer.GetErrorString());
+			return;
+		}
+	}
+	
+
+	const aiScene *scene = importer.ReadFile(pathToModel, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
+	directory = pathToModel.substr(0, path.find_last_of('/'));
 
 	for (int i = 0; i < scene->mNumMeshes; i++) {
 		MeshData mData = LoadData(scene->mMeshes[i]);

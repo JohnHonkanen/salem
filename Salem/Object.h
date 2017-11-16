@@ -4,7 +4,6 @@
 #include <glm\gtc\matrix_transform.hpp>
 
 using namespace glm;
-
 class Renderer;
 class Model;
 class InstanceManager;
@@ -29,6 +28,9 @@ public:
 	vec3 Up();
 	glm::mat4 GetModelMatrix();
 
+
+	virtual void SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap);
+	virtual void SetShader(const char * shader);
 protected:
 	mat4 transformMatrix;
 	quat rotationMatrix;
