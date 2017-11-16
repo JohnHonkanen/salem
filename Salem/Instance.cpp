@@ -92,6 +92,7 @@ void Instance::Render(Renderer * r, const char* shader)
 		shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
 		shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
 		shaderManager->SetUniformLocation1f(program, "material.shininess", 16.0f);
+		shaderManager->SetUniformLocation1f(program, "shininess", 16.0f);
 		
 		// Bind Map textures to texture units
 		shaderManager->SetUniformLocation1i(program, "diffuseMap", 0);
