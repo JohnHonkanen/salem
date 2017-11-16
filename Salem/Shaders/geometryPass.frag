@@ -9,11 +9,11 @@ in vec2 UV;
 in vec3 Normal;  
 in vec3 FragPos;
 
-uniform sampler2D gColorMap; 
+uniform sampler2D gDiffuseMap; 
  
 void main(void) {
 
 	gPosition = FragPos;  
     gNormal = Normal; 
-    gAlbedoSpec = vec4(0.0f, 1.0f, 3.0f, 1.0f);
+    gAlbedoSpec = texture(gDiffuseMap, UV);
 }

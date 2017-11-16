@@ -20,6 +20,11 @@ using namespace glm;
 #define STORED_BITANGENT	6
 
 struct Model::impl {
+	string pathToDirectory = "Assets/Models/";
+
+	int formatsAllowed = 2;
+
+	string formats[2] = {"obj", "dae"};
 	string directory;
 	string path;
 
@@ -185,20 +190,31 @@ void Model::impl::GenerateVAO()
 void Model::impl::LoadModel()
 {
 	Assimp::Importer importer;
+	string pathToModel;
+	bool foundFormat = false;
+	int i = 0;
+	if (!foundFormat) {
+		pathToModel = pathToDirectory + path + "/" + path + "." + formats[i];
 
-	//check if file exists
-	std::ifstream fin(path.c_str());
-	if (!fin.fail()) {
-		fin.close();
-	}
-	else {
-		printf("Couldn't open file: %s\n", path.c_str());
-		printf("%s\n", importer.GetErrorString());
-		return;
-	}
+		//check if file exists
+		std::ifstream fin(pathToModel.c_str());
+		if (!fin.fail()) {
+			fin.close();
+			foundFormat = true;
+		}
 
-	const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
-	directory = path.substr(0, path.find_last_of('/'));
+		i++;
+
+		if(i > formatsAllowed){
+			printf("Couldn't open file: %s\n", pathToModel.c_str());
+			printf("%s\n", importer.GetErrorString());
+			return;
+		}
+	}
+	
+
+	const aiScene *scene = importer.ReadFile(pathToModel, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
+	directory = pathToModel.substr(0, path.find_last_of('/'));
 
 	for (int i = 0; i < scene->mNumMeshes; i++) {
 		MeshData mData = LoadData(scene->mMeshes[i]);

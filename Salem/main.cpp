@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 	Application app = Application("Salem", 1280, 720);
 
 	AppDisk *salem = new AppDisk();
-	Instance *instance = new Instance("Assets/Models/Cube/cube.obj");
+	Instance *instance = new Instance("cube");
 	mat4 transform = mat4(1.0);
 	transform = translate(transform, vec3(2.0f ,0, -4.0f));
 	instance->AddInstance(transform);
@@ -21,9 +21,11 @@ int main(int argc, char* argv[]) {
 	instance->AddInstance(transform);
 
 	//Shader information
-	instance->SetShader("geometry");
-	salem->AddObject(instance, true);
+	instance = (Instance*)salem->AddObject(instance, true, "geometry"); // All deferred shading needs to use geometry shader
+	instance->SetMaterialMaps("Assets/Textures/container2.bmp", "", "");
 	
+	/*Object *object = salem->AddObject("cube", false, "instance_shader");
+	object->Translate(vec3(0,0, -5));*/
 	app.SetDisk(salem); 
 	app.Run();
 	return 0;
