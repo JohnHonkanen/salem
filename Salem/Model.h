@@ -18,6 +18,7 @@ struct MeshData {
 };
 
 struct Material {
+	std::string textureDirectory;
 	std::string shader = "default";
 	std::string diffuseMap; //Color Map
 	std::string normalMap;

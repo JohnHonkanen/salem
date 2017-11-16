@@ -7,6 +7,7 @@
 #include <GL\glew.h>
 #include <glm\glm.hpp>
 #include "ShaderManager.h"
+#include "TextureManager.h"
 #include <glm\gtc\matrix_transform.hpp>
 
 using namespace glm;
@@ -65,9 +66,12 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 	GLuint program = r->GetShader(pImpl->materials[0].shader); // <---- May need to change Material[0] when we do deferred shading.
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//glDisable(GL_CULL_FACE);
+	TextureManager* textureManager = r->GetTextureManager();
+
+	glUseProgram(program);
 
 	for (int i = 0; i < pImpl->VAO.size(); i++) {
-		glUseProgram(program);
+		
 		
 		
 
@@ -75,9 +79,38 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
 		shaderManager->SetUniformMatrix4fv(program, "model", modelMatrix);
 
+		// Bind Map textures to texture units
+		shaderManager->SetUniformLocation1i(program, "diffuseMap", 0);
+		shaderManager->SetUniformLocation1i(program, "specularMap", 1);
+		shaderManager->SetUniformLocation1i(program, "emissionMap", 2);
+		shaderManager->SetUniformLocation1i(program, "normalMap", 3);
+
+		unsigned int diffuseMap = textureManager->GetTexture(pImpl->materials[i].diffuseMap);
+		unsigned int specularMap = textureManager->GetTexture(pImpl->materials[i].specularMap);
+		//unsigned int emissionMap = textureManager.GetTexture(materials[i].emissionMap);
+		unsigned int normalMap = textureManager->GetTexture(pImpl->materials[i].normalMap);
+
+		// Bind diffuse map
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+		// Bind specular map
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
+
+		//// Bind emission map
+		//glActiveTexture(GL_TEXTURE2);
+		//glBindTexture(GL_TEXTURE_2D, emissionMap);
+
+		// Bind specular map
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, normalMap);
+
 		glBindVertexArray(pImpl->VAO[i]);
 		glDrawElements(GL_TRIANGLES, pImpl->data[i].indexCount, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 	}
 }
@@ -99,6 +132,7 @@ vector<GLuint> Model::GetVAO()
 
 void Model::SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap)
 {
+	pImpl->materials[0].textureDirectory = "Assets/Textures/";
 	pImpl->materials[0].diffuseMap = diffuseMap;
 	pImpl->materials[0].specularMap = specularMap;
 	pImpl->materials[0].normalMap = normalMap;

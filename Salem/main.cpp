@@ -21,11 +21,16 @@ int main(int argc, char* argv[]) {
 	instance->AddInstance(transform);
 
 	//Shader information
-	instance = (Instance*)salem->AddObject(instance, true, "geometry"); // All deferred shading needs to use geometry shader
+	instance = (Instance*)salem->AddObject(instance, true, "geometry_instance"); // All deferred shading needs to use geometry shader
 	instance->SetMaterialMaps("Assets/Textures/container2.bmp", "", "");
 	
-	/*Object *object = salem->AddObject("cube", false, "instance_shader");
-	object->Translate(vec3(0,0, -5));*/
+	Object *object = salem->AddObject("cube", true, "geometry");
+	object->Translate(vec3(0.0f ,0.0f, -15.0f));
+	object->SetMaterialMaps("Assets/Textures/container2.bmp", "", "");
+
+	Object *object2 = salem->AddObject("cube", true, "geometry");
+	object2->Translate(vec3(10.0f, 0.0f, -15.0f));
+	object2->SetMaterialMaps("Assets/Textures/container2.bmp", "", "");
 	app.SetDisk(salem); 
 	app.Run();
 	return 0;

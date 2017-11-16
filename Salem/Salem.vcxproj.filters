@@ -52,6 +52,9 @@
     <None Include="Shaders\textured.frag">
       <Filter>Resources</Filter>
     </None>
+    <None Include="Shaders\geometryPassNormal.vert">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">

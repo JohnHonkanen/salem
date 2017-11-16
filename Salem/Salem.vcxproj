@@ -146,6 +146,7 @@
   <ItemGroup>
     <None Include="Shaders\geometryPass.frag" />
     <None Include="Shaders\geometryPass.vert" />
+    <None Include="Shaders\geometryPassNormal.vert" />
     <None Include="Shaders\lightPass.frag" />
     <None Include="Shaders\lightPass.vert" />
     <None Include="Shaders\instance.frag" />
