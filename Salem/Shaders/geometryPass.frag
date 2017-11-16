@@ -9,7 +9,13 @@ in vec2 UV;
 in vec3 Normal;  
 in vec3 FragPos;
 
-uniform sampler2D gColorMap; 
+uniform vec3 viewPosi;
+uniform vec3 lightPosi;
+
+uniform sampler2D diffuseMap; 
+uniform sampler2D specularMap;
+uniform sampler2D normalMap;
+uniform sampler2D emissionMap;
  
 void main(void) {
 

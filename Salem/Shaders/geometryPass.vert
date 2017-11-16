@@ -2,10 +2,10 @@
 // use textures, but no lighting
 #version 330
 
-layout(location = 0) in vec3 position;
-layout(location = 2) in vec2 uv;
-layout(location = 3) in vec3 normal;
-layout (location = 7) in mat4 aInstanceMatrix;
+layout(location = 0) in vec3 in_Position;
+layout(location = 2) in vec2 in_UV;
+layout(location = 3) in vec3 in_Normal;
+layout (location = 7) in mat4 ImodelMatrix;
 
 uniform mat4 view;
 uniform mat4 projection;

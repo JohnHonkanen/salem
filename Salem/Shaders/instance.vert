@@ -4,8 +4,8 @@ layout(location = 0) in vec3 in_Position;
 layout(location = 2) in vec2 in_UV;
 layout(location = 3) in vec3 in_Normal;
 layout(location = 4) in mat4 ImodelMatrix; // Instance Model Matrix
-layout(location = 9) in vec3 in_Tangent;
-layout(location = 10) in vec3 in_Bitangent;
+layout(location = 5) in vec3 in_Tangent;
+layout(location = 6) in vec3 in_Bitangent;
 
 uniform mat4 view;
 uniform mat4 projection;
