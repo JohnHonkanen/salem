@@ -18,7 +18,7 @@ out vec2 UV;
 // multiply each vertex position by the MVP matrix
 void main(void) {
 
-	vec3 FragPos = vec3(aInstanceMatrix * vec4(position, 1.0));
+	vec3 FragPos = vec3(aInstanceMatrix * model * vec4(position, 1.0));
 	UV = uv;
 	Normal = normal;//(transpose(inverse(mat4(aInstanceMatrix))) * vec4(normal, 0.0)).xyz;
     gl_Position = projection * view * vec4(FragPos, 1.0);

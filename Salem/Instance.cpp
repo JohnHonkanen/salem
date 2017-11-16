@@ -57,6 +57,7 @@ void Instance::Render(Renderer * r)
 		
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
+		shaderManager->SetUniformMatrix4fv(program, "model", mat4(1.0));
 
 		// View position of camera
 		glm::vec3 cameraPosition = r->camera.GetModelMatrix()[3];
