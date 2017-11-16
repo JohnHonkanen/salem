@@ -21,26 +21,27 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
  
-uniform vec3 viewPosi; 
-uniform vec3 lightPos;
-uniform float shininess;
 uniform PointLight pointLight;
+uniform vec3 viewPosi; 
+uniform float shininess;
+
 
 // Function prototypes
-vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec4 Albedo);
+vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular);
 
 void main(void) {
 	
 	// Retrieve information from G-Buffer
 	vec3 FragPos = texture(gPosition, out_UV).rgb;
 	vec3 Normal = texture(gNormal, out_UV).rgb;
-	vec4 Albedo = texture(gAlbedoSpec, out_UV);
+	vec3 Diffuse = texture(gAlbedoSpec, out_UV).rgb;
+	float Specular = texture(gAlbedoSpec, out_UV).a;
 
 	// Properties:
 	vec3 viewDir = normalize(viewPosi - FragPos);
 
 	// Phase 1: Calculate Point Light
-	vec3 result = calcPointLight(pointLight, Normal, FragPos, viewDir, Albedo);
+	vec3 result = calcPointLight(pointLight, Normal, FragPos, viewDir, Diffuse, Specular);
 
 	// Phase 2: Apply Gamma Correction
 	//float gammaValue = 1 / 2.2f;
@@ -49,11 +50,11 @@ void main(void) {
 
 
 	// Phase 3: Output results
-	out_Color = vec4(result, 1.0f);
+	out_Color =  vec4(FragPos, 1.0f);
 }
 
 
-vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec4 Albedo){
+vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular){
 
 	// Normalize the resulting direction vector
 	vec3 lightDir = normalize(light.position.xyz - FragPos.xyz);
@@ -73,13 +74,13 @@ vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, v
 	float attenuation = 1.0f / (light.constant + light.linear * Distance + light.quadratic * (Distance * Distance));
 
 	// Combine results
-	vec3 ambient = light.ambient * Albedo.rgb;
-	vec3 diffuse = light.diffuse * diff * Albedo.rgb;
-	vec3 specular = light.specular * spec * Albedo.a;
+	vec3 ambient = light.ambient * Diffuse;
+	vec3 diffuse = light.diffuse * diff * Diffuse;
+	vec3 specular = light.specular * spec * Specular;
 
-	ambient *= attenuation;
-	diffuse *= attenuation;
-	specular *= attenuation;
+	//ambient *= attenuation;
+	//diffuse *= attenuation;
+	//specular *= attenuation;
 
-	return Albedo.rgb; // (ambient + diffuse + specular);
+	return (ambient + diffuse + specular);
 }

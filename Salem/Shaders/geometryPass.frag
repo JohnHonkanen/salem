@@ -36,11 +36,6 @@ void main(void) {
 
 	// Store the per-fragment normals into the gbuffer
 	gNormal = normalize(out_TBN * normal); 
-	
-	// Tangent Space Calcs
-	
-
-
 
 	//gEmission.rgb = texture(emissionMap, out_UV).rgb;
 	//gEmission.a = shininess;
