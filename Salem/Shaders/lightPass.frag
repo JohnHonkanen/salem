@@ -55,7 +55,7 @@ void main(void) {
 	result += pow(result, vec3(gammaValue));
 
 	// Phase 4: Output results
-	out_Color = vec4(result, 1.0f);
+	out_Color = vec4(result , 1.0f);
 }
 
 
@@ -83,9 +83,16 @@ vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, v
 	vec3 diffuse = light.diffuse * diff *  Diffuse;
 	vec3 specular = light.specular * spec * Specular;
 
-	ambient *= attenuation;
-	diffuse *= attenuation;
-	specular *= attenuation;
+	//Debug
+	diffuse = vec3(diff, Diffuse.y, Diffuse.z);
+
+	return diffuse;
+
+	//end of Debug
+
+	//ambient *= attenuation;
+	//diffuse *= attenuation;
+	//specular *= attenuation;
 
 	return (ambient + diffuse + specular);
 }

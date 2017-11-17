@@ -16,9 +16,9 @@ int main(int argc, char* argv[]) {
 
 	mat4 transform = mat4(1.0);
 
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 10; j++) {
-			for (int k = 0; k < 10; k++) {
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 2; j++) {
+			for (int k = 0; k < 5; k++) {
 				transform = mat4(1.0);
 				transform = translate(transform, vec3(5.0f * i ,5.0f * j, -5.0f * k));
 				mat4 scaleM(1.0);
@@ -39,11 +39,11 @@ int main(int argc, char* argv[]) {
 	Object *object = salem->AddObject("cube", true, "geometry");
 	object->Translate(vec3(20.0f ,0.0f, -40.0f));
 	object->Scale(vec3(3.0f));
-	object->SetMaterialMaps("Assets/Textures/container2.bmp", "", "");
+	object->SetMaterialMaps("Assets/Textures/container2.bmp", "Assets/Textures/container2_specular.bmp", "Assets/Textures/cube_normal.png");
 
 	Object *object2 = salem->AddObject("cube", true, "geometry");
 	object2->Translate(vec3(10.0f, 0.0f, -15.0f));
-	object2->SetMaterialMaps("Assets/Textures/container2.bmp", "", "");
+	object2->SetMaterialMaps("Assets/Textures/container2.bmp", "Assets/Textures/container2_specular.bmp", "Assets/Textures/cube_normal.png");
 	app.SetDisk(salem); 
 	app.Run();
 	return 0;
