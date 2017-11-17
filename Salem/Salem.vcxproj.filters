@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="AppDisk.cpp" />
+    <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FrameBuffer.cpp" />
+    <ClCompile Include="GBuffer.cpp" />
+    <ClCompile Include="InstanceManager.cpp" />
+    <ClCompile Include="Instance.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AppDisk.h" />
+    <ClInclude Include="Application.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="FrameBuffer.h" />
+    <ClInclude Include="GBuffer.h" />
+    <ClInclude Include="InstanceManager.h" />
+    <ClInclude Include="Instance.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="TextureManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\gDiffuse.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\gDiffuse.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\geometryPass.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\geometryPass.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\geometryPassNormal.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\gNormal.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\gNormal.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\gPosition.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\gPosition.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\instance.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\instance.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\lightPass.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\lightPass.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\textured.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\textured.vert">
+      <Filter>Resources</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{29fba64a-a0ef-4146-b318-7c44f77b2078}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
