@@ -7,7 +7,6 @@ layout(location = 5) in vec3 in_Tangent;
 layout(location = 6) in vec3 in_Bitangent;
 layout (location = 7) in mat4 ImodelMatrix;
 
-uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
@@ -23,7 +22,7 @@ void main(void) {
 	out_UV = in_UV;
 
 	// Calculate Vertex Positions
-	vec3 FragPos = vec3(ImodelMatrix * vec4(in_Position, 1.0));
+	FragPos = vec3(ImodelMatrix  * vec4(in_Position, 1.0));
 	
 	//out_Normal = mat3(transpose(inverse(ImodelMatrix))) * in_Normal;
 
@@ -42,6 +41,6 @@ void main(void) {
 
 	out_TBN = transpose(mat3(T, B, N));
 
-	gl_Position = projection * view * ImodelMatrix * vec4(in_Position, 1.0f);
+	gl_Position = projection * view * vec4(FragPos, 1.0f);
 	
 }

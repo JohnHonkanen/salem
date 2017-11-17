@@ -59,6 +59,7 @@ void Instance::Render(Renderer * r)
 		
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
+		shaderManager->SetUniformMatrix4fv(program, "model", mat4(1.0));
 		
 		// Bind Map textures to texture units
 		shaderManager->SetUniformLocation1i(program, "diffuseMap", 0);
@@ -66,28 +67,36 @@ void Instance::Render(Renderer * r)
 		shaderManager->SetUniformLocation1i(program, "emissionMap", 2);
 		shaderManager->SetUniformLocation1i(program, "normalMap", 3);
 
-		unsigned int diffuseMap = textureManager->GetTexture(materials[i].diffuseMap);
-		unsigned int specularMap = textureManager->GetTexture(materials[i].specularMap);
-		unsigned int emissionMap = textureManager->GetTexture(materials[i].emissionMap);
-		unsigned int normalMap = textureManager->GetTexture(materials[i].normalMap);
 
 		shaderManager->SetUniformLocation1f(program, "shininess", 16.0f);
 
-		// Bind diffuse map
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+		if (materials[i].diffuseMap != "") {
+			unsigned int diffuseMap = textureManager->GetTexture(materials[i].diffuseMap);
+			// Bind diffuse map
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, diffuseMap);
+		}
 
-		// Bind specular map
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap);
+		if (materials[i].specularMap != "") {
+			unsigned int specularMap = textureManager->GetTexture(materials[i].specularMap);
+			// Bind specular map
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, specularMap);
+		}
 
-		//// Bind emission map
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, emissionMap);
+		if (materials[i].emissionMap != "") {
+			unsigned int emissionMap = textureManager->GetTexture(materials[i].emissionMap);
+			// Bind emission map
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, emissionMap);
+		}
 
-		// Bind specular map
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, normalMap);
+		if (materials[i].normalMap != "") {
+			unsigned int normalMap = textureManager->GetTexture(materials[i].normalMap);
+			// Bind specular map
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, normalMap);
+		}
 
 		glBindVertexArray(VAOs[i]);
 		glDrawElementsInstanced(GL_TRIANGLES, data[i].indexCount, GL_UNSIGNED_INT, 0, pImpl->amount);

@@ -72,9 +72,6 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 
 	for (int i = 0; i < pImpl->VAO.size(); i++) {
 		
-		
-		
-
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
 		shaderManager->SetUniformMatrix4fv(program, "model", modelMatrix);
@@ -85,26 +82,49 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 		shaderManager->SetUniformLocation1i(program, "emissionMap", 2);
 		shaderManager->SetUniformLocation1i(program, "normalMap", 3);
 
-		unsigned int diffuseMap = textureManager->GetTexture(pImpl->materials[i].diffuseMap);
-		unsigned int specularMap = textureManager->GetTexture(pImpl->materials[i].specularMap);
-		//unsigned int emissionMap = textureManager.GetTexture(materials[i].emissionMap);
-		unsigned int normalMap = textureManager->GetTexture(pImpl->materials[i].normalMap);
-
-		// Bind diffuse map
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
-		// Bind specular map
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap);
-
-		//// Bind emission map
-		//glActiveTexture(GL_TEXTURE2);
-		//glBindTexture(GL_TEXTURE_2D, emissionMap);
-
-		// Bind specular map
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, normalMap);
+		if (pImpl->materials[i].diffuseMap != "") {
+			unsigned int diffuseMap = textureManager->GetTexture(pImpl->materials[i].diffuseMap);
+			// Bind diffuse map
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, diffuseMap);
+		}
+		else {
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		
+		if (pImpl->materials[i].specularMap != "") {
+			unsigned int specularMap = textureManager->GetTexture(pImpl->materials[i].specularMap);
+			// Bind specular map
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, specularMap);
+		}
+		else {
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		
+		if (pImpl->materials[i].emissionMap != "") {
+			unsigned int emissionMap = textureManager->GetTexture(pImpl->materials[i].emissionMap);
+			// Bind emission map
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, emissionMap);
+		}
+		else {
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+			
+		if (pImpl->materials[i].normalMap != "") {
+			unsigned int normalMap = textureManager->GetTexture(pImpl->materials[i].normalMap);
+			// Bind specular map
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, normalMap);
+		}
+		else {
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 
 		glBindVertexArray(pImpl->VAO[i]);
 		glDrawElements(GL_TRIANGLES, pImpl->data[i].indexCount, GL_UNSIGNED_INT, 0);
@@ -211,6 +231,9 @@ void Model::impl::GenerateVAO()
 			meshBuffers[STORED_BITANGENT] = bitangentBuffer;
 		}
 
+		//Make Sure InstanceMatrix is 1.0
+
+
 
 		glBindVertexArray(0); // Unbind VAO
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -227,7 +250,7 @@ void Model::impl::LoadModel()
 	string pathToModel;
 	bool foundFormat = false;
 	int i = 0;
-	if (!foundFormat) {
+	while (!foundFormat) {
 		pathToModel = pathToDirectory + path + "/" + path + "." + formats[i];
 
 		//check if file exists
@@ -248,7 +271,7 @@ void Model::impl::LoadModel()
 	
 
 	const aiScene *scene = importer.ReadFile(pathToModel, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
-	directory = pathToModel.substr(0, path.find_last_of('/'));
+	directory = pathToDirectory + path + "/";
 
 	for (int i = 0; i < scene->mNumMeshes; i++) {
 		MeshData mData = LoadData(scene->mMeshes[i]);
