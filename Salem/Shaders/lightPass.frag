@@ -20,14 +20,15 @@ in vec2 out_UV;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
+uniform sampler2D gEmission;
  
 uniform PointLight pointLight;
 uniform vec3 viewPosi; 
-uniform float shininess;
+
 
 
 // Function prototypes
-vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular);
+vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess);
 
 void main(void) {
 	
@@ -36,25 +37,29 @@ void main(void) {
 	vec3 Normal = texture(gNormal, out_UV).rgb;
 	vec3 Diffuse = texture(gAlbedoSpec, out_UV).rgb;
 	float Specular = texture(gAlbedoSpec, out_UV).a;
+	vec3 Emission = texture(gEmission, out_UV).rgb;
+	float Shininess = texture(gEmission, out_UV).a;
 
 	// Properties:
 	vec3 viewDir = normalize(viewPosi - FragPos);
 
 	// Phase 1: Calculate Point Light
-	vec3 result = calcPointLight(pointLight, Normal, FragPos, viewDir, Diffuse, Specular);
+	vec3 result = calcPointLight(pointLight, Normal, FragPos, viewDir, Diffuse, Specular, Shininess);
 
-	// Phase 2: Apply Gamma Correction
-	//float gammaValue = 1 / 2.2f;
+	// Phase 2: Apply Emission / Glow
+	result += Emission;
 
-	//result += pow(result, vec3(gammaValue));
+	// Phase 3: Apply Gamma Correction
+	float gammaValue = 1 / 2.2f;
 
+	result += pow(result, vec3(gammaValue));
 
-	// Phase 3: Output results
-	out_Color =  vec4(FragPos, 1.0f);
+	// Phase 4: Output results
+	out_Color = vec4(result, 1.0f);
 }
 
 
-vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular){
+vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess){
 
 	// Normalize the resulting direction vector
 	vec3 lightDir = normalize(light.position.xyz - FragPos.xyz);
@@ -67,7 +72,7 @@ vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, v
 
 	// Specular
 	// Blinn-Phong specular shading 
-	float spec = pow(max(dot(Normal, halfwayDir), 0.0), shininess);
+	float spec = pow(max(dot(Normal, halfwayDir), 0.0), Shininess);
 
 	// Attenuation
 	float Distance = length(light.position - FragPos);
@@ -75,12 +80,12 @@ vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, v
 
 	// Combine results
 	vec3 ambient = light.ambient * Diffuse;
-	vec3 diffuse = light.diffuse * diff * Diffuse;
+	vec3 diffuse = light.diffuse * diff *  Diffuse;
 	vec3 specular = light.specular * spec * Specular;
 
-	//ambient *= attenuation;
-	//diffuse *= attenuation;
-	//specular *= attenuation;
+	ambient *= attenuation;
+	diffuse *= attenuation;
+	specular *= attenuation;
 
 	return (ambient + diffuse + specular);
 }

@@ -59,42 +59,6 @@ void Instance::Render(Renderer * r, const char* shader)
 		
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
-
-		// View position of camera
-		glm::vec3 cameraPosition = r->camera.GetModelMatrix()[3];
-		shaderManager->SetUniformLocation3f(program, "pointLight.position",
-			cameraPosition.x, cameraPosition.y, cameraPosition.z);
-
-		// View position to be passed into vertex shader
-		glm::vec3 viewPosition = r->camera.GetModelMatrix()[3];
-		shaderManager->SetUniformLocation3f(program, "viewPosi",
-			cameraPosition.x, cameraPosition.y, cameraPosition.z);
-
-		// Light position to be passed into vertex shader
-		glm::vec3 lightPosition = r->camera.GetModelMatrix()[3];
-		shaderManager->SetUniformLocation3f(program, "lightPosi",
-			cameraPosition.x, cameraPosition.y, cameraPosition.z);
-
-		// Pointlight Uniforms + Properties
-		
-		shaderManager->SetUniformLocation3f(program, "pointLight.position", 
-			cameraPosition.x, cameraPosition.y, cameraPosition.z);
-
-		shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.05f, 0.05f, 0.05f);
-		shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.8f, 0.8f, 0.8f);
-		shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.3f, 0.3f, 0.3f);
-		
-		// Pointlight Attenuation
-		shaderManager->SetUniformLocation1f(program, "pointLight.constant", 1.0f);
-		shaderManager->SetUniformLocation1f(program, "pointLight.linear", 0.09f);
-		shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 0.032f);
-
-		// Material Uniforms + Properties
-
-		shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
-		shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
-		shaderManager->SetUniformLocation1f(program, "material.shininess", 16.0f);
-		shaderManager->SetUniformLocation1f(program, "shininess", 16.0f);
 		
 		// Bind Map textures to texture units
 		shaderManager->SetUniformLocation1i(program, "diffuseMap", 0);
@@ -104,8 +68,10 @@ void Instance::Render(Renderer * r, const char* shader)
 
 		unsigned int diffuseMap = textureManager->GetTexture(materials[i].diffuseMap);
 		unsigned int specularMap = textureManager->GetTexture(materials[i].specularMap);
-		//unsigned int emissionMap = textureManager.GetTexture(materials[i].emissionMap);
+		unsigned int emissionMap = textureManager->GetTexture(materials[i].emissionMap);
 		unsigned int normalMap = textureManager->GetTexture(materials[i].normalMap);
+
+		shaderManager->SetUniformLocation1f(program, "shininess", 16.0f);
 
 		// Bind diffuse map
 		glActiveTexture(GL_TEXTURE0);
@@ -116,8 +82,8 @@ void Instance::Render(Renderer * r, const char* shader)
 		glBindTexture(GL_TEXTURE_2D, specularMap);
 
 		//// Bind emission map
-		//glActiveTexture(GL_TEXTURE2);
-		//glBindTexture(GL_TEXTURE_2D, emissionMap);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, emissionMap);
 
 		// Bind specular map
 		glActiveTexture(GL_TEXTURE3);

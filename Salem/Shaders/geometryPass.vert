@@ -11,21 +11,22 @@ uniform mat4 view;
 uniform mat4 projection;
 
 out vec3 FragPos;
-out vec3 out_Normal;
+//out vec3 out_Normal;
 out vec2 out_UV;
 out mat3 out_TBN;
 
 // multiply each vertex position by the MVP matrix
 void main(void) {
 
-	gl_Position = projection * view * ImodelMatrix * vec4(in_Position, 1.0f);
-
+	
 	out_UV = in_UV;
 
 	// Calculate Vertex Positions
 	vec3 FragPos = vec3(ImodelMatrix * vec4(in_Position, 1.0));
 	
-	out_Normal = in_Normal;     //(transpose(inverse(mat4(ImodelMatrix))) * vec4(in_Normal, 0.0)).xyz;
+	//out_Normal = mat3(transpose(inverse(ImodelMatrix))) * in_Normal;
+
+	//mat3 normalMatrix = transpose(inverse(mat3(ImodelMatrix)));
 
     // Gram/Schmidt process to orthogolize the TBN vector so that each vector is again perpendicular to the other vectors.
 
@@ -36,7 +37,10 @@ void main(void) {
 	T = normalize(T - dot(T, N) * N);
 
 	// then retrieve perpendicular vector B with the cross product of T and N
-	vec3 B = cross(N, T);
+	vec3 B = cross(N, T); // normalize(vec3(normalMatrix * in_Bitangent));  
 
-	out_TBN = mat3(T, B, N);
+	out_TBN = transpose(mat3(T, B, N));
+
+	gl_Position = projection * view * ImodelMatrix * vec4(in_Position, 1.0f);
+	
 }
