@@ -51,6 +51,7 @@ void AppDisk::Start()
 	shaderManager->SetUniformLocation1i(lightPass, "gPosition", 0);
 	shaderManager->SetUniformLocation1i(lightPass, "gNormal", 1);
 	shaderManager->SetUniformLocation1i(lightPass, "gAlbedoSpec", 2);
+	shaderManager->SetUniformLocation1i(lightPass, "gEmission", 3);
 
 	pImpl->gBuffer->Init();
 }
@@ -137,10 +138,14 @@ void AppDisk::impl::RenderLightPass()
 
 	glUseProgram(renderer->GetShader("lightPass"));
 
+	unsigned int gPosition, gNormal, gAlbedoSpec, gEmission;
+
+	ShaderManager* shaderManager = renderer->GetShaderManager();
+	unsigned int program = renderer->GetShader("lightPass");
+
 	gBuffer->BindForReading();
 
-	unsigned int gPosition, gNormal, gAlbedoSpec;
-	gBuffer->GetTextures(gPosition, gNormal, gAlbedoSpec);
+	gBuffer->GetTextures(gPosition, gNormal, gAlbedoSpec, gEmission);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gPosition);
@@ -148,6 +153,39 @@ void AppDisk::impl::RenderLightPass()
 	glBindTexture(GL_TEXTURE_2D, gNormal);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, gEmission);
+
+	// View position of camera
+	glm::vec3 cameraPosition = renderer->camera.GetModelMatrix()[3];
+	shaderManager->SetUniformLocation3f(program, "pointLight.position",
+		cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+	// View position to be passed into vertex shader
+	glm::vec3 viewPosition = renderer->camera.GetModelMatrix()[3];
+	shaderManager->SetUniformLocation3f(program, "viewPosi",
+		cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+	// Light position to be passed into vertex shader
+	glm::vec3 lightPosition = renderer->camera.GetModelMatrix()[3];
+	shaderManager->SetUniformLocation3f(program, "lightPosi",
+		cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+	// Pointlight Uniforms + Properties
+
+	shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.05f, 0.05f, 0.05f);
+	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 1.0f, 1.0f, 1.0f);
+	shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.3f, 0.3f, 0.3f);
+
+	// Pointlight Attenuation
+	shaderManager->SetUniformLocation1f(program, "pointLight.constant", 1.0f);
+	shaderManager->SetUniformLocation1f(program, "pointLight.linear", 0.09f);
+	shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 0.032f);
+
+	// Material Uniforms + Properties
+
+	shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
+	shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
 
 	RenderQuad();
 

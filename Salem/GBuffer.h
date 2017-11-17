@@ -20,7 +20,7 @@ public:
 	void BindForReading();
 	void SetReadBuffer(GBUFFER_TEXTURE_TYPE TextureType);
 
-	void GetTextures(unsigned int &position, unsigned int &normal, unsigned int &albedoSpec);
+	void GetTextures(unsigned int &position, unsigned int &normal, unsigned int &albedoSpec, unsigned int & emission);
 private:
 	struct impl;
 

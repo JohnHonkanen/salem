@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 	Application app = Application("Salem", 1280, 720);
 
 	AppDisk *salem = new AppDisk();
-	Instance *instance = new Instance("cube");
+	Instance *instance = new Instance("nightshade");
 	mat4 transform = mat4(1.0);
 	transform = translate(transform, vec3(2.0f ,0, -5.0f));
 	instance->AddInstance(transform);
