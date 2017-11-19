@@ -68,7 +68,7 @@ void Instance::Render(Renderer * r)
 		shaderManager->SetUniformLocation1i(program, "normalMap", 3);
 
 
-		shaderManager->SetUniformLocation1f(program, "shininess", 16.0f);
+		shaderManager->SetUniformLocation1f(program, "shininess", 20.0f);
 
 		if (materials[i].diffuseMap != "") {
 			unsigned int diffuseMap = textureManager->GetTexture(materials[i].diffuseMap);

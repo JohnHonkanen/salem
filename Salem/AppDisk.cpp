@@ -173,9 +173,9 @@ void AppDisk::impl::RenderLightPass()
 
 	// Pointlight Uniforms + Properties
 
-	shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.05f, 0.05f, 0.05f);
-	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 1.0f, 1.0f, 1.0f);
-	shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.3f, 0.3f, 0.3f);
+	shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.005f, 0.005f, 0.005f);
+	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.8f, 0.8f, 0.8f);
+	shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.5f, 0.5f, 0.5f);
 
 	// Pointlight Attenuation
 	shaderManager->SetUniformLocation1f(program, "pointLight.constant", 1.0f);
