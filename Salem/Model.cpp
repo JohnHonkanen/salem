@@ -26,6 +26,7 @@ struct Model::impl {
 	int formatsAllowed = 3;
 
 	string formats[3] = {"obj", "dae", "fbx"};
+	int fileType = 0;
 	string directory;
 	string path;
 
@@ -258,6 +259,7 @@ void Model::impl::LoadModel()
 		if (!fin.fail()) {
 			fin.close();
 			foundFormat = true;
+			fileType = i;
 		}
 
 		i++;
@@ -317,8 +319,15 @@ MeshData Model::impl::LoadData(aiMesh * mesh)
 			if (mesh->HasNormals()) {
 				aiVector3D normal = mesh->mNormals[face.mIndices[j]];
 				normalArray.push_back(normal.x);
-				normalArray.push_back(normal.z);
-				normalArray.push_back(normal.y * - 1);
+				if (fileType = 1) {
+					// if Collada (.dae)
+					normalArray.push_back(normal.z);
+					normalArray.push_back(normal.y * -1);
+				}
+				else {
+					normalArray.push_back(normal.y);
+					normalArray.push_back(normal.z);
+				}
 			}
 
 			if (mesh->HasTangentsAndBitangents()) {

@@ -157,9 +157,8 @@ void AppDisk::impl::RenderLightPass()
 	glBindTexture(GL_TEXTURE_2D, gEmission);
 
 	// View position of camera
+
 	glm::vec3 cameraPosition = renderer->camera.GetModelMatrix()[3];
-	shaderManager->SetUniformLocation3f(program, "pointLight.position",
-		cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
 	// View position to be passed into vertex shader
 	glm::vec3 viewPosition = renderer->camera.GetModelMatrix()[3];
@@ -171,21 +170,49 @@ void AppDisk::impl::RenderLightPass()
 	shaderManager->SetUniformLocation3f(program, "lightPosi",
 		cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
-	// Pointlight Uniforms + Properties
+	/**********POINTLIGHT PROPERTIES**********/
 
-	shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.005f, 0.005f, 0.005f);
-	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.8f, 0.8f, 0.8f);
-	shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.5f, 0.5f, 0.5f);
+	// Camera
+	shaderManager->SetUniformLocation3f(program, "pointLight.position",
+		cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+	// Pointlight Uniforms 
+	shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.05f, 0.05f, 0.05f);
+	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.3f, 0.3f, 0.3f);
+	shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.15f, 0.15f, 0.15f);
 
 	// Pointlight Attenuation
 	shaderManager->SetUniformLocation1f(program, "pointLight.constant", 1.0f);
 	shaderManager->SetUniformLocation1f(program, "pointLight.linear", 0.09f);
 	shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 0.032f);
 
+	/**********SPOTLIGHT PROPERTIES**********/
+
+	// Camera
+	cameraPosition = renderer->camera.GetModelMatrix()[3];
+	shaderManager->SetUniformLocation3f(program, "spotLight.direction",
+		cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+	cameraPosition = renderer->camera.GetModelMatrix()[3];
+	shaderManager->SetUniformLocation3f(program, "spotLight.position",
+		cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+	// Spotlight Uniforms 
+	shaderManager->SetUniformLocation3f(program, "spotLight.ambient", 0.005f, 0.005f, 0.005f);
+	shaderManager->SetUniformLocation3f(program, "spotLight.diffuse", 0.8f, 0.8f, 0.8f);
+	shaderManager->SetUniformLocation3f(program, "spotLight.specular", 0.5f, 0.5f, 0.5f);
+
+	// Spotlight Attenuation + inner/outer cutoff: Range currently set at: 3250
+	shaderManager->SetUniformLocation1f(program, "spotLight.constant", 1.0f);
+	shaderManager->SetUniformLocation1f(program, "spotLight.linear", 0.0014f);
+	shaderManager->SetUniformLocation1f(program, "spotLight.quadratic", 0.000007f);
+	shaderManager->SetUniformLocation1f(program, "spotLight.cutOff", glm::cos(glm::radians(5.5f * 1.2f))); // 12.5
+	shaderManager->SetUniformLocation1f(program, "spotLight.cutOff", glm::cos(glm::radians(12.5f * 1.2f))); // 17.5
+
 	// Material Uniforms + Properties
 
-	shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
-	shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
+	//shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
+	//shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
 
 	RenderQuad();
 
