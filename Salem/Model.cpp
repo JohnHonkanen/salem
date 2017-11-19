@@ -40,6 +40,7 @@ struct Model::impl {
 	vector<GLuint> VAO;
 	vector<vector<GLuint *>> VBO;
 
+	vector<Mesh> meshes;
 	mat4 globalInverseTransform;
 	map<string, uint> boneMapping;
 	vector<BoneInfo> boneInfo;
@@ -50,7 +51,7 @@ struct Model::impl {
 	void LoadModel();
 
 	mat4 AiToGLM(aiMatrix4x4 matrix);
-	MeshData LoadData(aiMesh *mesh);
+	void LoadData(uint meshIndex, aiMesh *mesh, MeshData &data);
 	Material LoadMaterial(const aiScene *scene, int index);
 	string getTexturePath(aiMaterial *material, aiTextureType type);
 
@@ -299,10 +300,34 @@ void Model::impl::LoadModel()
 	directory = pathToDirectory + path + "/";
 
 	globalInverseTransform = AiToGLM(scene->mRootNode->mTransformation.Inverse());
-	for (int i = 0; i < scene->mNumMeshes; i++) {
-		MeshData mData = LoadData(scene->mMeshes[i]);
-		data.push_back(mData);
-		LoadBones(i, scene->mMeshes[i], data[i].boneArray);
+
+	meshes.resize(scene->mNumMeshes);
+
+	uint numVertices = 0;
+	uint numIndices = 0;
+
+	for (uint i = 0; i < meshes.size(); i++) {
+		meshes[i].numIndices = scene->mMeshes[i]->mNumFaces * 3;
+		meshes[i].baseVertex = numVertices;
+		meshes[i].baseIndex = numIndices;
+
+		numVertices += scene->mMeshes[i]->mNumVertices;
+		numIndices += meshes[i].numIndices;
+	}
+
+	MeshData mData;
+	mData.vertexArray.reserve(numVertices);
+	mData.normalArray.reserve(numVertices);
+	mData.uvArray.reserve(numVertices);
+	mData.indices.reserve(numIndices);
+	mData.tangentArray.reserve(numVertices);
+	mData.bitangentArray.reserve(numVertices);
+	mData.boneArray.resize(numVertices);
+	mData.numVerts = numVertices;
+	mData.indexCount = numIndices;
+
+	for (int i = 0; i < meshes.size(); i++) {
+		LoadData(i, scene->mMeshes[i], mData);
 
 		Material mat;
 		if (scene->mMeshes[i]->mMaterialIndex >= 0) {
@@ -310,6 +335,8 @@ void Model::impl::LoadModel()
 		}
 		materials.push_back(mat);
 	}
+
+	data.push_back(mData);
 }
 
 mat4 Model::impl::AiToGLM(aiMatrix4x4 matrix)
@@ -321,17 +348,8 @@ mat4 Model::impl::AiToGLM(aiMatrix4x4 matrix)
 				matrix.a4, matrix.b4, matrix.c4, matrix.d4);
 }
 
-MeshData Model::impl::LoadData(aiMesh * mesh)
+void Model::impl::LoadData(uint meshIndex, aiMesh * mesh, MeshData &data)
 {
-	std::vector<GLfloat> vertexArray;
-	std::vector<GLfloat> normalArray;
-	std::vector<GLfloat> uvArray;
-	std::vector<GLuint> indexArray;
-	std::vector<GLfloat> tangentArray;
-	std::vector<GLfloat> bitangentArray;
-	std::vector<VertexBoneData> boneArray;
-
-
 	GLuint numVerts;
 	GLuint indexCount = 0;
 
@@ -346,57 +364,45 @@ MeshData Model::impl::LoadData(aiMesh * mesh)
 		{
 			if (mesh->HasTextureCoords(0)) {
 				aiVector3D uv = mesh->mTextureCoords[0][face.mIndices[j]];
-				uvArray.push_back(uv.x);
-				uvArray.push_back(uv.y);
+				data.uvArray.push_back(uv.x);
+				data.uvArray.push_back(uv.y);
 			}
 
 
 			if (mesh->HasNormals()) {
 				aiVector3D normal = mesh->mNormals[face.mIndices[j]];
-				normalArray.push_back(normal.x);
-				normalArray.push_back(normal.y);
-				normalArray.push_back(normal.z);
+				data.normalArray.push_back(normal.x);
+				data.normalArray.push_back(normal.y);
+				data.normalArray.push_back(normal.z);
 			}
 
 			if (mesh->HasTangentsAndBitangents()) {
 				// Tangents
 				aiVector3D tangent = mesh->mTangents[face.mIndices[j]];
-				tangentArray.push_back(tangent.x);
-				tangentArray.push_back(tangent.y);
-				tangentArray.push_back(tangent.z);
+				data.tangentArray.push_back(tangent.x);
+				data.tangentArray.push_back(tangent.y);
+				data.tangentArray.push_back(tangent.z);
 
 				// Bitangents
 				aiVector3D bitangent = mesh->mBitangents[face.mIndices[j]];
-				bitangentArray.push_back(bitangent.x);
-				bitangentArray.push_back(bitangent.y);
-				bitangentArray.push_back(bitangent.z);
+				data.bitangentArray.push_back(bitangent.x);
+				data.bitangentArray.push_back(bitangent.y);
+				data.bitangentArray.push_back(bitangent.z);
 			}
 
 			aiVector3D pos = mesh->mVertices[face.mIndices[j]];
-			vertexArray.push_back(pos.x);
-			vertexArray.push_back(pos.y);
-			vertexArray.push_back(pos.z);
+			data.vertexArray.push_back(pos.x);
+			data.vertexArray.push_back(pos.y);
+			data.vertexArray.push_back(pos.z);
 		}
 		for (int j = 0; j < face.mNumIndices; j++) {
-			indexArray.push_back(face.mIndices[j]);
+			data.indices.push_back(face.mIndices[j]);
 
 		}
-
 	}
 
-
-	MeshData data;
-	data.vertexArray = vertexArray;
-	data.indices = indexArray;
-	data.uvArray = uvArray;
-	data.normalArray = normalArray;
-	data.numVerts = numVerts;
-	data.indexCount = indexArray.size();
-	data.tangentArray = tangentArray;
-	data.bitangentArray = bitangentArray;
-	data.boneArray = boneArray;
-
-	return data;
+	/*Loads the Bones*/
+	LoadBones(meshIndex, mesh, data.boneArray);
 }
 
 Material Model::impl::LoadMaterial(const aiScene * scene, int index)
@@ -450,7 +456,7 @@ void Model::impl::LoadBones(unsigned int index, const aiMesh * mesh, vector<Vert
 
 		//Double CHeck that this is right
 		for (uint j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
-			uint vertexId = data[index].numVerts + mesh->mBones[i]->mWeights[j].mVertexId;
+			uint vertexId = meshes[index].baseVertex + mesh->mBones[i]->mWeights[j].mVertexId;
 			float weight = mesh->mBones[i]->mWeights[j].mWeight;
 			bones[vertexId].AddBoneData(vertexId, weight);
 		}

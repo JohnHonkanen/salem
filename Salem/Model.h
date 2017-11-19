@@ -21,6 +21,12 @@ struct VertexBoneData {
 
 };
 
+struct Mesh {
+	unsigned int numIndices;
+	unsigned int baseVertex;
+	unsigned int baseIndex;
+};
+
 struct MeshData {
 	std::vector<GLfloat> vertexArray;
 	std::vector<GLfloat> normalArray;
