@@ -15,7 +15,8 @@ struct AppDisk::impl {
 	vector<ObjectUP> objects;
 	vector<ObjectUP> fObjects;
 	unique_ptr<GBuffer> gBuffer;
-
+	unique_ptr<FrameBuffer> HDRBuffer;
+	unique_ptr<FrameBuffer> lightBuffer;
 	GLuint quadVAO;
 
 	int windowWidth = 1280;
@@ -28,6 +29,9 @@ struct AppDisk::impl {
 	void RenderForward();
 
 	void RenderQuad();
+	
+	void RenderHDRPass();
+	void RendererFinalImage();
 };
 
 AppDisk::AppDisk()
@@ -35,6 +39,8 @@ AppDisk::AppDisk()
 	pImpl = new impl();
 	pImpl->renderer = make_unique<Renderer>();
 	pImpl->gBuffer = make_unique<GBuffer>(pImpl->windowWidth, pImpl->windowHeight);
+	pImpl->HDRBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
+	pImpl->lightBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 }
 
 
@@ -54,6 +60,8 @@ void AppDisk::Start()
 	shaderManager->SetUniformLocation1i(lightPass, "gEmission", 3);
 
 	pImpl->gBuffer->Init();
+	pImpl->HDRBuffer->Init();
+	pImpl->lightBuffer->Init();
 }
 
 void AppDisk::Update(float dt)
@@ -76,6 +84,11 @@ void AppDisk::Render()
 	/* Do Forward Rendering Passes  */
 	pImpl->RenderForward();
 	/*-------------------------------*/
+	
+	/*Do HDR Pass*/
+	pImpl->RenderHDRPass();
+	/*-------------------------------*/
+	pImpl->RendererFinalImage();
 }
 
 void AppDisk::Input(SDL_Event* sdlEvent)
@@ -132,8 +145,8 @@ void AppDisk::impl::RenderGeometryPass()
 
 void AppDisk::impl::RenderLightPass()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); //Bind Default FrameBuffer
-
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0); //Bind Default FrameBuffer
+	lightBuffer->BindForWriting();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(renderer->GetShader("lightPass"));
@@ -179,14 +192,14 @@ void AppDisk::impl::RenderLightPass()
 
 	// Pointlight Uniforms 
 	shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.05f, 0.05f, 0.05f);
-	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.0f, 1.0f, 0.0f);
+	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.0f, 200.0f, 0.0f);
 	//shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.3f, 0.3f, 0.3f);
 	shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.15f, 0.15f, 0.15f);
 
 	// Pointlight Attenuation
 	shaderManager->SetUniformLocation1f(program, "pointLight.constant", 1.0f);
-	shaderManager->SetUniformLocation1f(program, "pointLight.linear", 0.45f);
-	shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 0.16f);
+	shaderManager->SetUniformLocation1f(program, "pointLight.linear", 0.9f);
+	shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 0.32f);
 
 	/**********SPOTLIGHT PROPERTIES**********/
 
@@ -218,12 +231,11 @@ void AppDisk::impl::RenderLightPass()
 
 	RenderQuad();
 
-	gBuffer->BindForReading();
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); //Write to default
+	//gBuffer->BindForReading();
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); //Write to default
 
-	glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+	//glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void AppDisk::impl::PointLightPass()
@@ -263,4 +275,55 @@ void AppDisk::impl::RenderQuad()
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
+}
+
+void AppDisk::impl::RenderHDRPass()
+{
+	HDRBuffer->BindForWriting();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glUseProgram(renderer->GetShader("HDRPass"));
+
+	unsigned int texture;
+
+	ShaderManager* shaderManager = renderer->GetShaderManager();
+	unsigned int program = renderer->GetShader("HDRPass");
+
+
+	// Read Lightbuffer data 
+	lightBuffer->BindForReading();
+	texture = lightBuffer->GetTexture();
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	shaderManager->SetUniformLocation1i(program, "HDR", 0);
+	
+	RenderQuad();
+}
+
+void AppDisk::impl::RendererFinalImage()
+{
+
+	HDRBuffer->BindForReading();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); //Write to default
+
+	ShaderManager* shaderManager = renderer->GetShaderManager();
+	unsigned int program = renderer->GetShader("default");
+
+	glUseProgram(program);
+
+	unsigned int texture;
+
+	// Read HDRBuffer data 
+	texture = HDRBuffer->GetTexture();
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	shaderManager->SetUniformLocation1i(program, "texture0", 0);
+
+	RenderQuad();
+
+	glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

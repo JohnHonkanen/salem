@@ -127,6 +127,7 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
+
 		glBindVertexArray(pImpl->VAO[i]);
 		glDrawElements(GL_TRIANGLES, pImpl->data[i].indexCount, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);

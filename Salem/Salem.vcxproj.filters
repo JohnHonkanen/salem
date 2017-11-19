@@ -75,6 +75,12 @@
     <None Include="Shaders\textured.vert">
       <Filter>Resources</Filter>
     </None>
+    <None Include="Shaders\HDRPass.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\HDRPass.vert">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">

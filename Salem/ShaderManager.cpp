@@ -144,10 +144,10 @@ void ShaderManager::impl::CreateShader(string name, const char * vertexPath, con
 
 void ShaderManager::impl::Init()
 {
-	CreateShader("default", "Shaders/textured.vert", "Shaders/textured.frag");
+	CreateShader("default", "Shaders/HDRPass.vert", "Shaders/textured.frag");
 	CreateShader("instance_shader", "Shaders/instance.vert", "Shaders/instance.frag");
-	CreateShader("lightPass", "Shaders/lightPass.vert", "Shaders/lightPass.frag");
+	CreateShader("lightPass", "Shaders/HDRPass.vert", "Shaders/lightPass.frag");
 	CreateShader("geometry", "Shaders/geometryPassNormal.vert", "Shaders/geometryPass.frag");
 	CreateShader("geometry_instance", "Shaders/geometryPass.vert", "Shaders/geometryPass.frag");
-
+	CreateShader("HDRPass", "Shaders/HDRPass.vert", "Shaders/HDRPass.frag");
 }

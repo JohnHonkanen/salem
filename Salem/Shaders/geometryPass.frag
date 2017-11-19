@@ -19,6 +19,7 @@ uniform sampler2D diffuseMap;
 uniform sampler2D specularMap;
 uniform sampler2D normalMap;
 uniform sampler2D emissionMap;
+uniform sampler2D hdrBuffer;
  
 void main(void) {
 

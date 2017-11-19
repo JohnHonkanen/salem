@@ -1,17 +1,15 @@
-// textured.frag
-#version 330
+#version 330 core
 
-out vec4 FragColor;
+in vec2 out_UV;
 
-in vec2 UV;
+out vec4 out_Color;
 
-in vec3 Normal;  
-in vec3 FragPos;
+uniform sampler2D texture0;
 
- 
 void main(void) {
+	
+	vec3 finalTexture = texture(texture0, out_UV).rgb;
 
-	vec3 result = vec3(0.0, 1.0, 0.3);
-
-    FragColor = vec4(result, 1.0); 
+	out_Color = vec4(finalTexture, 1.0f);
 }
+

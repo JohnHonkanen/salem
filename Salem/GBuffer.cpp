@@ -4,7 +4,7 @@
 
 struct GBuffer::impl {
 	GLuint gBuffer;
-	GLuint gPosition, gNormal, gAlbedoSpec, gEmission;
+	GLuint gPosition, gNormal, gAlbedoSpec, gEmission, gHDR;
 	GLuint rboDepth;
 	int screenWidth, screenHeight;
 	void ConfigureGBuffer();
@@ -85,7 +85,7 @@ void GBuffer::impl::ConfigureGBuffer()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
 
-	// - color + specular color buffer
+	// - color + Emission color buffer
 	glGenTextures(1, &gEmission);
 	glBindTexture(GL_TEXTURE_2D, gEmission);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenWidth, screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -94,8 +94,8 @@ void GBuffer::impl::ConfigureGBuffer()
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gEmission, 0);
 
 	// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
-	unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-	glDrawBuffers(4, attachments);
+	unsigned int attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4};
+	glDrawBuffers(5, attachments);
 
 	glGenRenderbuffers(1, &rboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
