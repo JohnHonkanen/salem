@@ -3,7 +3,23 @@
 #include <glm\glm.hpp>
 #include <vector>
 #include "Renderer.h"
+
 using namespace std;
+using namespace glm;
+
+#define BONES_PER_VERTEX 4
+struct BoneInfo {
+	mat4 boneOffset = mat4(0);
+	mat4 finalTransformation= mat4(0);
+};
+
+struct VertexBoneData {
+	unsigned int ids[BONES_PER_VERTEX];
+	float weights[BONES_PER_VERTEX];
+
+	void AddBoneData(uint boneId, float weight);
+
+};
 
 struct MeshData {
 	std::vector<GLfloat> vertexArray;
@@ -11,11 +27,14 @@ struct MeshData {
 	std::vector<GLfloat> uvArray;
 	std::vector<GLfloat> tangentArray;
 	std::vector<GLfloat> bitangentArray;
+	std::vector<VertexBoneData> boneArray;
 
 	std::vector<GLuint> indices;
 	GLuint numVerts;
 	GLuint indexCount;
 };
+
+
 
 struct Material {
 	std::string textureDirectory;

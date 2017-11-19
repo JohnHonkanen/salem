@@ -4,6 +4,7 @@
 #include <assimp\postprocess.h>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <GL\glew.h>
 #include <glm\glm.hpp>
 #include "ShaderManager.h"
@@ -19,6 +20,10 @@ using namespace glm;
 #define STORED_INDEX		4
 #define STORED_TANGENT		5
 #define STORED_BITANGENT	6
+#define STORED_BONES_ID		11
+#define STORED_BONES_WEIGHT 12
+
+#define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
 struct Model::impl {
 	string pathToDirectory = "Assets/Models/";
@@ -35,11 +40,21 @@ struct Model::impl {
 	vector<GLuint> VAO;
 	vector<vector<GLuint *>> VBO;
 
+	mat4 globalInverseTransform;
+	map<string, uint> boneMapping;
+	vector<BoneInfo> boneInfo;
+
+	uint numBones = 0;
+
 	void GenerateVAO();
 	void LoadModel();
+
+	mat4 AiToGLM(aiMatrix4x4 matrix);
 	MeshData LoadData(aiMesh *mesh);
 	Material LoadMaterial(const aiScene *scene, int index);
 	string getTexturePath(aiMaterial *material, aiTextureType type);
+
+	void LoadBones(unsigned int index, const aiMesh* mesh, vector<VertexBoneData> &bones);
 };
 
 Model::Model(string path)
@@ -167,8 +182,8 @@ void Model::impl::GenerateVAO()
 {
 	for (int i = 0; i < data.size(); i++) {
 		GLuint vao;
-		GLuint vertexBuffer, uvBuffer, normalBuffer, elementBuffer, tangentBuffer, bitangentBuffer;
-		GLuint* meshBuffers = new GLuint[6];
+		GLuint vertexBuffer, uvBuffer, normalBuffer, elementBuffer, tangentBuffer, bitangentBuffer, boneBuffer;
+		GLuint* meshBuffers = new GLuint[7];
 
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vertexBuffer);
@@ -231,7 +246,17 @@ void Model::impl::GenerateVAO()
 			meshBuffers[STORED_BITANGENT] = bitangentBuffer;
 		}
 
-		//Make Sure InstanceMatrix is 1.0
+		//BoneBuffer
+		if (!data[i].boneArray.empty()) {
+			glGenBuffers(1, &boneBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, bitangentBuffer);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(data[i].boneArray[0]) * data[i].boneArray.size(), &data[i].boneArray[0], GL_STATIC_DRAW);
+			glEnableVertexAttribArray(STORED_BONES_ID);
+			glVertexAttribIPointer(STORED_BONES_ID, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
+			glEnableVertexAttribArray(STORED_BONES_WEIGHT);
+			glVertexAttribPointer(STORED_BONES_WEIGHT, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
+			meshBuffers[7] = boneBuffer;
+		}
 
 
 
@@ -273,9 +298,11 @@ void Model::impl::LoadModel()
 	const aiScene *scene = importer.ReadFile(pathToModel, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
 	directory = pathToDirectory + path + "/";
 
+	globalInverseTransform = AiToGLM(scene->mRootNode->mTransformation.Inverse());
 	for (int i = 0; i < scene->mNumMeshes; i++) {
 		MeshData mData = LoadData(scene->mMeshes[i]);
 		data.push_back(mData);
+		LoadBones(i, scene->mMeshes[i], data[i].boneArray);
 
 		Material mat;
 		if (scene->mMeshes[i]->mMaterialIndex >= 0) {
@@ -283,6 +310,15 @@ void Model::impl::LoadModel()
 		}
 		materials.push_back(mat);
 	}
+}
+
+mat4 Model::impl::AiToGLM(aiMatrix4x4 matrix)
+{
+	//Need to Double check order
+	return mat4(matrix.a1, matrix.b1, matrix.c1, matrix.d1,
+				matrix.a2, matrix.b2, matrix.c2, matrix.d2, 
+				matrix.a3, matrix.b3, matrix.c3, matrix.d3, 
+				matrix.a4, matrix.b4, matrix.c4, matrix.d4);
 }
 
 MeshData Model::impl::LoadData(aiMesh * mesh)
@@ -293,6 +329,7 @@ MeshData Model::impl::LoadData(aiMesh * mesh)
 	std::vector<GLuint> indexArray;
 	std::vector<GLfloat> tangentArray;
 	std::vector<GLfloat> bitangentArray;
+	std::vector<VertexBoneData> boneArray;
 
 
 	GLuint numVerts;
@@ -347,6 +384,7 @@ MeshData Model::impl::LoadData(aiMesh * mesh)
 
 	}
 
+
 	MeshData data;
 	data.vertexArray = vertexArray;
 	data.indices = indexArray;
@@ -356,6 +394,7 @@ MeshData Model::impl::LoadData(aiMesh * mesh)
 	data.indexCount = indexArray.size();
 	data.tangentArray = tangentArray;
 	data.bitangentArray = bitangentArray;
+	data.boneArray = boneArray;
 
 	return data;
 }
@@ -387,4 +426,47 @@ string Model::impl::getTexturePath(aiMaterial * material, aiTextureType type)
 	}
 
 	return path;
+}
+
+void Model::impl::LoadBones(unsigned int index, const aiMesh * mesh, vector<VertexBoneData>& bones)
+{
+	for (uint i = 0; i < mesh->mNumBones; i++) {
+		uint boneIndex = 0;
+		string boneName(mesh->mBones[i]->mName.data);
+
+		if (boneMapping.find(boneName) == boneMapping.end()) {
+			/*Allocate Index to a new bone*/
+			boneIndex = numBones;
+			numBones++;
+
+			BoneInfo info;
+			boneInfo.push_back(info);
+			boneInfo[boneIndex].boneOffset = AiToGLM(mesh->mBones[i]->mOffsetMatrix);
+			boneMapping[boneName] = boneIndex;
+		}
+		else {
+			boneIndex = boneMapping[boneName];
+		}
+
+		//Double CHeck that this is right
+		for (uint j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
+			uint vertexId = data[index].numVerts + mesh->mBones[i]->mWeights[j].mVertexId;
+			float weight = mesh->mBones[i]->mWeights[j].mWeight;
+			bones[vertexId].AddBoneData(vertexId, weight);
+		}
+	}
+}
+
+void VertexBoneData::AddBoneData(uint boneId, float weight)
+{
+	for (uint i = 0; i < ARRAY_SIZE_IN_ELEMENTS(ids); i++) {
+		if (weights[i] == 0.0) {
+			ids[i] = boneId;
+			weights[i] = weight;
+			return;
+		}
+	}
+
+	//Should never get here, more bones than we have space for
+	assert(0);
 }
