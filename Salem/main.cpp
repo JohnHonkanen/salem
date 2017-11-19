@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 
 	//Shader information
 	instance = (Instance*)salem->AddObject(instance, true, "geometry_instance"); // All deferred shading needs to use geometry shader
-	
+	instance->SetMaterialMaps("Assets/Textures/Nightshade_diffuse.png", "Assets/Textures/Nightshade_specular.png", "Assets/Textures/Nightshade_normal.png");
 	Object *object = salem->AddObject("cube", true, "geometry");
 	object->Translate(vec3(20.0f ,0.0f, -40.0f));
 	object->Scale(vec3(3.0f));

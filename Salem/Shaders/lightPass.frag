@@ -55,7 +55,7 @@ void main(void) {
 	result += pow(result, vec3(gammaValue));
 
 	// Phase 4: Output results
-	out_Color = vec4(result , 1.0f);
+	out_Color = vec4(Normal , 1.0f);
 }
 
 
