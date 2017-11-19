@@ -8,7 +8,7 @@
 using namespace std;
 using namespace glm;
 
-#define BONES_PER_VERTEX 8
+#define BONES_PER_VERTEX 4
 struct BoneInfo {
 	mat4 boneOffset = mat4(0);
 	mat4 finalTransformation= mat4(0);
@@ -63,7 +63,7 @@ class Model
 {
 public:
 	Model(string path);
-	Model(string path, Assimp::Importer importer);
+	Model(string path, Assimp::Importer &importer);
 	~Model();
 
 	void Update(float dt);

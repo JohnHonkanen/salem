@@ -22,10 +22,13 @@ out mat3 out_TBN;
 
 // multiply each vertex position by the MVP matrix
 void main(void) {
-	mat4 boneTransform = bones[boneIds.x] * weights.x;
-	boneTransform += bones[boneIds.y] * weights.y;
-	boneTransform += bones[boneIds.z] * weights.z;
-	boneTransform += bones[boneIds.w] * weights.w;
+
+	float totalWeights = weights[0] + weights[1] + weights[2] + weights[3];
+	vec4 weightPerc = weights * (1/totalWeights);
+	mat4 boneTransform = bones[boneIds[0]] * weightPerc[0];
+	boneTransform += bones[boneIds[1]] * weightPerc[1];
+	boneTransform += bones[boneIds[2]] * weightPerc[2];
+	boneTransform += bones[boneIds[3]] * weightPerc[3];
 	
 	out_UV = in_UV;
 

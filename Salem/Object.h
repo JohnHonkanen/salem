@@ -15,7 +15,7 @@ public:
 	~Object();
 
 	virtual void Init(InstanceManager *manager);
-	virtual void Update();
+	virtual void Update(float dt);
 	virtual void Input();
 	virtual void Render(Renderer *r);
 	void Translate(glm::vec3 translation);

@@ -36,13 +36,14 @@ int main(int argc, char* argv[]) {
 	////Shader information
 	//instance = (Instance*)salem->AddObject(instance, true, "geometry_instance"); // All deferred shading needs to use geometry shader
 	
-	Object *object = salem->AddObject("nightshade", true, "geometry");
-	object->Translate(vec3(20.0f ,0.0f, -20.0f));
-	object->Scale(vec3(0.02f));
+	Object *object = salem->AddObject("nightshade/nightshade.dae", true, "geometry");
+	object->Translate(vec3(0.0f ,0.0f, -15.0f));
+	object->Scale(vec3(0.001f));
+	object->SetMaterialMaps("Assets/Textures/Nightshade_diffuse.png", "Nightshade_specular.png", "Nightshade_normal.png");
 
-	Object *object2 = salem->AddObject("cube", true, "geometry");
+	/*Object *object2 = salem->AddObject("cube", true, "geometry");
 	object2->Translate(vec3(10.0f, 0.0f, -15.0f));
-	object2->SetMaterialMaps("Assets/Textures/container2.bmp", "", "");
+	object2->SetMaterialMaps("Assets/Textures/container2.bmp", "", "");*/
 	app.SetDisk(salem); 
 	app.Run();
 	return 0;

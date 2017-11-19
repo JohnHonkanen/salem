@@ -19,7 +19,6 @@ struct InstanceManager::impl {
 InstanceManager::InstanceManager()
 {
 	pImpl = new impl();
-
 }
 
 

@@ -47,6 +47,7 @@ Application::Application(const char* name, uint width, uint height) : pImpl( new
 {
 	pImpl->SetupRC();
 	pImpl->IntializeOpenGL();
+	pImpl->prevTick = SDL_GetTicks();
 }
 
 void Application::SetDisk(AppDisk *program)
@@ -63,7 +64,6 @@ void Application::Run()
 		int current = SDL_GetTicks();
 
 		float dt = float(current - pImpl->prevTick) / 1000.0f;
-
 		pImpl->prevTick = current;
 
 		pImpl->Input();

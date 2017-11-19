@@ -27,12 +27,12 @@ using namespace Assimp;
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
 struct Model::impl {
-	float totalTime;
+	float totalTime = 0;
 	string pathToDirectory = "Assets/Models/";
 
-	int formatsAllowed = 2;
+	int formatsAllowed = 3;
 
-	string formats[2] = {"obj", "dae"};
+	string formats[3] = {"obj", "dae", "md5mesh"};
 	string directory;
 	string path;
 
@@ -52,7 +52,7 @@ struct Model::impl {
 	uint numBones = 0;
 
 	void GenerateVAO();
-	void LoadModel(Assimp::Importer importer);
+	void LoadModel(Assimp::Importer &importer);
 
 	mat4 AiToGLM(aiMatrix4x4 matrix);
 	vec3 AiToGLM(aiVector3D vector3d);
@@ -85,7 +85,7 @@ Model::Model(string path)
 	pImpl->GenerateVAO();
 }
 
-Model::Model(string path, Assimp::Importer importer)
+Model::Model(string path, Assimp::Importer &importer)
 {
 	pImpl = new impl();
 	pImpl->path = path;
@@ -102,10 +102,14 @@ Model::~Model()
 void Model::Update(float dt)
 {
 	pImpl->boneTransforms.clear();
-	pImpl->totalTime += dt;
+	pImpl->totalTime = dt + pImpl->totalTime;
+
+	std::cout << pImpl->totalTime << std::endl;
 
 	pImpl->BoneTransform(pImpl->totalTime, pImpl->boneTransforms);
 }
+
+#define MAX_BONES = 100
 
 void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 {
@@ -121,7 +125,12 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 
 	glUseProgram(program);
 
-	for (int i = 0; i < pImpl->VAO.size(); i++) {
+	for (uint i = 0; i < pImpl->boneTransforms.size(); i++) {
+		string location = "bones[" + to_string(i) + "]";
+		shaderManager->SetUniformMatrix4fv(program, location.c_str(), pImpl->boneTransforms[i]);
+	}
+
+	for (int i = 0; i < pImpl->meshes.size(); i++) {
 		
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
@@ -132,6 +141,8 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 		shaderManager->SetUniformLocation1i(program, "specularMap", 1);
 		shaderManager->SetUniformLocation1i(program, "emissionMap", 2);
 		shaderManager->SetUniformLocation1i(program, "normalMap", 3);
+
+		
 
 		if (pImpl->materials[i].diffuseMap != "") {
 			unsigned int diffuseMap = textureManager->GetTexture(pImpl->materials[i].diffuseMap);
@@ -177,8 +188,9 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
-		glBindVertexArray(pImpl->VAO[i]);
-		glDrawElements(GL_TRIANGLES, pImpl->data[i].indexCount, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(pImpl->VAO[0]);
+		glDrawElementsBaseVertex(GL_TRIANGLES, pImpl->meshes[i].numIndices, GL_UNSIGNED_INT, (void*)(sizeof(uint) * pImpl->meshes[i].baseIndex),
+			pImpl->meshes[i].baseVertex);
 		glBindVertexArray(0);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -285,7 +297,7 @@ void Model::impl::GenerateVAO()
 		//BoneBuffer
 		if (!data[i].boneArray.empty()) {
 			glGenBuffers(1, &boneBuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, bitangentBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, boneBuffer);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(data[i].boneArray[0]) * data[i].boneArray.size(), &data[i].boneArray[0], GL_STATIC_DRAW);
 			glEnableVertexAttribArray(STORED_BONES_ID);
 			glVertexAttribIPointer(STORED_BONES_ID, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
@@ -305,34 +317,28 @@ void Model::impl::GenerateVAO()
 	}
 }
 
-void Model::impl::LoadModel(Assimp::Importer importer)
+void Model::impl::LoadModel(Assimp::Importer &importer)
 {
 	
 	string pathToModel;
-	bool foundFormat = false;
-	int i = 0;
-	while (!foundFormat) {
-		pathToModel = pathToDirectory + path + "/" + path + "." + formats[i];
+	
+	pathToModel = pathToDirectory + path;
 
-		//check if file exists
-		std::ifstream fin(pathToModel.c_str());
-		if (!fin.fail()) {
-			fin.close();
-			foundFormat = true;
-		}
-
-		i++;
-
-		if(i > formatsAllowed){
-			printf("Couldn't open file: %s\n", pathToModel.c_str());
-			printf("%s\n", importer.GetErrorString());
-			return;
-		}
+	//check if file exists
+	std::ifstream fin(pathToModel.c_str());
+	if (!fin.fail()) {
+		fin.close();
+	}
+	else {
+		printf("Couldn't open file: %s\n", pathToModel.c_str());
+		printf("%s\n", importer.GetErrorString());
+		return;
 	}
 	
 	
+	
 	scene = importer.ReadFile(pathToModel, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
-	directory = pathToDirectory + path + "/";
+	directory = pathToModel.substr(0, path.find_last_of('/'));
 
 	globalInverseTransform = AiToGLM(scene->mRootNode->mTransformation.Inverse());
 
@@ -376,6 +382,10 @@ void Model::impl::LoadModel(Assimp::Importer importer)
 
 mat4 Model::impl::AiToGLM(aiMatrix4x4 matrix)
 {
+	/*return mat4(matrix.a1, matrix.a2, matrix.a3, matrix.a4,
+		matrix.b1, matrix.b2, matrix.b3, matrix.b4,
+		matrix.c1, matrix.c2, matrix.c3, matrix.c4,
+		matrix.d1, matrix.d2, matrix.d3, matrix.d4);*/
 	//Need to Double check order
 	return mat4(matrix.a1, matrix.b1, matrix.c1, matrix.d1,
 				matrix.a2, matrix.b2, matrix.c2, matrix.d2, 
@@ -553,7 +563,8 @@ void Model::impl::ReadNodeHeirachy(float animationTime, const aiNode * node, con
 
 	if (boneMapping.find(nodeName) != boneMapping.end()) {
 		uint boneIndex = boneMapping[nodeName];
-		boneInfo[boneIndex].finalTransformation = globalInverseTransform * globalTransformation * boneInfo[boneIndex].boneOffset;
+		boneInfo[boneIndex].finalTransformation =  globalTransformation * boneInfo[boneIndex].boneOffset;
+		int test = 0;
 	}
 
 	for (uint i = 0; i < node->mNumChildren; i++) {
@@ -587,7 +598,7 @@ void Model::impl::CalcInterpolatedScaling(aiVector3D & out, float animationTime,
 	assert(scalingIndex < nodeAnim->mNumScalingKeys);
 
 	float deltaTime = (float)(nodeAnim->mScalingKeys[nextScalingIndex].mTime - nodeAnim->mScalingKeys[scalingIndex].mTime);
-	float factor = (animationTime - (float)nodeAnim->mScalingKeys[scalingIndex].mTime / deltaTime);
+	float factor = (animationTime - (float)nodeAnim->mScalingKeys[scalingIndex].mTime) / deltaTime;
 
 	assert(factor >= 0.0f && factor <= 1.0f);
 
@@ -637,7 +648,7 @@ void Model::impl::CalcInterpolatedRotation(aiQuaternion & out, float animationTi
 	assert(nextRotationIndex < nodeAnim->mNumRotationKeys);
 
 	float deltaTime = (float)(nodeAnim->mRotationKeys[nextRotationIndex].mTime - nodeAnim->mRotationKeys[rotationIndex].mTime);
-	float factor = (animationTime - (float)nodeAnim->mRotationKeys[rotationIndex].mTime / deltaTime);
+	float factor = (animationTime - (float)nodeAnim->mRotationKeys[rotationIndex].mTime) / deltaTime;
 
 	assert(factor >= 0.0f && factor <= 1.0f);
 
@@ -696,14 +707,22 @@ uint Model::impl::FindPosition(float animationTime, const aiNodeAnim * nodeAnim)
 
 void VertexBoneData::AddBoneData(uint boneId, float weight)
 {
+	int smallest = 0;
 	for (uint i = 0; i < ARRAY_SIZE_IN_ELEMENTS(ids); i++) {
 		if (weights[i] == 0.0) {
 			ids[i] = boneId;
 			weights[i] = weight;
 			return;
 		}
+
+		if (weights[i] < weights[smallest]) {
+			smallest = i;
+		}
 	}
 
+	ids[smallest] = boneId;
+	weights[smallest] = weight;
+	return;
 	//Should never get here, more bones than we have space for
 	assert(0);
 }

@@ -22,7 +22,7 @@ uniform sampler2D emissionMap;
  
 void main(void) {
 
-	gPosition = FragPos;  
+	gPosition = FragPos;
     //gNormal = out_Normal; 
 
 	// Store diffuse per-fragment color.
