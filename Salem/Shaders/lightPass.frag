@@ -58,7 +58,7 @@ void main(void) {
 	// Properties:
 	vec3 viewDir = normalize(viewPosi - FragPos);
 
-	// Phase 1.1: Calculate Point Light
+	// Phase 1: Calculate Point Light
 	vec3 result = calcPointLight(pointLight, Normal, FragPos, viewDir, Diffuse, Specular, Shininess);
 	
 
@@ -69,11 +69,11 @@ void main(void) {
 	result += Emission;
 
 	// Phase 4: Apply Gamma Correction
-	float gammaValue = 1 / 2.2f;
+	//float gammaValue = 1 / 2.2f;
 
-	result += pow(result, vec3(gammaValue));
+	//result += pow(result, vec3(gammaValue));
 
-	// Phase 5: Output results
+	// Phase 4: Output results
 	out_Color = vec4(result , 1.0f);
 }
 
