@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <GL\glew.h>
 #include <glm\glm.hpp>
 #include "TextureManager.h"
@@ -50,7 +51,10 @@ struct Model::impl {
 
 	uint numBones = 0;
 
-	bool playAnimation = false;
+	bool playAnimation = true ;
+	map<string, const aiAnimation*> animations;
+	const aiAnimation* activeAnimation;
+
 
 	void GenerateVAO();
 	void LoadModel(Assimp::Importer &importer);
@@ -75,6 +79,8 @@ struct Model::impl {
 	uint FindRotation(float animationTime, const aiNodeAnim* nodeAnim);
 	uint FindPosition(float animationTime, const aiNodeAnim* nodeAnim);
 
+	void LoadAnimation(string name, const aiAnimation * animaition);
+	void setActiveAnimation(string name);
 };
 
 Model::Model(string path)
@@ -92,6 +98,12 @@ Model::Model(string path, Assimp::Importer &importer)
 	pImpl->path = path;
 	pImpl->LoadModel(importer);
 	pImpl->GenerateVAO();
+
+	if (pImpl->scene->HasAnimations()) {
+		pImpl->LoadAnimation("default", pImpl->scene->mAnimations[0]);
+		pImpl->setActiveAnimation("default");
+	}
+	
 }
 
 
@@ -536,9 +548,9 @@ void Model::impl::BoneTransform(float timeInSec, vector<mat4> &transforms)
 	}
 	mat4 identity(1.0f);
 
-	float ticksPerSecond = (float)(scene->mAnimations[0]->mTicksPerSecond != 0 ? scene->mAnimations[0]->mTicksPerSecond : 25.0f);
+	float ticksPerSecond = (float)(activeAnimation->mTicksPerSecond != 0 ? activeAnimation->mTicksPerSecond : 25.0f);
 	float timeInTicks = timeInSec * ticksPerSecond;
-	float animationTime = fmod(timeInTicks, (float)scene->mAnimations[0]->mDuration);
+	float animationTime = fmod(timeInTicks, (float)activeAnimation->mDuration);
 
 	ReadNodeHeirachy(animationTime, scene->mRootNode, identity);
 
@@ -553,7 +565,7 @@ void Model::impl::ReadNodeHeirachy(float animationTime, const aiNode * node, con
 {
 	string nodeName(node->mName.data);
 
-	const aiAnimation *animation = scene->mAnimations[0];
+	const aiAnimation *animation = activeAnimation;
 	mat4 nodeTransformation = AiToGLM(node->mTransformation);
 
 	const aiNodeAnim* nodeAnim = FindNodeAnim(animation, nodeName);
@@ -723,6 +735,17 @@ uint Model::impl::FindPosition(float animationTime, const aiNodeAnim * nodeAnim)
 	assert(0);
 
 	return 0;
+}
+
+void Model::impl::LoadAnimation(string name, const aiAnimation * animation)
+{
+	animations[name] = animation;
+}
+
+void Model::impl::setActiveAnimation(string name)
+{
+	totalTime = 0;
+	activeAnimation = animations[name];
 }
 
 void VertexBoneData::AddBoneData(uint boneId, float weight)
