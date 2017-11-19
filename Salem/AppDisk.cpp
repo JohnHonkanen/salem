@@ -297,7 +297,8 @@ void AppDisk::impl::RenderHDRPass()
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	shaderManager->SetUniformLocation1i(program, "HDR", 0);
-	
+	//shaderManager->SetUniformLocation1f(program, "exposure", 1.0f);
+
 	RenderQuad();
 }
 

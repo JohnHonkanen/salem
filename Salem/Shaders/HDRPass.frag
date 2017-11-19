@@ -5,6 +5,7 @@ in vec2 out_UV;
 out vec4 out_Color;
 
 uniform sampler2D HDR; // <----- HDR Buffer
+//uniform float exposure;
 
 void main(void) {
 	
@@ -16,12 +17,14 @@ void main(void) {
 	// Reinhard tone mapping
 	vec3 result = HDRBufferColor / (HDRBufferColor + vec3(1.0f));
 
+	// Exposure tone mapping
+	//vec3 result = vec3(1.0f) - exp(-HDRBufferColor * exposure);
+
 	// Phase 2: Apply Gamma Correction
 	float gammaValue = 1.0f / gamma;
 
 	result = pow(result, vec3(gammaValue));
 	
-
 	out_Color = vec4(result, 1.0f);
 }
 
