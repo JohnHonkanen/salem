@@ -63,7 +63,7 @@ void main(void) {
 	
 
 	// Phase 2: Calculate Spot Light
-	//vec3 result = calcSpotLight(spotLight, Normal, FragPos, viewDir, Diffuse, Specular, Shininess);
+	result += calcSpotLight(spotLight, Normal, FragPos, viewDir, Diffuse, Specular, Shininess);
 	
 	// Phase 3: Apply Emission / Glow
 	result += Emission;
