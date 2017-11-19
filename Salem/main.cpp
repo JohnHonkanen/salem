@@ -40,6 +40,12 @@ int main(int argc, char* argv[]) {
 	Object *object2 = salem->AddObject("cube", true, "geometry");
 	object2->Translate(vec3(10.0f, 0.0f, -15.0f));
 	object2->SetMaterialMaps("Assets/Textures/container2.bmp", "Assets/Textures/container2_specular.bmp", "Assets/Textures/cube_normal.png");
+
+	Object *object3 = salem->AddObject("cube", true, "geometry");
+	object3->Translate(vec3(10.0f, 10.0f, -15.0f));
+	object3->Scale(vec3(0.5f));
+	object3->SetMaterialMaps("Assets/Textures/container2.bmp", "Assets/Textures/container2_specular.bmp", "Assets/Textures/cube_normal.png");
+
 	app.SetDisk(salem); 
 	app.Run();
 	return 0;

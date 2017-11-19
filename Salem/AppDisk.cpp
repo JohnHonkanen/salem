@@ -174,11 +174,12 @@ void AppDisk::impl::RenderLightPass()
 
 	// Camera
 	shaderManager->SetUniformLocation3f(program, "pointLight.position",
-		cameraPosition.x, cameraPosition.y, cameraPosition.z);
+		10.0f, 10.0f, -15.0f);
 
 	// Pointlight Uniforms 
 	shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.05f, 0.05f, 0.05f);
-	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.3f, 0.3f, 0.3f);
+	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.0f, 1.0f, 0.0f);
+	//shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.3f, 0.3f, 0.3f);
 	shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.15f, 0.15f, 0.15f);
 
 	// Pointlight Attenuation
