@@ -23,7 +23,7 @@ uniform sampler2D hdrBuffer;
  
 void main(void) {
 
-	gPosition = FragPos;  
+	gPosition = FragPos;
     //gNormal = out_Normal; 
 
 	// Store diffuse per-fragment color.

@@ -55,6 +55,7 @@ void Instance::Render(Renderer * r)
 
 	TextureManager* textureManager = r->GetTextureManager();
 
+	pImpl->instance->SetBoneUniforms(program, shaderManager);
 	for (int i = 0; i < VAOs.size(); i++) {
 		
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
@@ -117,6 +118,10 @@ void Instance::Init(InstanceManager * manager)
 	pImpl->instance = manager->GetModel(pImpl->path);
 	pImpl->instance->GetMaterial()[0].shader = pImpl->shader;
 	pImpl->ConfigureInstance();
+}
+void Instance::Update(float dt)
+{
+	pImpl->instance->Update(dt);
 }
 void Instance::SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap)
 {

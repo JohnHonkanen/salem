@@ -161,6 +161,8 @@
     <None Include="Shaders\lightPass.vert" />
     <None Include="Shaders\instance.frag" />
     <None Include="Shaders\instance.vert" />
+    <None Include="Shaders\skinnedInstancePass.vert" />
+    <None Include="Shaders\skinnedMeshPass.vert" />
     <None Include="Shaders\textured.frag" />
     <None Include="Shaders\textured.vert" />
   </ItemGroup>

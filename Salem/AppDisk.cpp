@@ -68,7 +68,7 @@ void AppDisk::Update(float dt)
 {
 	pImpl->renderer->camera.Update(dt);
 	for (int i = 0; i < pImpl->objects.size(); i++) {
-		pImpl->objects[i]->Update();
+		pImpl->objects[i]->Update(dt);
 	}
 }
 

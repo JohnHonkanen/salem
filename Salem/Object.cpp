@@ -26,8 +26,9 @@ void Object::Init(InstanceManager *manager)
 {
 }
 
-void Object::Update()
+void Object::Update(float dt)
 {
+	pImpl->model->Update(dt);
 }
 
 void Object::Input()
