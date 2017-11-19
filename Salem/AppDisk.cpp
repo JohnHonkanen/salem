@@ -213,7 +213,7 @@ void AppDisk::impl::RenderLightPass()
 
 	// Spotlight Uniforms 
 	shaderManager->SetUniformLocation3f(program, "spotLight.ambient", 0.005f, 0.005f, 0.005f);
-	shaderManager->SetUniformLocation3f(program, "spotLight.diffuse", 1.0f, 0.0f, 0.0f);
+	shaderManager->SetUniformLocation3f(program, "spotLight.diffuse", 200.0f, 0.0f, 0.0f);
 	//shaderManager->SetUniformLocation3f(program, "spotLight.diffuse", 0.8f, 0.8f, 0.8f);
 	shaderManager->SetUniformLocation3f(program, "spotLight.specular", 0.5f, 0.5f, 0.5f);
 
