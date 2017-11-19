@@ -15,6 +15,7 @@ public:
 	void Render(Renderer *r);
 	void AddInstance(glm::mat4 transform);
 	void Init(InstanceManager *manager);
+	void Update(float dt);
 
 	void SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap);
 	void SetShader(const char * shader);

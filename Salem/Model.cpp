@@ -4,13 +4,15 @@
 #include <assimp\postprocess.h>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <memory>
 #include <GL\glew.h>
 #include <glm\glm.hpp>
-#include "ShaderManager.h"
 #include "TextureManager.h"
 #include <glm\gtc\matrix_transform.hpp>
 
 using namespace glm;
+using namespace Assimp;
 
 #define STORED_VERTEX       0
 #define STORED_COLOR        1
@@ -19,14 +21,18 @@ using namespace glm;
 #define STORED_INDEX		4
 #define STORED_TANGENT		5
 #define STORED_BITANGENT	6
+#define STORED_BONES_ID		11
+#define STORED_BONES_WEIGHT 12
+
+#define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
 struct Model::impl {
+	float totalTime = 0;
 	string pathToDirectory = "Assets/Models/";
 
 	int formatsAllowed = 3;
-
-	string formats[3] = {"obj", "dae", "fbx"};
-	int fileType = 0;
+	int fileType = 1;
+	string formats[3] = {"obj", "dae", "md5mesh"};
 	string directory;
 	string path;
 
@@ -36,26 +42,95 @@ struct Model::impl {
 	vector<GLuint> VAO;
 	vector<vector<GLuint *>> VBO;
 
+	const aiScene *scene;
+	vector<Mesh> meshes;
+	mat4 globalInverseTransform;
+	map<string, uint> boneMapping;
+	vector<BoneInfo> boneInfo;
+	vector<mat4> boneTransforms;
+
+	uint numBones = 0;
+
+	bool playAnimation = true ;
+	map<string, const aiAnimation*> animations;
+	const aiAnimation* activeAnimation;
+
+
 	void GenerateVAO();
-	void LoadModel();
-	MeshData LoadData(aiMesh *mesh);
+	void LoadModel(Assimp::Importer &importer);
+
+	mat4 AiToGLM(aiMatrix4x4 matrix);
+	vec3 AiToGLM(aiVector3D vector3d);
+	void LoadData(uint meshIndex, aiMesh *mesh, MeshData &data);
 	Material LoadMaterial(const aiScene *scene, int index);
 	string getTexturePath(aiMaterial *material, aiTextureType type);
+
+	void LoadBones(unsigned int index, const aiMesh* mesh, vector<VertexBoneData> &bones);
+
+	void BoneTransform(float timeInSec, vector<mat4> &transforms);
+	void ReadNodeHeirachy(float animationTime, const aiNode* node, const mat4 &parentTransform);
+	const aiNodeAnim * FindNodeAnim(const aiAnimation* pAnimation, const string NodeName);
+
+	void CalcInterpolatedScaling(aiVector3D &out, float animationTime, const aiNodeAnim* nodeAnim);
+	void CalcInterpolatedPosition(aiVector3D &out, float animationTime, const aiNodeAnim* nodeAnim);
+	void CalcInterpolatedRotation(aiQuaternion &out, float animationTime, const aiNodeAnim* nodeAnim);
+
+	uint FindScaling(float animationTime, const aiNodeAnim* nodeAnim);
+	uint FindRotation(float animationTime, const aiNodeAnim* nodeAnim);
+	uint FindPosition(float animationTime, const aiNodeAnim* nodeAnim);
+
+	void LoadAnimation(string name, const aiAnimation * animaition);
+	void setActiveAnimation(string name);
 };
 
 Model::Model(string path)
 {
+	Assimp::Importer importer;
 	pImpl = new impl();
 	pImpl->path = path;
-	pImpl->LoadModel();
+	pImpl->LoadModel(importer);
 	pImpl->GenerateVAO();
+}
+
+Model::Model(string path, Assimp::Importer &importer)
+{
+	pImpl = new impl();
+	pImpl->path = path;
+	pImpl->LoadModel(importer);
+	pImpl->GenerateVAO();
+
+	if (pImpl->scene->HasAnimations()) {
+		pImpl->LoadAnimation("default", pImpl->scene->mAnimations[0]);
+		pImpl->setActiveAnimation("default");
+	}
+	
 }
 
 
 Model::~Model()
 {
+	delete pImpl->scene;
 	delete pImpl;
 }
+
+#define MAX_BONES 100
+
+void Model::Update(float dt)
+{
+	if (pImpl->scene->HasAnimations() && pImpl->playAnimation) {
+		pImpl->boneTransforms.clear();
+		pImpl->totalTime = dt + pImpl->totalTime;
+
+		pImpl->BoneTransform(pImpl->totalTime, pImpl->boneTransforms);
+	}
+	else {
+		pImpl->boneTransforms.clear();
+		pImpl->totalTime = 0;
+		pImpl->BoneTransform(pImpl->totalTime, pImpl->boneTransforms);
+	}
+}
+
+
 
 void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 {
@@ -71,7 +146,12 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 
 	glUseProgram(program);
 
-	for (int i = 0; i < pImpl->VAO.size(); i++) {
+	for (uint i = 0; i < pImpl->boneTransforms.size(); i++) {
+		string location = "bones[" + to_string(i) + "]";
+		shaderManager->SetUniformMatrix4fv(program, location.c_str(), pImpl->boneTransforms[i]);
+	}
+
+	for (int i = 0; i < pImpl->meshes.size(); i++) {
 		
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
@@ -82,6 +162,8 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 		shaderManager->SetUniformLocation1i(program, "specularMap", 1);
 		shaderManager->SetUniformLocation1i(program, "emissionMap", 2);
 		shaderManager->SetUniformLocation1i(program, "normalMap", 3);
+
+		
 
 		if (pImpl->materials[i].diffuseMap != "") {
 			unsigned int diffuseMap = textureManager->GetTexture(pImpl->materials[i].diffuseMap);
@@ -127,8 +209,9 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
-		glBindVertexArray(pImpl->VAO[i]);
-		glDrawElements(GL_TRIANGLES, pImpl->data[i].indexCount, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(pImpl->VAO[0]);
+		glDrawElementsBaseVertex(GL_TRIANGLES, pImpl->meshes[i].numIndices, GL_UNSIGNED_INT, (void*)(sizeof(uint) * pImpl->meshes[i].baseIndex),
+			pImpl->meshes[i].baseVertex);
 		glBindVertexArray(0);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -164,12 +247,20 @@ void Model::SetShader(const char * shader)
 	pImpl->materials[0].shader = shader;
 }
 
+void Model::SetBoneUniforms(unsigned int shader, ShaderManager *shaderM)
+{
+	for (uint i = 0; i < pImpl->boneTransforms.size(); i++) {
+		string location = "bones[" + to_string(i) + "]";
+		shaderM->SetUniformMatrix4fv(shader, location.c_str(), pImpl->boneTransforms[i]);
+	}
+}
+
 void Model::impl::GenerateVAO()
 {
 	for (int i = 0; i < data.size(); i++) {
 		GLuint vao;
-		GLuint vertexBuffer, uvBuffer, normalBuffer, elementBuffer, tangentBuffer, bitangentBuffer;
-		GLuint* meshBuffers = new GLuint[6];
+		GLuint vertexBuffer, uvBuffer, normalBuffer, elementBuffer, tangentBuffer, bitangentBuffer, boneBuffer;
+		GLuint* meshBuffers = new GLuint[7];
 
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vertexBuffer);
@@ -232,7 +323,17 @@ void Model::impl::GenerateVAO()
 			meshBuffers[STORED_BITANGENT] = bitangentBuffer;
 		}
 
-		//Make Sure InstanceMatrix is 1.0
+		//BoneBuffer
+		if (!data[i].boneArray.empty()) {
+			glGenBuffers(1, &boneBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, boneBuffer);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(data[i].boneArray[0]) * data[i].boneArray.size(), &data[i].boneArray[0], GL_STATIC_DRAW);
+			glEnableVertexAttribArray(STORED_BONES_ID);
+			glVertexAttribIPointer(STORED_BONES_ID, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
+			glEnableVertexAttribArray(STORED_BONES_WEIGHT);
+			glVertexAttribPointer(STORED_BONES_WEIGHT, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
+			meshBuffers[7] = boneBuffer;
+		}
 
 
 
@@ -245,39 +346,58 @@ void Model::impl::GenerateVAO()
 	}
 }
 
-void Model::impl::LoadModel()
+void Model::impl::LoadModel(Assimp::Importer &importer)
 {
-	Assimp::Importer importer;
+	
 	string pathToModel;
-	bool foundFormat = false;
-	int i = 0;
-	while (!foundFormat) {
-		pathToModel = pathToDirectory + path + "/" + path + "." + formats[i];
+	
+	pathToModel = pathToDirectory + path;
 
-		//check if file exists
-		std::ifstream fin(pathToModel.c_str());
-		if (!fin.fail()) {
-			fin.close();
-			foundFormat = true;
-			fileType = i;
-		}
-
-		i++;
-
-		if(i > formatsAllowed){
-			printf("Couldn't open file: %s\n", pathToModel.c_str());
-			printf("%s\n", importer.GetErrorString());
-			return;
-		}
+	//check if file exists
+	std::ifstream fin(pathToModel.c_str());
+	if (!fin.fail()) {
+		fin.close();
+	}
+	else {
+		printf("Couldn't open file: %s\n", pathToModel.c_str());
+		printf("%s\n", importer.GetErrorString());
+		return;
 	}
 	
+	
+	importer.ReadFile(pathToModel, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
+	scene = importer.GetOrphanedScene();
+	directory = pathToModel.substr(0, pathToModel.find_last_of('/'));
 
-	const aiScene *scene = importer.ReadFile(pathToModel, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
-	directory = pathToDirectory + path + "/";
+	globalInverseTransform = AiToGLM(scene->mRootNode->mTransformation.Inverse());
 
-	for (int i = 0; i < scene->mNumMeshes; i++) {
-		MeshData mData = LoadData(scene->mMeshes[i]);
-		data.push_back(mData);
+	meshes.resize(scene->mNumMeshes);
+
+	uint numVertices = 0;
+	uint numIndices = 0;
+
+	for (uint i = 0; i < meshes.size(); i++) {
+		meshes[i].numIndices = scene->mMeshes[i]->mNumFaces * 3;
+		meshes[i].baseVertex = numVertices;
+		meshes[i].baseIndex = numIndices;
+
+		numVertices += scene->mMeshes[i]->mNumVertices;
+		numIndices += meshes[i].numIndices;
+	}
+
+	MeshData mData;
+	mData.vertexArray.reserve(numVertices);
+	mData.normalArray.reserve(numVertices);
+	mData.uvArray.reserve(numVertices);
+	mData.indices.reserve(numIndices);
+	mData.tangentArray.reserve(numVertices);
+	mData.bitangentArray.reserve(numVertices);
+	mData.boneArray.resize(numVertices);
+	mData.numVerts = numVertices;
+	mData.indexCount = numIndices;
+
+	for (int i = 0; i < meshes.size(); i++) {
+		LoadData(i, scene->mMeshes[i], mData);
 
 		Material mat;
 		if (scene->mMeshes[i]->mMaterialIndex >= 0) {
@@ -285,18 +405,30 @@ void Model::impl::LoadModel()
 		}
 		materials.push_back(mat);
 	}
+
+	data.push_back(mData);
 }
 
-MeshData Model::impl::LoadData(aiMesh * mesh)
+mat4 Model::impl::AiToGLM(aiMatrix4x4 matrix)
 {
-	std::vector<GLfloat> vertexArray;
-	std::vector<GLfloat> normalArray;
-	std::vector<GLfloat> uvArray;
-	std::vector<GLuint> indexArray;
-	std::vector<GLfloat> tangentArray;
-	std::vector<GLfloat> bitangentArray;
+	/*return mat4(matrix.a1, matrix.a2, matrix.a3, matrix.a4,
+		matrix.b1, matrix.b2, matrix.b3, matrix.b4,
+		matrix.c1, matrix.c2, matrix.c3, matrix.c4,
+		matrix.d1, matrix.d2, matrix.d3, matrix.d4);*/
+	//Need to Double check order
+	return mat4(matrix.a1, matrix.b1, matrix.c1, matrix.d1,
+				matrix.a2, matrix.b2, matrix.c2, matrix.d2, 
+				matrix.a3, matrix.b3, matrix.c3, matrix.d3, 
+				matrix.a4, matrix.b4, matrix.c4, matrix.d4);
+}
 
+vec3 Model::impl::AiToGLM(aiVector3D vector3d)
+{
+	return vec3(vector3d.x, vector3d.y, vector3d.z);
+}
 
+void Model::impl::LoadData(uint meshIndex, aiMesh * mesh, MeshData &data)
+{
 	GLuint numVerts;
 	GLuint indexCount = 0;
 
@@ -311,62 +443,52 @@ MeshData Model::impl::LoadData(aiMesh * mesh)
 		{
 			if (mesh->HasTextureCoords(0)) {
 				aiVector3D uv = mesh->mTextureCoords[0][face.mIndices[j]];
-				uvArray.push_back(uv.x);
-				uvArray.push_back(uv.y);
+				data.uvArray.push_back(uv.x);
+				data.uvArray.push_back(uv.y);
 			}
 
 
 			if (mesh->HasNormals()) {
 				aiVector3D normal = mesh->mNormals[face.mIndices[j]];
-				normalArray.push_back(normal.x);
+				data.normalArray.push_back(normal.x);
 				if (fileType = 1) {
 					// if Collada (.dae)
-					normalArray.push_back(normal.z);
-					normalArray.push_back(normal.y * -1);
+					data.normalArray.push_back(normal.z);
+					data.normalArray.push_back(normal.y * -1);
 				}
 				else {
-					normalArray.push_back(normal.y);
-					normalArray.push_back(normal.z);
+					data.normalArray.push_back(normal.y);
+					data.normalArray.push_back(normal.z);
 				}
 			}
 
 			if (mesh->HasTangentsAndBitangents()) {
 				// Tangents
 				aiVector3D tangent = mesh->mTangents[face.mIndices[j]];
-				tangentArray.push_back(tangent.x);
-				tangentArray.push_back(tangent.y);
-				tangentArray.push_back(tangent.z);
+				data.tangentArray.push_back(tangent.x);
+				data.tangentArray.push_back(tangent.y);
+				data.tangentArray.push_back(tangent.z);
 
 				// Bitangents
 				aiVector3D bitangent = mesh->mBitangents[face.mIndices[j]];
-				bitangentArray.push_back(bitangent.x);
-				bitangentArray.push_back(bitangent.y);
-				bitangentArray.push_back(bitangent.z);
+				data.bitangentArray.push_back(bitangent.x);
+				data.bitangentArray.push_back(bitangent.y);
+				data.bitangentArray.push_back(bitangent.z);
 			}
 
 			aiVector3D pos = mesh->mVertices[face.mIndices[j]];
-			vertexArray.push_back(pos.x);
-			vertexArray.push_back(pos.y);
-			vertexArray.push_back(pos.z);
+			data.vertexArray.push_back(pos.x);
+			data.vertexArray.push_back(pos.y);
+			data.vertexArray.push_back(pos.z);
 		}
 		for (int j = 0; j < face.mNumIndices; j++) {
-			indexArray.push_back(face.mIndices[j]);
+			data.indices.push_back(face.mIndices[j]);
 
 		}
-
 	}
 
-	MeshData data;
-	data.vertexArray = vertexArray;
-	data.indices = indexArray;
-	data.uvArray = uvArray;
-	data.normalArray = normalArray;
-	data.numVerts = numVerts;
-	data.indexCount = indexArray.size();
-	data.tangentArray = tangentArray;
-	data.bitangentArray = bitangentArray;
-
-	return data;
+	/*Loads the Bones*/
+	LoadBones(meshIndex, mesh, data.boneArray);
 }
 
 Material Model::impl::LoadMaterial(const aiScene * scene, int index)
@@ -396,4 +518,261 @@ string Model::impl::getTexturePath(aiMaterial * material, aiTextureType type)
 	}
 
 	return path;
+}
+
+void Model::impl::LoadBones(unsigned int index, const aiMesh * mesh, vector<VertexBoneData>& bones)
+{
+	for (uint i = 0; i < mesh->mNumBones; i++) {
+		uint boneIndex = 0;
+		string boneName(mesh->mBones[i]->mName.data);
+
+		if (boneMapping.find(boneName) == boneMapping.end()) {
+			/*Allocate Index to a new bone*/
+			boneIndex = numBones;
+			numBones++;
+
+			BoneInfo info;
+			boneInfo.push_back(info);
+			boneInfo[boneIndex].boneOffset = AiToGLM(mesh->mBones[i]->mOffsetMatrix);
+			boneMapping[boneName] = boneIndex;
+		}
+		else {
+			boneIndex = boneMapping[boneName];
+		}
+
+		for (uint j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
+			uint vertexId = meshes[index].baseVertex + mesh->mBones[i]->mWeights[j].mVertexId;
+			float weight = mesh->mBones[i]->mWeights[j].mWeight;
+			bones[vertexId].AddBoneData(boneIndex, weight);
+		}
+	}
+}
+
+void Model::impl::BoneTransform(float timeInSec, vector<mat4> &transforms)
+{
+	if (!scene->HasAnimations()) {
+		return;
+	}
+	mat4 identity(1.0f);
+
+	float ticksPerSecond = (float)(activeAnimation->mTicksPerSecond != 0 ? activeAnimation->mTicksPerSecond : 25.0f);
+	float timeInTicks = timeInSec * ticksPerSecond;
+	float animationTime = fmod(timeInTicks, (float)activeAnimation->mDuration);
+
+	ReadNodeHeirachy(animationTime, scene->mRootNode, identity);
+
+	transforms.resize(numBones);
+
+	for (uint i = 0; i < numBones; i++) {
+		transforms[i] = boneInfo[i].finalTransformation;
+	}
+}
+
+void Model::impl::ReadNodeHeirachy(float animationTime, const aiNode * node, const mat4 & parentTransform)
+{
+	string nodeName(node->mName.data);
+
+	const aiAnimation *animation = activeAnimation;
+	mat4 nodeTransformation = AiToGLM(node->mTransformation);
+
+	const aiNodeAnim* nodeAnim = FindNodeAnim(animation, nodeName);
+
+	if (nodeAnim) {
+		// Interpolate scaling and generate scaling transformation matrix
+		aiVector3D scaling;
+		CalcInterpolatedScaling(scaling, animationTime, nodeAnim);
+		mat4 scaleMatrix(1.0);
+		scaleMatrix = scale(scaleMatrix, AiToGLM(scaling));
+
+		// Interpolate rotationQ and generate rotation transformation matrix
+		aiQuaternion rotationQ;
+		CalcInterpolatedRotation(rotationQ, animationTime, nodeAnim);
+		mat4 rotationMatrix = AiToGLM(aiMatrix4x4(rotationQ.GetMatrix()));
+
+		// Interpolate translation and generate translation transformation matrix
+		aiVector3D translation;
+		CalcInterpolatedPosition(translation, animationTime, nodeAnim);
+		mat4 translationMatrix(1.0);
+		translationMatrix = translate(translationMatrix, AiToGLM(translation));
+
+		nodeTransformation = translationMatrix * rotationMatrix * scaleMatrix;
+	}
+
+	mat4 globalTransformation = parentTransform * nodeTransformation;
+
+	if (boneMapping.find(nodeName) != boneMapping.end()) {
+		uint boneIndex = boneMapping[nodeName];
+		boneInfo[boneIndex].finalTransformation = globalTransformation * boneInfo[boneIndex].boneOffset;
+		int test = 0;
+	}
+
+	for (uint i = 0; i < node->mNumChildren; i++) {
+		ReadNodeHeirachy(animationTime, node->mChildren[i], globalTransformation);
+	}
+}
+
+const aiNodeAnim * Model::impl::FindNodeAnim(const aiAnimation * animation, const string nodeName)
+{
+	for (uint i = 0; i < animation->mNumChannels; i++) {
+		const aiNodeAnim* nodeAnim = animation->mChannels[i];
+
+		if (string(nodeAnim->mNodeName.data) == nodeName) {
+			return nodeAnim;
+		}
+	}
+
+	return NULL;
+}
+
+void Model::impl::CalcInterpolatedScaling(aiVector3D & out, float animationTime, const aiNodeAnim * nodeAnim)
+{
+	if (nodeAnim->mNumScalingKeys == 1) {
+		out = nodeAnim->mScalingKeys[0].mValue;
+		return;
+	}
+
+	uint scalingIndex = FindScaling(animationTime, nodeAnim);
+	uint nextScalingIndex = (scalingIndex + 1);
+
+	assert(scalingIndex < nodeAnim->mNumScalingKeys);
+
+	float deltaTime = (float)(nodeAnim->mScalingKeys[nextScalingIndex].mTime - nodeAnim->mScalingKeys[scalingIndex].mTime);
+	float factor = (animationTime - (float)nodeAnim->mScalingKeys[scalingIndex].mTime) / deltaTime;
+
+	assert(factor >= 0.0f && factor <= 1.0f);
+
+	const aiVector3D &start = nodeAnim->mScalingKeys[scalingIndex].mValue;
+	const aiVector3D &end = nodeAnim->mScalingKeys[nextScalingIndex].mValue;
+
+	aiVector3D delta = end - start;
+
+	out = start + factor * delta;
+}
+
+void Model::impl::CalcInterpolatedPosition(aiVector3D & out, float animationTime, const aiNodeAnim * nodeAnim)
+{
+	if (nodeAnim->mNumPositionKeys == 1) {
+		out = nodeAnim->mPositionKeys[0].mValue;
+		return;
+	}
+
+	uint positionIndex = FindPosition(animationTime, nodeAnim);
+	uint nextPositionIndex = (positionIndex + 1);
+
+	assert(nextPositionIndex < nodeAnim->mNumPositionKeys);
+
+	float deltaTime = (float)(nodeAnim->mPositionKeys[nextPositionIndex].mTime - nodeAnim->mPositionKeys[positionIndex].mTime);
+	float factor = (animationTime - (float)nodeAnim->mPositionKeys[positionIndex].mTime) / deltaTime;
+
+	assert(factor >= 0.0f && factor <= 1.0f);
+
+	const aiVector3D &start = nodeAnim->mPositionKeys[positionIndex].mValue;
+	const aiVector3D &end = nodeAnim->mPositionKeys[nextPositionIndex].mValue;
+
+	aiVector3D delta = end - start;
+
+	out = start + factor * delta;
+}
+
+void Model::impl::CalcInterpolatedRotation(aiQuaternion & out, float animationTime, const aiNodeAnim * nodeAnim)
+{
+	if (nodeAnim->mNumRotationKeys == 1) {
+		out = nodeAnim->mRotationKeys[0].mValue;
+		return;
+	}
+
+	uint rotationIndex = FindRotation(animationTime, nodeAnim);
+	uint nextRotationIndex = (rotationIndex + 1);
+
+	assert(nextRotationIndex < nodeAnim->mNumRotationKeys);
+
+	float deltaTime = (float)(nodeAnim->mRotationKeys[nextRotationIndex].mTime - nodeAnim->mRotationKeys[rotationIndex].mTime);
+	float factor = (animationTime - (float)nodeAnim->mRotationKeys[rotationIndex].mTime) / deltaTime;
+
+	assert(factor >= 0.0f && factor <= 1.0f);
+
+	const aiQuaternion &startRotationQ = nodeAnim->mRotationKeys[rotationIndex].mValue;
+	const aiQuaternion &endRotationQ = nodeAnim->mRotationKeys[nextRotationIndex].mValue;
+
+	aiQuaternion::Interpolate(out, startRotationQ, endRotationQ, factor);
+
+	out = out.Normalize();
+}
+
+uint Model::impl::FindScaling(float animationTime, const aiNodeAnim * nodeAnim)
+{
+	assert(nodeAnim->mNumScalingKeys > 0);
+
+	for (uint i = 0; i < nodeAnim->mNumScalingKeys - 1; i++) {
+		if (animationTime < (float)nodeAnim->mScalingKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+
+	assert(0);
+
+	return 0;
+}
+
+uint Model::impl::FindRotation(float animationTime, const aiNodeAnim * nodeAnim)
+{
+	assert(nodeAnim->mNumRotationKeys > 0);
+
+	for (uint i = 0; i < nodeAnim->mNumRotationKeys - 1; i++) {
+		if (animationTime < (float)nodeAnim->mRotationKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+
+	assert(0);
+
+	return 0;
+}
+
+uint Model::impl::FindPosition(float animationTime, const aiNodeAnim * nodeAnim)
+{
+	assert(nodeAnim->mNumScalingKeys > 0);
+
+	for (uint i = 0; i < nodeAnim->mNumScalingKeys - 1; i++) {
+		if (animationTime < (float)nodeAnim->mScalingKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+
+	assert(0);
+
+	return 0;
+}
+
+void Model::impl::LoadAnimation(string name, const aiAnimation * animation)
+{
+	animations[name] = animation;
+}
+
+void Model::impl::setActiveAnimation(string name)
+{
+	totalTime = 0;
+	activeAnimation = animations[name];
+}
+
+void VertexBoneData::AddBoneData(uint boneId, float weight)
+{
+	int smallest = 0;
+	for (uint i = 0; i < ARRAY_SIZE_IN_ELEMENTS(ids); i++) {
+		if (weights[i] == 0.0) {
+			ids[i] = boneId;
+			weights[i] = weight;
+			return;
+		}
+
+		if (weights[i] < weights[smallest]) {
+			smallest = i;
+		}
+	}
+
+	ids[smallest] = boneId;
+	weights[smallest] = weight;
+	return;
+	//Should never get here, more bones than we have space for
+	assert(0);
 }
