@@ -148,6 +148,8 @@ void ShaderManager::impl::Init()
 	CreateShader("instance_shader", "Shaders/instance.vert", "Shaders/instance.frag");
 	CreateShader("lightPass", "Shaders/lightPass.vert", "Shaders/lightPass.frag");
 	CreateShader("geometry", "Shaders/geometryPassNormal.vert", "Shaders/geometryPass.frag");
+	CreateShader("skinned", "Shaders/skinnedMeshPass.vert", "Shaders/geometryPass.frag");
+	CreateShader("skinned_instance", "Shaders/skinnedInstancePass.vert", "Shaders/geometryPass.frag");
 	CreateShader("geometry_instance", "Shaders/geometryPass.vert", "Shaders/geometryPass.frag");
 
 }

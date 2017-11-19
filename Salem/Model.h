@@ -4,6 +4,7 @@
 #include <vector>
 #include "Renderer.h"
 #include <assimp\Importer.hpp>
+#include "ShaderManager.h"
 
 using namespace std;
 using namespace glm;
@@ -74,6 +75,8 @@ public:
 	vector<GLuint> GetVAO();
 	void SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap);
 	void SetShader(const char * shader);
+
+	void SetBoneUniforms(unsigned int shader, ShaderManager *shaderM);
 private:
 	struct impl;
 

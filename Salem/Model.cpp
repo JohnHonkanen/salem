@@ -7,7 +7,6 @@
 #include <map>
 #include <GL\glew.h>
 #include <glm\glm.hpp>
-#include "ShaderManager.h"
 #include "TextureManager.h"
 #include <glm\gtc\matrix_transform.hpp>
 
@@ -96,20 +95,23 @@ Model::Model(string path, Assimp::Importer &importer)
 
 Model::~Model()
 {
+	delete pImpl->scene;
 	delete pImpl;
 }
 
+#define MAX_BONES 100
+
 void Model::Update(float dt)
 {
-	pImpl->boneTransforms.clear();
-	pImpl->totalTime = dt + pImpl->totalTime;
+	if (pImpl->scene->HasAnimations()) {
+		pImpl->boneTransforms.clear();
+		pImpl->totalTime = dt + pImpl->totalTime;
 
-	std::cout << pImpl->totalTime << std::endl;
-
-	pImpl->BoneTransform(pImpl->totalTime, pImpl->boneTransforms);
+		pImpl->BoneTransform(pImpl->totalTime, pImpl->boneTransforms);
+	}
 }
 
-#define MAX_BONES = 100
+
 
 void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 {
@@ -226,6 +228,14 @@ void Model::SetShader(const char * shader)
 	pImpl->materials[0].shader = shader;
 }
 
+void Model::SetBoneUniforms(unsigned int shader, ShaderManager *shaderM)
+{
+	for (uint i = 0; i < pImpl->boneTransforms.size(); i++) {
+		string location = "bones[" + to_string(i) + "]";
+		shaderM->SetUniformMatrix4fv(shader, location.c_str(), pImpl->boneTransforms[i]);
+	}
+}
+
 void Model::impl::GenerateVAO()
 {
 	for (int i = 0; i < data.size(); i++) {
@@ -336,9 +346,9 @@ void Model::impl::LoadModel(Assimp::Importer &importer)
 	}
 	
 	
-	
-	scene = importer.ReadFile(pathToModel, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
-	directory = pathToModel.substr(0, path.find_last_of('/'));
+	importer.ReadFile(pathToModel, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
+	scene = importer.GetOrphanedScene();
+	directory = pathToModel.substr(0, pathToModel.find_last_of('/'));
 
 	globalInverseTransform = AiToGLM(scene->mRootNode->mTransformation.Inverse());
 
@@ -563,7 +573,7 @@ void Model::impl::ReadNodeHeirachy(float animationTime, const aiNode * node, con
 
 	if (boneMapping.find(nodeName) != boneMapping.end()) {
 		uint boneIndex = boneMapping[nodeName];
-		boneInfo[boneIndex].finalTransformation =  globalTransformation * boneInfo[boneIndex].boneOffset;
+		boneInfo[boneIndex].finalTransformation = globalTransformation * boneInfo[boneIndex].boneOffset;
 		int test = 0;
 	}
 
