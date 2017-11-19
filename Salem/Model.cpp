@@ -50,6 +50,8 @@ struct Model::impl {
 
 	uint numBones = 0;
 
+	bool playAnimation = false;
+
 	void GenerateVAO();
 	void LoadModel(Assimp::Importer &importer);
 
@@ -103,10 +105,15 @@ Model::~Model()
 
 void Model::Update(float dt)
 {
-	if (pImpl->scene->HasAnimations()) {
+	if (pImpl->scene->HasAnimations() && pImpl->playAnimation) {
 		pImpl->boneTransforms.clear();
 		pImpl->totalTime = dt + pImpl->totalTime;
 
+		pImpl->BoneTransform(pImpl->totalTime, pImpl->boneTransforms);
+	}
+	else {
+		pImpl->boneTransforms.clear();
+		pImpl->totalTime = 0;
 		pImpl->BoneTransform(pImpl->totalTime, pImpl->boneTransforms);
 	}
 }
@@ -524,6 +531,9 @@ void Model::impl::LoadBones(unsigned int index, const aiMesh * mesh, vector<Vert
 
 void Model::impl::BoneTransform(float timeInSec, vector<mat4> &transforms)
 {
+	if (!scene->HasAnimations()) {
+		return;
+	}
 	mat4 identity(1.0f);
 
 	float ticksPerSecond = (float)(scene->mAnimations[0]->mTicksPerSecond != 0 ? scene->mAnimations[0]->mTicksPerSecond : 25.0f);
