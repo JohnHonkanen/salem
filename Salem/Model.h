@@ -3,11 +3,12 @@
 #include <glm\glm.hpp>
 #include <vector>
 #include "Renderer.h"
+#include <assimp\Importer.hpp>
 
 using namespace std;
 using namespace glm;
 
-#define BONES_PER_VERTEX 4
+#define BONES_PER_VERTEX 8
 struct BoneInfo {
 	mat4 boneOffset = mat4(0);
 	mat4 finalTransformation= mat4(0);
@@ -58,13 +59,14 @@ struct Material {
 	float shininess;
 };
 
-
 class Model
 {
 public:
 	Model(string path);
+	Model(string path, Assimp::Importer importer);
 	~Model();
 
+	void Update(float dt);
 	void Render(Renderer *r, glm::mat4 modelMatrix);
 
 	vector<MeshData> GetData();

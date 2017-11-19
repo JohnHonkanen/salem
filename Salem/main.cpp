@@ -12,34 +12,33 @@ int main(int argc, char* argv[]) {
 	Application app = Application("Salem", 1280, 720);
 
 	AppDisk *salem = new AppDisk();
-	Instance *instance = new Instance("nightshade");
+	//Instance *instance = new Instance("nightshade");
 
-	mat4 transform = mat4(1.0);
+	//mat4 transform = mat4(1.0);
 
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 10; j++) {
-			for (int k = 0; k < 10; k++) {
-				transform = mat4(1.0);
-				transform = translate(transform, vec3(5.0f * i ,5.0f * j, -5.0f * k));
-				mat4 scaleM(1.0);
-				scaleM = scale(scaleM, vec3(0.02f));
-				instance->AddInstance(transform * scaleM);
-			}
-			
-		}
+	//for (int i = 0; i < 10; i++) {
+	//	for (int j = 0; j < 10; j++) {
+	//		for (int k = 0; k < 10; k++) {
+	//			transform = mat4(1.0);
+	//			transform = translate(transform, vec3(5.0f * i ,5.0f * j, -5.0f * k));
+	//			mat4 scaleM(1.0);
+	//			scaleM = scale(scaleM, vec3(0.02f));
+	//			instance->AddInstance(transform * scaleM);
+	//		}
+	//		
+	//	}
 
-		
-		
-		
-	}
+	//	
+	//	
+	//	
+	//}
 
-	//Shader information
-	instance = (Instance*)salem->AddObject(instance, true, "geometry_instance"); // All deferred shading needs to use geometry shader
+	////Shader information
+	//instance = (Instance*)salem->AddObject(instance, true, "geometry_instance"); // All deferred shading needs to use geometry shader
 	
-	Object *object = salem->AddObject("cube", true, "geometry");
-	object->Translate(vec3(20.0f ,0.0f, -40.0f));
-	object->Scale(vec3(3.0f));
-	object->SetMaterialMaps("Assets/Textures/container2.bmp", "", "");
+	Object *object = salem->AddObject("nightshade", true, "geometry");
+	object->Translate(vec3(20.0f ,0.0f, -20.0f));
+	object->Scale(vec3(0.02f));
 
 	Object *object2 = salem->AddObject("cube", true, "geometry");
 	object2->Translate(vec3(10.0f, 0.0f, -15.0f));
