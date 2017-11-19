@@ -23,9 +23,9 @@ using namespace glm;
 struct Model::impl {
 	string pathToDirectory = "Assets/Models/";
 
-	int formatsAllowed = 2;
+	int formatsAllowed = 3;
 
-	string formats[2] = {"obj", "dae"};
+	string formats[3] = {"obj", "dae", "fbx"};
 	string directory;
 	string path;
 
@@ -317,8 +317,8 @@ MeshData Model::impl::LoadData(aiMesh * mesh)
 			if (mesh->HasNormals()) {
 				aiVector3D normal = mesh->mNormals[face.mIndices[j]];
 				normalArray.push_back(normal.x);
-				normalArray.push_back(normal.y);
 				normalArray.push_back(normal.z);
+				normalArray.push_back(normal.y * - 1);
 			}
 
 			if (mesh->HasTangentsAndBitangents()) {

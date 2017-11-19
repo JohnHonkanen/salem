@@ -26,11 +26,7 @@ int main(int argc, char* argv[]) {
 				instance->AddInstance(transform * scaleM);
 			}
 			
-		}
-
-		
-		
-		
+		}	
 	}
 
 	//Shader information

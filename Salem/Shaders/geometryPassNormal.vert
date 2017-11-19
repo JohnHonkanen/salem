@@ -11,7 +11,7 @@ uniform mat4 view;
 uniform mat4 projection;
 
 out vec3 FragPos;
-//out vec3 out_Normal;
+out vec3 out_Normal;
 out vec2 out_UV;
 out mat3 out_TBN;
 
@@ -24,7 +24,7 @@ void main(void) {
 	// Calculate Vertex Positions
 	FragPos = vec3(model * vec4(in_Position, 1.0));
 	
-	//out_Normal = mat3(transpose(inverse(model))) * in_Normal;
+	out_Normal = mat3(transpose(inverse(model))) * in_Normal;
 
 	//mat3 normalMatrix = transpose(inverse(mat3(model)));
 

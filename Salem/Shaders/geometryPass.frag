@@ -6,7 +6,7 @@ layout (location = 2) out vec4 gAlbedoSpec;
 layout (location = 3) out vec4 gEmission;
 
 in vec3 FragPos;
-//in vec3 out_Normal;  
+in vec3 out_Normal;  
 in vec2 out_UV;
 in mat3 out_TBN;
 
@@ -37,6 +37,7 @@ void main(void) {
 
 	//normal = texture(normalMap, out_UV).rgb;
 	//normal =  out_TBN * (texture(normalMap, out_UV).rgb);
+	//normal = out_Normal;
 
 	// 2nd normal strategy
 	//vec3 bumpMap = texture(normalMap, out_UV).rgb;
