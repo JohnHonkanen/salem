@@ -24,20 +24,9 @@ void main(void) {
 	// Calculate Vertex Positions
 	FragPos = vec3(ImodelMatrix  * vec4(in_Position, 1.0));
 	
-	out_Normal = vec3(ImodelMatrix * vec4(in_Tangent, 0.0f));
+	out_Normal = vec3(ImodelMatrix * vec4(in_Normal, 0.0f));
 
     // Gram/Schmidt process to orthogolize the TBN vector so that each vector is again perpendicular to the other vectors.
-
-	vec3 T = normalize(vec3(ImodelMatrix * vec4(in_Tangent, 0.0f)));
-	vec3 N = normalize(vec3(ImodelMatrix * vec4(in_Normal, 0.0f)));
-
-	// re-orthogonalize T with respect to N
-	T = normalize(T - dot(T, N) * N);
-
-	// then retrieve perpendicular vector B with the cross product of T and N
-	vec3 B = cross(N, T);
-
-	out_TBN = transpose(mat3(T, B, N));
 
 	gl_Position = projection * view * vec4(FragPos, 1.0f);
 	

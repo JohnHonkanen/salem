@@ -42,7 +42,7 @@ void main(void) {
 
     // Gram/Schmidt process to orthogolize the TBN vector so that each vector is again perpendicular to the other vectors.
 
-	vec3 T = normalize(vec3(ImodelMatrix * vec4(in_Tangent, 0.0f)));
+	vec3 T = normalize(vec3(ImodelMatrix * boneTransform * vec4(in_Tangent, 0.0f)));
 	vec3 N = normalize(vec3(ImodelMatrix * boneTransform * vec4(in_Normal, 0.0f)));
 
 	// re-orthogonalize T with respect to N

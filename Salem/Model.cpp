@@ -31,7 +31,7 @@ struct Model::impl {
 	string pathToDirectory = "Assets/Models/";
 
 	int formatsAllowed = 3;
-	int fileType = 1;
+	int fileType = 0;
 	string formats[3] = {"obj", "dae", "md5mesh"};
 	string directory;
 	string path;
@@ -369,6 +369,10 @@ void Model::impl::LoadModel(Assimp::Importer &importer)
 	scene = importer.GetOrphanedScene();
 	directory = pathToModel.substr(0, pathToModel.find_last_of('/'));
 
+	if (pathToModel.substr(pathToModel.find_last_of('.') + 1) == "dae") {
+		fileType = 1;
+	}
+
 	globalInverseTransform = AiToGLM(scene->mRootNode->mTransformation.Inverse());
 
 	meshes.resize(scene->mNumMeshes);
@@ -451,7 +455,7 @@ void Model::impl::LoadData(uint meshIndex, aiMesh * mesh, MeshData &data)
 			if (mesh->HasNormals()) {
 				aiVector3D normal = mesh->mNormals[face.mIndices[j]];
 				data.normalArray.push_back(normal.x);
-				if (fileType = 1) {
+				if (fileType == 1) {
 					// if Collada (.dae)
 					data.normalArray.push_back(normal.z);
 					data.normalArray.push_back(normal.y * -1);

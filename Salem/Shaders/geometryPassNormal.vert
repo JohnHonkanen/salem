@@ -38,7 +38,7 @@ void main(void) {
 	// then retrieve perpendicular vector B with the cross product of T and N
 	vec3 B = cross(N, T); // normalize(vec3(normalMatrix * in_Bitangent));  
 
-	out_TBN = inverse(transpose(mat3(T, B, N)));
+	out_TBN = transpose(mat3(T, B, N));
 
 	gl_Position = projection * view * vec4(FragPos, 1.0f);
 	

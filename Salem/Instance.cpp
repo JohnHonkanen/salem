@@ -77,12 +77,21 @@ void Instance::Render(Renderer * r)
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, diffuseMap);
 		}
+		else {
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+
 
 		if (materials[i].specularMap != "") {
 			unsigned int specularMap = textureManager->GetTexture(materials[i].specularMap);
 			// Bind specular map
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, specularMap);
+		}
+		else {
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
 		if (materials[i].emissionMap != "") {
@@ -91,12 +100,20 @@ void Instance::Render(Renderer * r)
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, emissionMap);
 		}
+		else {
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 
 		if (materials[i].normalMap != "") {
 			unsigned int normalMap = textureManager->GetTexture(materials[i].normalMap);
 			// Bind specular map
 			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_2D, normalMap);
+		}
+		else {
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
 		glBindVertexArray(VAOs[i]);

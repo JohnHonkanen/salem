@@ -14,6 +14,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="TextureManager.cpp" />
+    <ClCompile Include="Collider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppDisk.h" />
@@ -28,14 +29,9 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="TextureManager.h" />
+    <ClInclude Include="Collider.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\gDiffuse.frag">
-      <Filter>Resources</Filter>
-    </None>
-    <None Include="Shaders\gDiffuse.vert">
-      <Filter>Resources</Filter>
-    </None>
     <None Include="Shaders\geometryPass.frag">
       <Filter>Resources</Filter>
     </None>
@@ -43,18 +39,6 @@
       <Filter>Resources</Filter>
     </None>
     <None Include="Shaders\geometryPassNormal.vert">
-      <Filter>Resources</Filter>
-    </None>
-    <None Include="Shaders\gNormal.frag">
-      <Filter>Resources</Filter>
-    </None>
-    <None Include="Shaders\gNormal.vert">
-      <Filter>Resources</Filter>
-    </None>
-    <None Include="Shaders\gPosition.frag">
-      <Filter>Resources</Filter>
-    </None>
-    <None Include="Shaders\gPosition.vert">
       <Filter>Resources</Filter>
     </None>
     <None Include="Shaders\instance.frag">
@@ -85,6 +69,12 @@
       <Filter>Resources</Filter>
     </None>
     <None Include="Shaders\HDRPass.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\geometryPassNoMap.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\geometryPassNoMap.frag">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>

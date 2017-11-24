@@ -120,6 +120,7 @@
     <ClCompile Include="AppDisk.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Collider.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="InstanceManager.cpp" />
@@ -135,6 +136,7 @@
     <ClInclude Include="AppDisk.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Collider.h" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GBuffer.h" />
     <ClInclude Include="InstanceManager.h" />
@@ -146,15 +148,11 @@
     <ClInclude Include="TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\gDiffuse.frag" />
-    <None Include="Shaders\gDiffuse.vert" />
     <None Include="Shaders\geometryPass.frag" />
     <None Include="Shaders\geometryPass.vert" />
+    <None Include="Shaders\geometryPassNoMap.frag" />
+    <None Include="Shaders\geometryPassNoMap.vert" />
     <None Include="Shaders\geometryPassNormal.vert" />
-    <None Include="Shaders\gNormal.frag" />
-    <None Include="Shaders\gNormal.vert" />
-    <None Include="Shaders\gPosition.frag" />
-    <None Include="Shaders\gPosition.vert" />
     <None Include="Shaders\HDRPass.frag" />
     <None Include="Shaders\HDRPass.vert" />
     <None Include="Shaders\lightPass.frag" />

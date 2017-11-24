@@ -184,7 +184,7 @@ void Application::impl::Update(float dt)
 
 void Application::impl::Render()
 {
-	glClearColor(0.05f, 0.05f, 0.05f, 1.0f); // Color to clear with (Background color of active scene)
+	glClearColor(0.00f, 0.00f, 0.00f, 1.0f); // Color to clear with (Background color of active scene)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen
 
 	program->Render();

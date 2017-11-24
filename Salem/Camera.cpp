@@ -24,6 +24,8 @@ struct Camera::impl {
 Camera::Camera()
 {
 	pImpl = new impl();
+
+	Translate(vec3(3.0f, 0.0f, -5.0f));
 }
 
 

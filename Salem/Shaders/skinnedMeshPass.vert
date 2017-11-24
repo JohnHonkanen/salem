@@ -35,14 +35,11 @@ void main(void) {
 
 	// Calculate Vertex Positions
 	FragPos = vec3(model * boneTransform * vec4(in_Position, 1.0));
-	
-	//out_Normal = mat3(transpose(inverse(model))) * in_Normal;
 
-	//mat3 normalMatrix = transpose(inverse(mat3(model)));
 
     // Gram/Schmidt process to orthogolize the TBN vector so that each vector is again perpendicular to the other vectors.
 
-	vec3 T = normalize(vec3(model * vec4(in_Tangent, 0.0f)));
+	vec3 T = normalize(vec3(model * boneTransform * vec4(in_Tangent, 0.0f)));
 	vec3 N = normalize(vec3(model * boneTransform * vec4(in_Normal, 0.0f)));
 
 	// re-orthogonalize T with respect to N

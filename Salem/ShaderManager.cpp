@@ -151,5 +151,6 @@ void ShaderManager::impl::Init()
 	CreateShader("skinned", "Shaders/skinnedMeshPass.vert", "Shaders/geometryPass.frag");
 	CreateShader("skinned_instance", "Shaders/skinnedInstancePass.vert", "Shaders/geometryPass.frag");
 	CreateShader("geometry_instance", "Shaders/geometryPass.vert", "Shaders/geometryPass.frag");
+	CreateShader("geometry_instance_no_map", "Shaders/geometryPassNoMap.vert", "Shaders/geometryPassNoMap.frag");
 	CreateShader("HDRPass", "Shaders/HDRPass.vert", "Shaders/HDRPass.frag");
 }
