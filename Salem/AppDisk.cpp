@@ -60,8 +60,8 @@ void AppDisk::Start()
 	shaderManager->SetUniformLocation1i(lightPass, "gEmission", 3);
 
 	pImpl->gBuffer->Init();
-	pImpl->HDRBuffer->Init();
-	pImpl->lightBuffer->Init();
+	pImpl->HDRBuffer->Init(1);
+	pImpl->lightBuffer->Init(1);
 }
 
 void AppDisk::Update(float dt)
@@ -188,18 +188,18 @@ void AppDisk::impl::RenderLightPass()
 
 	// Camera
 	shaderManager->SetUniformLocation3f(program, "pointLight.position",
-		10.0f, 10.0f, -15.0f);
+		15.0f, 6.0f, -5.0f);
 
 	// Pointlight Uniforms 
-	shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.5f, 0.5f, 0.5f);
-	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.5f, 0.5f, 0.5f);
+	shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 30.5f, 10.5f, 10.5f);
+	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 30.5f, 10.5f, 10.5f);
 	//shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.3f, 0.3f, 0.3f);
 	shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.15f, 0.15f, 0.15f);
 
 	// Pointlight Attenuation
 	shaderManager->SetUniformLocation1f(program, "pointLight.constant", 1.0f);
-	shaderManager->SetUniformLocation1f(program, "pointLight.linear", 0.9f);
-	shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 0.32f);
+	shaderManager->SetUniformLocation1f(program, "pointLight.linear", 0.1f);
+	shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 3.0f);
 
 	/**********SPOTLIGHT PROPERTIES**********/
 

@@ -5,8 +5,8 @@ struct FrameBuffer::impl {
 	unsigned int fbo;
 	unsigned int colorBuffer, depthBuffer;
 
-	unsigned int screenWidth, screenHeight;
-	void ConfigureFBO();
+	unsigned int screenWidth, screenHeight, attachmentCount;
+	void ConfigureFBO(int attachmentCount);
 };
 
 FrameBuffer::FrameBuffer()
@@ -14,11 +14,18 @@ FrameBuffer::FrameBuffer()
 	pImpl = new impl;
 }
 
-FrameBuffer::FrameBuffer(unsigned int width, unsigned int height)
+FrameBuffer::FrameBuffer(unsigned int width, unsigned int height) : FrameBuffer(width, height, 1)
+{
+
+}
+
+
+FrameBuffer::FrameBuffer(unsigned int width, unsigned int height, unsigned int count)
 {
 	pImpl = new impl;
 	pImpl->screenWidth = width;
 	pImpl->screenHeight = height;
+	pImpl->attachmentCount = count;
 }
 
 
@@ -27,9 +34,17 @@ FrameBuffer::~FrameBuffer()
 	delete pImpl;
 }
 
-void FrameBuffer::Init()
+void FrameBuffer::Init(int count)
 {
-	pImpl->ConfigureFBO();
+	pImpl->attachmentCount = count;
+
+	if (pImpl->attachmentCount == 1) {
+
+		pImpl->ConfigureFBO(count);
+	}
+	else {
+		std::cout << "num attach higher than 1" << std::endl;
+	}
 }
 
 void FrameBuffer::BindForWriting()
@@ -47,13 +62,17 @@ unsigned int FrameBuffer::GetTexture()
 	return pImpl->colorBuffer;
 }
 
-void FrameBuffer::impl::ConfigureFBO()
+void FrameBuffer::impl::ConfigureFBO(int count)
 {
+
+	attachmentCount = count;
+
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 
+
 	// - position color buffer
-	glGenTextures(1, &colorBuffer);
+	glGenTextures(attachmentCount, &colorBuffer);
 	glBindTexture(GL_TEXTURE_2D, colorBuffer);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

@@ -4,9 +4,10 @@ class FrameBuffer
 public:
 	FrameBuffer();
 	FrameBuffer(unsigned int width, unsigned int height);
+	FrameBuffer(unsigned int width, unsigned int height, unsigned int attachmentCount);
 	~FrameBuffer();
 
-	void Init();
+	void Init(int numAttachment);
 
 	void BindForWriting();
 	void BindForReading();
