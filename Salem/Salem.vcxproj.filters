@@ -15,6 +15,7 @@
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="FireFly.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppDisk.h" />
@@ -30,6 +31,7 @@
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Collider.h" />
+    <ClInclude Include="FireFly.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\geometryPass.frag">
@@ -75,6 +77,12 @@
       <Filter>Resources</Filter>
     </None>
     <None Include="Shaders\geometryPassNoMap.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\particles.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\particles.vert">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>

@@ -70,6 +70,10 @@ void AppDisk::Update(float dt)
 	for (int i = 0; i < pImpl->objects.size(); i++) {
 		pImpl->objects[i]->Update(dt);
 	}
+
+	for (int i = 0; i < pImpl->fObjects.size(); i++) {
+		pImpl->fObjects[i]->Update(dt);
+	}
 }
 
 void AppDisk::Render()
@@ -80,15 +84,15 @@ void AppDisk::Render()
 	/* Do Light Pass */
 	pImpl->RenderLightPass();
 	/*-------------------------------*/
-
-	/* Do Forward Rendering Passes  */
-	pImpl->RenderForward();
-	/*-------------------------------*/
 	
 	/*Do HDR Pass*/
 	pImpl->RenderHDRPass();
 	/*-------------------------------*/
 	pImpl->RendererFinalImage();
+
+	/* Do Forward Rendering Passes  */
+	pImpl->RenderForward();
+	/*-------------------------------*/
 }
 
 void AppDisk::Input(SDL_Event* sdlEvent)
@@ -244,6 +248,14 @@ void AppDisk::impl::PointLightPass()
 
 void AppDisk::impl::RenderForward()
 {
+	//Copy Depth Buffer
+	gBuffer->BindForReading();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	glBlitFramebuffer(
+		0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST
+	);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	for (int i = 0; i < fObjects.size(); i++) {
 		fObjects[i]->Render(renderer.get());
 	}
@@ -324,7 +336,4 @@ void AppDisk::impl::RendererFinalImage()
 	shaderManager->SetUniformLocation1i(program, "texture0", 0);
 
 	RenderQuad();
-
-	glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
