@@ -1,4 +1,3 @@
-// textured.frag
 #version 330
 
 struct PointLight {

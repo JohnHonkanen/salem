@@ -17,6 +17,8 @@ struct AppDisk::impl {
 	unique_ptr<GBuffer> gBuffer;
 	unique_ptr<FrameBuffer> HDRBuffer;
 	unique_ptr<FrameBuffer> lightBuffer;
+	unique_ptr<FrameBuffer> bloomBuffer;
+
 	GLuint quadVAO;
 
 	int windowWidth = 1280;
@@ -30,6 +32,7 @@ struct AppDisk::impl {
 
 	void RenderQuad();
 	
+	void RenderBloomPass();
 	void RenderHDRPass();
 	void RendererFinalImage();
 };
@@ -42,6 +45,7 @@ AppDisk::AppDisk()
 	pImpl->HDRBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 	pImpl->lightBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 	pImpl->lightBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 2);
+	pImpl->bloomBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 2);
 }
 
 
@@ -63,6 +67,7 @@ void AppDisk::Start()
 	pImpl->gBuffer->Init();
 	pImpl->HDRBuffer->Init();
 	pImpl->lightBuffer->Init();
+	pImpl->bloomBuffer->Init();
 }
 
 void AppDisk::Update(float dt)
@@ -86,6 +91,10 @@ void AppDisk::Render()
 	pImpl->RenderForward();
 	/*-------------------------------*/
 	
+	/*Do Bloom Pass*/
+	pImpl->RenderBloomPass();
+	/*-------------------------------*/
+
 	/*Do HDR Pass*/
 	pImpl->RenderHDRPass();
 	/*-------------------------------*/
@@ -276,6 +285,28 @@ void AppDisk::impl::RenderQuad()
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
+}
+
+
+void AppDisk::impl::RenderBloomPass()
+{
+	bloomBuffer->BindForWriting();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glUseProgram(renderer->GetShader("BloomPass"));
+
+	vector<unsigned int >texture;
+
+	ShaderManager* shaderManager = renderer->GetShaderManager();
+	unsigned int program = renderer->GetShader("BloomPass");
+
+	// Read Lightbuffer data 
+	lightBuffer->BindForReading();
+	lightBuffer->GetTexture(texture);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture[1]);
+
+	shaderManager->SetUniformLocation1i(program, "Image", 0);
 }
 
 void AppDisk::impl::RenderHDRPass()
