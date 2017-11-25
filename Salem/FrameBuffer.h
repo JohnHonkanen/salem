@@ -1,4 +1,9 @@
 #pragma once
+
+#include <vector>
+
+using namespace std;
+
 class FrameBuffer
 {
 public:
@@ -12,6 +17,7 @@ public:
 	void BindForWriting();
 	void BindForReading();
 
+	void GetTexture(vector<unsigned int>& textures);
 	unsigned int GetTexture();
 private:
 	struct impl;
