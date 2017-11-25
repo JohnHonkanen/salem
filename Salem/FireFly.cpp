@@ -10,6 +10,7 @@
 #include <SDL.h>
 
 #include "ShaderManager.h"
+#include "TextureManager.h"
 #include "Renderer.h"
 
 
@@ -17,7 +18,7 @@ using namespace std;
 using namespace glm;
 
 struct FireFly::impl {
-
+	string texture = "Assets/Textures/particle.png";
 	const char *shader;
 	unsigned int vao;
 	unsigned int vbo[2];
@@ -26,6 +27,9 @@ struct FireFly::impl {
 	vector<float> velocities;
 	vector<float> timepassed;
 	vector<float> check;
+
+	int velocity = 10;
+	float clamps = 1.0f;
 
 
 	float timePassed = 0;
@@ -57,6 +61,7 @@ void FireFly::Render(Renderer * r)
 	r->GetProjection(projection, view);
 
 	ShaderManager *sm = r->GetShaderManager();
+	TextureManager* tm = r->GetTextureManager();
 
 	GLuint program = sm->GetShader(pImpl->shader);
 
@@ -66,7 +71,19 @@ void FireFly::Render(Renderer * r)
 	sm->SetUniformMatrix4fv(program, "view", view);
 	sm->SetUniformMatrix4fv(program, "model", modelMatrix);
 
+	unsigned int pTex = tm->GetTexture(pImpl->texture);
+	// Bind diffuse map
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, pTex);
+	sm->SetUniformLocation1i(program, "texture0", 0);
+
 	glPointSize(10);
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
+	glEnable(GL_BLEND);
+
+
 	glBindVertexArray(pImpl->vao);
 	glBindBuffer(GL_ARRAY_BUFFER, pImpl->vbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, pImpl->particles*3 * sizeof(float), &pImpl->vertices[0], GL_DYNAMIC_DRAW);
@@ -75,26 +92,26 @@ void FireFly::Render(Renderer * r)
 
 	glDrawArrays(GL_POINTS, 0, pImpl->particles);
 	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_BLEND);
 }
 
 void FireFly::Update(float dt)
 {
-
-
 	for (int i = 0; i < pImpl->particles*3; i++) {
 		pImpl->timepassed[i] += dt;
 
 		if (pImpl->timepassed[i] > pImpl->check[i])
 		{
 			float v;
-			v = (rand() % 100 - 50) / 10.0f;
+			v = (rand() % pImpl->velocity - pImpl->velocity/2) / 10.0f;
 			pImpl->velocities[i] = v;
 			pImpl->timepassed[i] = 0.0f;
 		}
 
 		pImpl->vertices[i] += pImpl->velocities[i] * dt;
 
-		pImpl->vertices[i] = clamp(pImpl->vertices[i], -2.0f, 2.0f);
+		pImpl->vertices[i] = clamp(pImpl->vertices[i], -pImpl->clamps, pImpl->clamps);
 	}
 }
 
