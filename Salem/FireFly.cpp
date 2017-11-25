@@ -21,10 +21,14 @@ struct FireFly::impl {
 	const char *shader;
 	unsigned int vao;
 	unsigned int vbo[2];
+	int particles = 5;
 	vector<float> vertices;
 	vector<float> velocities;
+	vector<float> timepassed;
+	vector<float> check;
 
-	int timePassed;
+
+	float timePassed = 0;
 
 	void Setup();
 	void SetupVertices();
@@ -65,33 +69,32 @@ void FireFly::Render(Renderer * r)
 	glPointSize(10);
 	glBindVertexArray(pImpl->vao);
 	glBindBuffer(GL_ARRAY_BUFFER, pImpl->vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, pImpl->vertices.size() * sizeof(float), &pImpl->vertices[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, pImpl->particles*3 * sizeof(float), &pImpl->vertices[0], GL_DYNAMIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
-	glDrawArrays(GL_POINTS, 0, pImpl->vertices.size());
+	glDrawArrays(GL_POINTS, 0, pImpl->particles);
 	glBindVertexArray(0);
 }
 
 void FireFly::Update(float dt)
 {
-	double PI = 3.141592653589793238462643383279502884197;
-	double seg = PI / 2.0f;
 
-	pImpl->vertices.clear();
 
-	for (double phi = 0; phi < PI * 2; phi += seg) {
-		for (double theta = 0; theta < PI; theta += seg) {
-			float r = (rand() % 20) / 10.0f;
-			float x, y, z;
-			x = r * cos(phi) * sin(theta);
-			y = r * sin(phi) * sin(theta);
-			z = r * cos(theta);
+	for (int i = 0; i < pImpl->particles*3; i++) {
+		pImpl->timepassed[i] += dt;
 
-			pImpl->vertices.push_back(x);
-			pImpl->vertices.push_back(y);
-			pImpl->vertices.push_back(z);
+		if (pImpl->timepassed[i] > pImpl->check[i])
+		{
+			float v;
+			v = (rand() % 100 - 50) / 10.0f;
+			pImpl->velocities[i] = v;
+			pImpl->timepassed[i] = 0.0f;
 		}
+
+		pImpl->vertices[i] += pImpl->velocities[i] * dt;
+
+		pImpl->vertices[i] = clamp(pImpl->vertices[i], -2.0f, 2.0f);
 	}
 }
 
@@ -109,7 +112,7 @@ void FireFly::impl::Setup()
 	glBindVertexArray(vao);
 	/* Vertex position*/
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size()/3 * sizeof(float), &vertices[0], GL_DYNAMIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 , 0);
 	glEnableVertexAttribArray(0);
 
@@ -121,7 +124,7 @@ void FireFly::impl::SetupVertices()
 	double PI = 3.141592653589793238462643383279502884197;
 	double seg = PI / 2.0f;
 
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < particles; i++) {
 		
 		float x, y, z;
 		x = 0.0f;
@@ -129,12 +132,26 @@ void FireFly::impl::SetupVertices()
 		z = 0.0f;
 
 		float vx, vy, vz;
-		vx = rand() % 10 - 5;
-		vy = rand() % 10 - 5;
-		vz = rand() % 10 - 5;
+		vx = (rand() % 100 - 50) / 10.0f;
+		vy = (rand() % 100 - 50) / 10.0f;
+		vz = (rand() % 100 - 50) / 10.0f;
 
 		vertices.push_back(x);
 		vertices.push_back(y);
 		vertices.push_back(z);
+
+		velocities.push_back(vx);
+		velocities.push_back(vy);
+		velocities.push_back(vz);
+
+		timepassed.push_back(0);
+		timepassed.push_back(0);
+		timepassed.push_back(0);
+
+		float c = (rand() % 50 + 50) / 100.0f;
+		check.push_back(c);
+		check.push_back(c);
+		check.push_back(c);
+
 	}
 }
