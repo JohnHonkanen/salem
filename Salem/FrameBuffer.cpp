@@ -7,7 +7,7 @@ struct FrameBuffer::impl {
 	unsigned int fbo;
 	unsigned int depthBuffer;
 	unsigned int screenWidth, screenHeight, attachmentCount;
-	void ConfigureFBO(int attachmentCount);
+	void ConfigureFBO();
 
 	vector<unsigned int> colorBuffer;
 };
@@ -38,17 +38,9 @@ FrameBuffer::~FrameBuffer()
 	delete pImpl;
 }
 
-void FrameBuffer::Init(int count)
+void FrameBuffer::Init()
 {
-	pImpl->attachmentCount = count;
-
-	if (pImpl->attachmentCount == 1) {
-
-		pImpl->ConfigureFBO(count);
-	}
-	else {
-		std::cout << "num attach higher than 1" << std::endl;
-	}
+	pImpl->ConfigureFBO();
 }
 
 void FrameBuffer::BindForWriting()
@@ -71,10 +63,8 @@ unsigned int FrameBuffer::GetTexture()
 	return pImpl->colorBuffer[0];
 }
 
-void FrameBuffer::impl::ConfigureFBO(int count)
+void FrameBuffer::impl::ConfigureFBO()
 {
-
-	attachmentCount = count;
 
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
@@ -95,7 +85,6 @@ void FrameBuffer::impl::ConfigureFBO(int count)
 		
 		// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
 		attachments[i] = GL_COLOR_ATTACHMENT0 + i;
-
 	}
 	glDrawBuffers(attachmentCount, &attachments[0]);
 
@@ -103,6 +92,8 @@ void FrameBuffer::impl::ConfigureFBO(int count)
 	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenWidth, screenHeight);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+
+
 
 	//Check if framebuffer is complete
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {

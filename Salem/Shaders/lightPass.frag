@@ -30,7 +30,9 @@ struct SpotLight {
 
 in vec2 out_UV;
 
-out vec4 out_Color;
+//out vec4 out_Color;
+layout (location = 0) out vec4 out_Color;
+layout (location = 1) out vec4 out_BrightColor;
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
@@ -75,6 +77,16 @@ void main(void) {
 
 	// Phase 4: Output results
 	out_Color = vec4(result , 1.0f);
+
+	// Phase 5: Check for brightness
+	// check whether fragment output is higher than threshold, if so output as brightness color
+
+	//float brightness = dot(out_Color.rgb, vec3(0.2126f, 0.7152f, 0.0722f));
+	//if(brightness > 1.0f){
+	//	out_BrightColor = vec4(out_Color.rgb, 1.0f);
+	//} else {
+	//	out_BrightColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	//}
 }
 
 

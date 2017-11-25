@@ -41,6 +41,7 @@ AppDisk::AppDisk()
 	pImpl->gBuffer = make_unique<GBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 	pImpl->HDRBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 	pImpl->lightBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
+	pImpl->lightBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 2);
 }
 
 
@@ -60,8 +61,8 @@ void AppDisk::Start()
 	shaderManager->SetUniformLocation1i(lightPass, "gEmission", 3);
 
 	pImpl->gBuffer->Init();
-	pImpl->HDRBuffer->Init(1);
-	pImpl->lightBuffer->Init(1);
+	pImpl->HDRBuffer->Init();
+	pImpl->lightBuffer->Init();
 }
 
 void AppDisk::Update(float dt)

@@ -12,7 +12,7 @@ public:
 	FrameBuffer(unsigned int width, unsigned int height, unsigned int attachmentCount);
 	~FrameBuffer();
 
-	void Init(int numAttachment);
+	void Init();
 
 	void BindForWriting();
 	void BindForReading();
