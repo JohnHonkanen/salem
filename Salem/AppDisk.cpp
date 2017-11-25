@@ -284,7 +284,7 @@ void AppDisk::impl::RenderHDRPass()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(renderer->GetShader("HDRPass"));
 
-	unsigned int texture;
+	vector<unsigned int >texture;
 
 	ShaderManager* shaderManager = renderer->GetShaderManager();
 	unsigned int program = renderer->GetShader("HDRPass");
@@ -292,10 +292,10 @@ void AppDisk::impl::RenderHDRPass()
 
 	// Read Lightbuffer data 
 	lightBuffer->BindForReading();
-	texture = lightBuffer->GetTexture();
+	lightBuffer->GetTexture(texture);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, texture[1]);
 
 	shaderManager->SetUniformLocation1i(program, "HDR", 0);
 	//shaderManager->SetUniformLocation1f(program, "exposure", 1.0f);
