@@ -16,8 +16,8 @@ void main(void) {
 
 	// Phase 1: Apply HDR Tone Mapping (+ Bloom Color)
 	vec3 HDRBufferColor = texture(HDR, out_UV).rgb; 
-	//vec3 bloomColor = texture(bloomBlur, out_UV).rgb;
-	//HDRBufferColor += bloomColor; 
+	vec3 bloomColor = texture(bloomBlur, out_UV).rgb;
+	HDRBufferColor += bloomColor; 
 
 	// Reinhard tone mapping
 	vec3 result = HDRBufferColor / (HDRBufferColor + vec3(1.0f));
@@ -29,8 +29,7 @@ void main(void) {
 	float gammaValue = 1.0f / gamma;
 
 	result = pow(result, vec3(gammaValue));
-	
-	//out_Color = vec4(1.0f, 0.0f, 0.0f , 1.0f);
-	out_Color = vec4(HDRBufferColor, 1.0f);
+
+	out_Color = vec4(result, 1.0f);
 }
 

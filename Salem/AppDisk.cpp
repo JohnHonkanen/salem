@@ -302,23 +302,24 @@ void AppDisk::impl::RenderBloomPass()
 	bool firstIteration = true;
 	int count = 10;
 
-	shaderManager->SetUniformLocation1i(program, "image", 0);
-
 	for (unsigned int i = 0; i < count; i++) {
+
 		pingPongBuffer[horizontal]->BindForWriting();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		shaderManager->SetUniformLocation1i(program, "image", 0);
 		shaderManager->SetUniformLocation1i(program, "Horizontal", horizontal);
-		
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, texture[1]);
 
-		GLuint tex = firstIteration ? texture[1] : pingPongBuffer[!horizontal]->GetTexture();
+		GLuint tex = texture[1];
+
+		if (!firstIteration) {
+			tex = pingPongBuffer[!horizontal]->GetTexture();
+		}
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, tex); // bind texture of other framebuffer (or scene if first iteration)
-		//glBindTexture(GL_TEXTURE_2D, texture[0]);
-		
-		RenderQuad();
 
+		RenderQuad();
 		horizontal = !horizontal;
+
 		if (firstIteration) {
 			firstIteration = false;
 		}
@@ -327,29 +328,39 @@ void AppDisk::impl::RenderBloomPass()
 
 void AppDisk::impl::RenderHDRPass()
 {
+	// Apply tone mapping.
 
 	HDRBuffer->BindForWriting();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(renderer->GetShader("HDRPass"));
 
-	vector<unsigned int >texture;
+	vector<unsigned int >texture1, texture2;
 
 	ShaderManager* shaderManager = renderer->GetShaderManager();
 	unsigned int program = renderer->GetShader("HDRPass");
 
 	// Read Lightbuffer data 
 	lightBuffer->BindForReading();
-	lightBuffer->GetTexture(texture);
+	lightBuffer->GetTexture(texture1);
 
-	pingPongBuffer[horizontal]->GetTexture(texture);
+	// Read pingPong buffer data
+	pingPongBuffer[!horizontal]->GetTexture(texture2);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
+	glBindTexture(GL_TEXTURE_2D, texture1[0]);
 
 	shaderManager->SetUniformLocation1i(program, "HDR", 0);
 
-	// Apply tone mapping.
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture2[0]);
+
+	shaderManager->SetUniformLocation1i(program, "bloomBlur", 1);
+
 	
+
+	
+	// Apply tone mapping.
+
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//
 	//vector<unsigned int >texture;

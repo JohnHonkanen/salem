@@ -33,7 +33,5 @@ void main(){
 			result += texture(image, out_UV - vec2(0.0f, UV_offset.y * i)).rgb * Weight[i];
 		}
 	}
-	out_Color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-	
-	//out_Color = vec4(result, 1.0f);
+	out_Color = vec4(result, 1.0f);
 }
