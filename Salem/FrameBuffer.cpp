@@ -100,7 +100,7 @@ void FrameBuffer::impl::ConfigureFBO()
 		// we only need the depth information when rendering the scene from the light's perspective, so there is no need for a color buffer to render any color data.
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		
 	}
 	else {
 		for (int i = 0; i < attachmentCount; i++) {

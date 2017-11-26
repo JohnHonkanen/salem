@@ -165,6 +165,8 @@
     <None Include="Shaders\instance.vert" />
     <None Include="Shaders\particles.frag" />
     <None Include="Shaders\particles.vert" />
+    <None Include="Shaders\shadowMapDepth.frag" />
+    <None Include="Shaders\shadowMapDepth.vert" />
     <None Include="Shaders\skinnedInstancePass.vert" />
     <None Include="Shaders\skinnedMeshPass.vert" />
     <None Include="Shaders\textured.frag" />

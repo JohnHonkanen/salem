@@ -133,20 +133,20 @@ int main(int argc, char* argv[]) {
 	instance->SetMaterialMaps("Assets/Textures/wall.jpg", "Assets/Textures/container2_specular.bmp", "");
 
 	//Violin
-	Object * object = salem->AddObject("violinman/violinman.dae", true, "skinned");
-	object->Translate(vec3(10.0f, -1.0f, -27.0f));
-	object->Scale(vec3(0.0001f));
-	object->SetMaterialMaps("Assets/Textures/parasiteZombie_diffuse.png",
-		"Assets/Textures/parasiteZombie_specular.png",
-		"Assets/Textures/parasiteZombie_normal.png");
+	//Object * object = salem->AddObject("violinman/violinman.dae", true, "skinned");
+	//object->Translate(vec3(10.0f, -1.0f, -27.0f));
+	//object->Scale(vec3(0.0001f));
+	//object->SetMaterialMaps("Assets/Textures/parasiteZombie_diffuse.png",
+	//	"Assets/Textures/parasiteZombie_specular.png",
+	//	"Assets/Textures/parasiteZombie_normal.png");
 
 	//gangnam
-	object = salem->AddObject("nightshade/nightshade.dae", true, "skinned");
+	/*object = salem->AddObject("nightshade/nightshade.dae", true, "skinned");
 	object->Translate(vec3(7.0f, -1.0f, -27.0f));
 	object->Scale(vec3(0.0001f));
 	object->SetMaterialMaps("Assets/Textures/nightshade_diffuse.png",
 		"Assets/Textures/nightshade_specular.png",
-		"Assets/Textures/nightshade_normal.png");
+		"Assets/Textures/nightshade_normal.png");*/
 
 
 	Instance *shroom = new Instance("boletus/boletus.dae");

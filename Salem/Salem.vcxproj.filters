@@ -91,6 +91,12 @@
     <None Include="Shaders\bloomPass.frag">
       <Filter>Resources</Filter>
     </None>
+    <None Include="Shaders\shadowMapDepth.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\shadowMapDepth.frag">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
