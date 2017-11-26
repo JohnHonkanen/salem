@@ -38,7 +38,9 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 uniform sampler2D gEmission;
  
-uniform PointLight pointLight;
+const int MAX_LIGHTS = 100;
+uniform int totalLights;
+uniform PointLight pointLight[MAX_LIGHTS];
 uniform SpotLight spotLight;
 uniform vec3 viewPosi; 
 
@@ -60,8 +62,13 @@ void main(void) {
 	vec3 viewDir = normalize(viewPosi - FragPos);
 
 	// Phase 1: Calculate Point Light
-	vec3 result = calcPointLight(pointLight, Normal, FragPos, viewDir, Diffuse, Specular, Shininess);
+	vec3 result;
 	
+	int numLight = 0;
+	numLight = min(totalLights, MAX_LIGHTS);
+	for(int i = 0; i < numLight; i++){
+		result += calcPointLight(pointLight[i], Normal, FragPos, viewDir, Diffuse, Specular, Shininess);
+	}
 
 	// Phase 2: Calculate Spot Light
 	result += calcSpotLight(spotLight, Normal, FragPos, viewDir, Diffuse, Specular, Shininess);

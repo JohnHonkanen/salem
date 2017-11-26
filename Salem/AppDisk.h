@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
 #include <SDL.h>
-class Object;
+#include "PointLight.h"
 
+class Object;
 
 class AppDisk
 {
@@ -18,6 +19,8 @@ public:
 
 	Object * AddObject(std::string path, bool deferred, const char* shader);
 	Object * AddObject(Object * object, bool deferred, const char* shader);
+
+	void AddPointLights(PointLight light);
 private:
 	struct impl;
 

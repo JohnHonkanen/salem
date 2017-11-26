@@ -5,10 +5,12 @@
 #include "Instance.h"
 #include "FireFly.h"
 #include <glm\glm.hpp>
+#include <ctime>
 
 using namespace glm;
 
 int main(int argc, char* argv[]) {
+	srand(time(NULL));
 	//Application has to be called first
 	Application app = Application("Salem", 1280, 720);
 
@@ -97,14 +99,14 @@ int main(int argc, char* argv[]) {
 
 	offset += vec3(0, -12, 0);
 
-	for (int x = 0; x < 10; x++) {
-		for (int z = 0; z < 10; z++) {
+	for (int x = 0; x < 70; x++) {
+		for (int z = 0; z < 70; z++) {
 
 			transform = mat4(1.0);
 			transform = translate(transform, vec3(2.0f * x, -2.0f, -2.0f * z) + offset);
 			instance->AddInstance(transform);
 
-			if (x == 0 || x == 9 || z == 0 || z == 9) {
+			if (x == 0 || x == 69 || z == 0 || z == 69) {
 				for (int y = 1; y < 5; y++) {
 					transform = translate(transform, vec3(0.0, 2.0, 0.0));
 					instance->AddInstance(transform);
@@ -113,8 +115,8 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	//////////////////////////////////ROOM 3 ROOF///////////////////////////////////////
-	for (int x = 0; x < 10; x++) {
-		for (int z = 0; z < 10; z++) {
+	for (int x = 0; x < 70; x++) {
+		for (int z = 0; z < 70; z++) {
 			if (x == 7 && z == 5) {
 				//Hole in roof
 			}
@@ -132,18 +134,18 @@ int main(int argc, char* argv[]) {
 	instance = (Instance*)salem->AddObject(instance, true, "geometry_instance_no_map"); // All deferred shading needs to use geometry shader
 	instance->SetMaterialMaps("Assets/Textures/wall.jpg", "Assets/Textures/container2_specular.bmp", "");
 
-	//Violin
-	Object * object = salem->AddObject("violinman/violinman.dae", true, "skinned");
-	object->Translate(vec3(10.0f, -1.0f, -27.0f));
-	object->Scale(vec3(0.0001f));
-	object->SetMaterialMaps("Assets/Textures/parasiteZombie_diffuse.png",
-		"Assets/Textures/parasiteZombie_specular.png",
-		"Assets/Textures/parasiteZombie_normal.png");
+	////Violin
+	//Object * object = salem->AddObject("violinman/violinman.dae", true, "skinned");
+	//object->Translate(vec3(10.0f, -1.0f, -27.0f));
+	//object->Scale(vec3(0.0001f));
+	//object->SetMaterialMaps("Assets/Textures/parasiteZombie_diffuse.png",
+	//	"Assets/Textures/parasiteZombie_specular.png",
+	//	"Assets/Textures/parasiteZombie_normal.png");
 
 	//gangnam
-	object = salem->AddObject("nightshade/nightshade.dae", true, "skinned");
+	Object * object = salem->AddObject("nightshade/nightshade.dae", true, "skinned");
 	object->Translate(vec3(7.0f, -1.0f, -27.0f));
-	object->Scale(vec3(0.0001f));
+	object->Scale(vec3(0.0003f));
 	object->SetMaterialMaps("Assets/Textures/nightshade_diffuse.png",
 		"Assets/Textures/nightshade_specular.png",
 		"Assets/Textures/nightshade_normal.png");
@@ -181,16 +183,69 @@ int main(int argc, char* argv[]) {
 		mTransform = scale(mTransform, vec3((rand() % 20) / 10.0f));
 		shroom->AddInstance(mTransform * base);
 	}
-	//mTransform = mat4(1.0);
-	//shroom->AddInstance(mTransform * base);
-	//mTransform = mat4(1.0);
-	//shroom->AddInstance(mTransform * base);
+
 	shroom = (Instance*)salem->AddObject(shroom, true, "geometry_instance_no_map"); // All deferred shading needs to use geometry shader
 
-	/* Fire Flies */
-	FireFly * firefly = new FireFly();
-	firefly = (FireFly*)salem->AddObject(firefly, false, "particles");
-	firefly->Translate(vec3(15.0f, 6.0f, -5.0f));
+	
+
+
+	PointLight light0{
+		vec3(15.0f, 6.0f, -5.0f), // Position
+		vec3(0.5f), // Ambient
+		vec3(0.5f), // Diffuse
+		vec3(0.15f), // Specular
+		1.0f, 0.1f, 3.0f // constant, linear, quadratic
+	};
+	salem->AddPointLights(light0);
+	PointLight light1{
+		vec3(5.0f, 6.0f, -15.0f), // Position
+		vec3(0.2f, 0.5f, 1.0f), // Ambient
+		vec3(0.5f), // Diffuse
+		vec3(0.15f), // Specular
+		1.0f, 0.1f, 3.0f // constant, linear, quadratic
+	};
+	salem->AddPointLights(light1);
+
+	for (int x = 0; x < 5; x++) {
+		for (int z = 0; z < 5; z++) {
+			vec3 position = vec3(20.0f + 20.0f * x, 0.0f,  -20.0f + -20.0f * z) + offset;
+			vec3 ambient = vec3((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
+			vec3 diffuse = ambient;//vec3((rand() % 10) / 10.0f, (rand() % 10) / 10.0f, (rand() % 10) / 10.0f);
+			vec3 specular = vec3(1.0f);
+
+			PointLight light{
+				position, // Position
+				ambient, // Ambient
+				diffuse, // Diffuse
+				specular, // Specular
+				1.0f, 1.0f, 3.0f // constant, linear, quadratic
+			};
+
+			FireFly * firefly = new FireFly(ambient);
+			firefly = (FireFly*)salem->AddObject(firefly, false, "particles");
+			firefly->Translate(position + vec3(0,1,0));
+
+			salem->AddPointLights(light);			
+		}
+	}
+	
+	//PointLight light2{
+	//	vec3(5.0f, 6.0f, -15.0f) + offset, // Position
+	//	vec3(10.2f, 0.5f, 1.0f), // Ambient
+	//	vec3(0.5f), // Diffuse
+	//	vec3(0.15f), // Specular
+	//	1.0f, 0.1f, 3.0f // constant, linear, quadratic
+	//};
+	//salem->AddPointLights(light2);
+
+	//PointLight light3{
+	//	vec3(5.0f, 6.0f, -5.0f) + offset, // Position
+	//	vec3(0.2f, 10.5f, 1.0f), // Ambient
+	//	vec3(0.5f), // Diffuse
+	//	vec3(0.15f), // Specular
+	//	1.0f, 0.1f, 3.0f // constant, linear, quadratic
+	//};
+	//salem->AddPointLights(light3);
 
 	app.SetDisk(salem); 
 	app.Run();

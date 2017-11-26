@@ -4,9 +4,10 @@
 #include "GBuffer.h"
 #include "FrameBuffer.h"
 #include "ShaderManager.h"
-#include "PointLight.h"
+
 #include <vector>
 #include <memory>
+#include <string>
 
 using namespace std;
 typedef unique_ptr<Object> ObjectUP;
@@ -19,6 +20,8 @@ struct AppDisk::impl {
 	unique_ptr<FrameBuffer> HDRBuffer;
 	unique_ptr<FrameBuffer> lightBuffer;
 	unique_ptr<FrameBuffer> pingPongBuffer[2];
+
+	vector<PointLight> pointLights;
 
 	GLuint quadVAO;
 
@@ -149,6 +152,11 @@ Object * AppDisk::AddObject(Object * object, bool deferred, const char* shader)
 	
 }
 
+void AppDisk::AddPointLights(PointLight light)
+{
+	pImpl->pointLights.push_back(light);
+}
+
 void AppDisk::impl::RenderGeometryPass()
 {
 	gBuffer->BindForWriting();
@@ -204,19 +212,36 @@ void AppDisk::impl::RenderLightPass()
 
 	/**********POINTLIGHT PROPERTIES**********/
 
-	// Camera
-	shaderManager->SetUniformLocation3f(program, "pointLight.position",
-		15.0f, 6.0f, -5.0f);
+	//// Camera
+	//shaderManager->SetUniformLocation3f(program, "pointLight.position",
+	//	15.0f, 6.0f, -5.0f);
 
-	// Pointlight Uniforms 
-	shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.5f, 0.5f, 0.5f);
-	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.5f, 0.5f, 0.5f);
-	shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.15f, 0.15f, 0.15f);
+	//// Pointlight Uniforms 
+	//shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.5f, 0.5f, 0.5f);
+	//shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.5f, 0.5f, 0.5f);
+	//shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.15f, 0.15f, 0.15f);
 
-	// Pointlight Attenuation
-	shaderManager->SetUniformLocation1f(program, "pointLight.constant", 1.0f);
-	shaderManager->SetUniformLocation1f(program, "pointLight.linear", 0.1f);
-	shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 3.0f);
+	//// Pointlight Attenuation
+	//shaderManager->SetUniformLocation1f(program, "pointLight.constant", 1.0f);
+	//shaderManager->SetUniformLocation1f(program, "pointLight.linear", 0.1f);
+	//shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 3.0f);
+
+	shaderManager->SetUniformLocation1i(program, "totalLights", pointLights.size());
+
+	for (int i = 0; i < pointLights.size(); i++) {
+		shaderManager->SetUniformLocation3f(program, "pointLight["+ std::to_string(i) +"].position",
+			pointLights[i].position.x, pointLights[i].position.y, pointLights[i].position.z);
+
+		// Pointlight Uniforms 
+		shaderManager->SetUniformLocation3f(program, "pointLight[" + std::to_string(i) + "].ambient", pointLights[i].ambient.x, pointLights[i].ambient.y, pointLights[i].ambient.z);
+		shaderManager->SetUniformLocation3f(program, "pointLight[" + std::to_string(i) + "].diffuse", pointLights[i].diffuse.x, pointLights[i].diffuse.y, pointLights[i].diffuse.z);
+		shaderManager->SetUniformLocation3f(program, "pointLight[" + std::to_string(i) + "].specular", pointLights[i].specular.x, pointLights[i].specular.y, pointLights[i].specular.z);
+
+		// Pointlight Attenuation
+		shaderManager->SetUniformLocation1f(program, "pointLight[" + std::to_string(i) + "].constant", pointLights[i].constant);
+		shaderManager->SetUniformLocation1f(program, "pointLight[" + std::to_string(i) + "].linear", pointLights[i].linear);
+		shaderManager->SetUniformLocation1f(program, "pointLight[" + std::to_string(i) + "].quadratic", pointLights[i].quadratic);
+	}
 
 	/**********SPOTLIGHT PROPERTIES**********/
 
