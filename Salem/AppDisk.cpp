@@ -307,7 +307,7 @@ void AppDisk::impl::RenderQuad()
 void AppDisk::impl::RenderShadowPass()
 {
 	ShaderManager* shaderManager = renderer->GetShaderManager();
-	unsigned int program = renderer->GetShader("ShadowPass");
+	unsigned int program = renderer->GetShader("shadow");
 
 	glUseProgram(program);
 
