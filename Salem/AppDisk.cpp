@@ -18,6 +18,7 @@ struct AppDisk::impl {
 	unique_ptr<FrameBuffer> HDRBuffer;
 	unique_ptr<FrameBuffer> lightBuffer;
 	unique_ptr<FrameBuffer> pingPongBuffer[2];
+	unique_ptr<FrameBuffer> shadowBuffer;
 
 	GLuint quadVAO;
 
@@ -25,7 +26,7 @@ struct AppDisk::impl {
 
 	int windowWidth = 1280;
 	int windowHeight = 720;
-	
+
 	void RenderGeometryPass();
 	void RenderLightPass();
 	void PointLightPass();
@@ -33,7 +34,8 @@ struct AppDisk::impl {
 	void RenderForward();
 
 	void RenderQuad();
-	
+
+	void RenderShadowPass();
 	void RenderBloomPass();
 	void RenderHDRPass();
 	void RendererFinalImage();
@@ -48,6 +50,7 @@ AppDisk::AppDisk()
 	pImpl->lightBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 2);
 	pImpl->pingPongBuffer[0] = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 	pImpl->pingPongBuffer[1] = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
+	pImpl->shadowBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 1, true);
 }
 
 
@@ -71,6 +74,7 @@ void AppDisk::Start()
 	pImpl->lightBuffer->Init();
 	pImpl->pingPongBuffer[0]->Init();
 	pImpl->pingPongBuffer[1]->Init();
+	pImpl->shadowBuffer->Init();
 }
 
 void AppDisk::Update(float dt)
@@ -93,7 +97,10 @@ void AppDisk::Render()
 	/* Do Light Pass */
 	pImpl->RenderLightPass();
 	/*-------------------------------*/
-	
+
+	/*Do Shadow Pass*/
+	pImpl->RenderShadowPass();
+
 	/*Do Bloom Pass*/
 	pImpl->RenderBloomPass();
 	/*-------------------------------*/
@@ -129,7 +136,7 @@ Object * AppDisk::AddObject(std::string path, bool deferred, const char* shader)
 		return pImpl->fObjects.back().get();
 	}
 
-	
+
 }
 
 Object * AppDisk::AddObject(Object * object, bool deferred, const char* shader)
@@ -145,7 +152,7 @@ Object * AppDisk::AddObject(Object * object, bool deferred, const char* shader)
 		pImpl->fObjects.push_back(std::move(o));
 		return pImpl->fObjects.back().get();
 	}
-	
+
 }
 
 void AppDisk::impl::RenderGeometryPass()
@@ -241,10 +248,10 @@ void AppDisk::impl::RenderLightPass()
 	shaderManager->SetUniformLocation1f(program, "spotLight.cutOff", glm::cos(glm::radians(12.5f))); //glm::cos(glm::radians(5.5f * 1.2f))); // 12.5
 	shaderManager->SetUniformLocation1f(program, "spotLight.outerCutOff", glm::cos(glm::radians(17.5f))); //glm::cos(glm::radians(12.5f * 1.2f))); // 17.5
 
-	// Material Uniforms + Properties
+																										  // Material Uniforms + Properties
 
-	//shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
-	//shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
+																										  //shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
+																										  //shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
 
 	RenderQuad();
 }
@@ -297,9 +304,31 @@ void AppDisk::impl::RenderQuad()
 }
 
 
+void AppDisk::impl::RenderShadowPass()
+{
+	ShaderManager* shaderManager = renderer->GetShaderManager();
+	unsigned int program = renderer->GetShader("ShadowPass");
+
+	glUseProgram(program);
+
+	vector<unsigned int >texture;
+
+	// Read Lightbuffer data 
+	lightBuffer->BindForReading();
+	lightBuffer->GetTexture(texture);
+
+	shadowBuffer->BindForWriting();
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	/*Configure matrices and shader mat4 uniforms*/
+
+	glBindTexture(GL_TEXTURE_2D, texture[0]); // bind texture of depth map.
+	RenderQuad(); // Render scene
+}
+
 void AppDisk::impl::RenderBloomPass()
 {
-	
+
 	ShaderManager* shaderManager = renderer->GetShaderManager();
 	unsigned int program = renderer->GetShader("BloomPass");
 
@@ -368,9 +397,9 @@ void AppDisk::impl::RenderHDRPass()
 
 	shaderManager->SetUniformLocation1i(program, "bloomBlur", 1);
 
-	
 
-	
+
+
 	// Apply tone mapping.
 
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -399,9 +428,9 @@ void AppDisk::impl::RenderHDRPass()
 	//glBindTexture(GL_TEXTURE_2D, pingPongBuffer[!horizontal]->GetTexture());
 
 	//shaderManager->SetUniformLocation1i(program, "bloomBlur", 1);
-	
+
 	//shaderManager->SetUniformLocation1f(program, "exposure", 1.0f);
-	
+
 
 	RenderQuad();
 }
