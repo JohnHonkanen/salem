@@ -1,9 +1,15 @@
 #pragma once
+
+#include <vector>
+
+using namespace std;
+
 class FrameBuffer
 {
 public:
 	FrameBuffer();
 	FrameBuffer(unsigned int width, unsigned int height);
+	FrameBuffer(unsigned int width, unsigned int height, unsigned int attachmentCount);
 	~FrameBuffer();
 
 	void Init();
@@ -11,6 +17,7 @@ public:
 	void BindForWriting();
 	void BindForReading();
 
+	void GetTexture(vector<unsigned int>& textures);
 	unsigned int GetTexture();
 private:
 	struct impl;
