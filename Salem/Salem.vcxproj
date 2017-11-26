@@ -121,6 +121,7 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="FireFly.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="InstanceManager.cpp" />
@@ -137,6 +138,7 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Collider.h" />
+    <ClInclude Include="FireFly.h" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GBuffer.h" />
     <ClInclude Include="InstanceManager.h" />
@@ -161,6 +163,8 @@
     <None Include="Shaders\lightPass.vert" />
     <None Include="Shaders\instance.frag" />
     <None Include="Shaders\instance.vert" />
+    <None Include="Shaders\particles.frag" />
+    <None Include="Shaders\particles.vert" />
     <None Include="Shaders\skinnedInstancePass.vert" />
     <None Include="Shaders\skinnedMeshPass.vert" />
     <None Include="Shaders\textured.frag" />

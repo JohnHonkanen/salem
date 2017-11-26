@@ -101,6 +101,7 @@ void Application::impl::SetupRC()
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4); // Turn on x4 multisampling anti-aliasing (MSAA)
 
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 	// Create window
 	window = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
@@ -145,6 +146,7 @@ void Application::impl::IntializeOpenGL()
 	// Setup OpenGL options
 
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_POINT_SPRITE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
 	glEnable(GL_DEPTH_TEST); // Enable Z Buffer

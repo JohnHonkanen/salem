@@ -154,4 +154,5 @@ void ShaderManager::impl::Init()
 	CreateShader("geometry_instance_no_map", "Shaders/geometryPassNoMap.vert", "Shaders/geometryPassNoMap.frag");
 	CreateShader("HDRPass", "Shaders/HDRPass.vert", "Shaders/HDRPass.frag");
 	CreateShader("BloomPass", "Shaders/bloomPass.vert", "Shaders/bloomPass.frag");
+	CreateShader("particles", "Shaders/particles.vert", "Shaders/particles.frag");
 }
