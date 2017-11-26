@@ -3,7 +3,6 @@
 #include "FireFly.h"
 #include <vector>
 #include <GL\glew.h>
-#include <glm\glm.hpp>
 #include <glm\gtc\constants.hpp>
 #include <cmath>
 #include <ctime>
@@ -15,7 +14,6 @@
 
 
 using namespace std;
-using namespace glm;
 
 struct FireFly::impl {
 	string texture = "Assets/Textures/particle.png";
@@ -24,10 +22,12 @@ struct FireFly::impl {
 	unsigned int vbo[2];
 	int particles = 5;
 	vector<float> vertices;
+	vector<float> color;
 	vector<float> velocities;
 	vector<float> timepassed;
 	vector<float> check;
 
+	vec3 mainColor;
 	int velocity = 10;
 	float clamps = 1.0f;
 
@@ -38,11 +38,10 @@ struct FireFly::impl {
 	void SetupVertices();
 };
 
-FireFly::FireFly()
+FireFly::FireFly(vec3 color)
 {
-	srand(time(NULL));
 	pImpl = new impl;
-
+	pImpl->mainColor = color;
 	pImpl->Setup();
 }
 
@@ -133,6 +132,11 @@ void FireFly::impl::Setup()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 , 0);
 	glEnableVertexAttribArray(0);
 
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, color.size() / 3 * sizeof(float), &color[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
+
 	glBindVertexArray(0);
 }
 
@@ -156,6 +160,10 @@ void FireFly::impl::SetupVertices()
 		vertices.push_back(x);
 		vertices.push_back(y);
 		vertices.push_back(z);
+
+		color.push_back(mainColor.x);
+		color.push_back(mainColor.y);
+		color.push_back(mainColor.z);
 
 		velocities.push_back(vx);
 		velocities.push_back(vy);

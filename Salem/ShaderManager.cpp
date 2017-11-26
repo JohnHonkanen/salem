@@ -36,14 +36,14 @@ void ShaderManager::SetUniformMatrix4fv(GLuint program, const char * location, g
 	glUniformMatrix4fv(glGetUniformLocation(program, location), 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void ShaderManager::SetUniformLocation3f(GLuint program, const char * location, float x, float y, float z)
+void ShaderManager::SetUniformLocation3f(GLuint program, string location, float x, float y, float z)
 {
-	glUniform3f(glGetUniformLocation(program, location), x, y, z);
+	glUniform3f(glGetUniformLocation(program, location.c_str()), x, y, z);
 }
 
-void ShaderManager::SetUniformLocation1f(GLuint program, const char * location, float x)
+void ShaderManager::SetUniformLocation1f(GLuint program, string location, float x)
 {
-	glUniform1f(glGetUniformLocation(program, location), x);
+	glUniform1f(glGetUniformLocation(program, location.c_str()), x);
 }
 
 void ShaderManager::SetUniformLocation1i(GLuint program, const char * location, int x)
