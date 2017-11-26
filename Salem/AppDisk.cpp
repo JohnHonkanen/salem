@@ -4,6 +4,7 @@
 #include "GBuffer.h"
 #include "FrameBuffer.h"
 #include "ShaderManager.h"
+#include "PointLight.h"
 #include <vector>
 #include <memory>
 
@@ -197,7 +198,6 @@ void AppDisk::impl::RenderLightPass()
 	// Pointlight Uniforms 
 	shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.5f, 0.5f, 0.5f);
 	shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.5f, 0.5f, 0.5f);
-	//shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.3f, 0.3f, 0.3f);
 	shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.15f, 0.15f, 0.15f);
 
 	// Pointlight Attenuation
