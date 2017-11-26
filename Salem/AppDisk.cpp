@@ -17,9 +17,11 @@ struct AppDisk::impl {
 	unique_ptr<GBuffer> gBuffer;
 	unique_ptr<FrameBuffer> HDRBuffer;
 	unique_ptr<FrameBuffer> lightBuffer;
-	unique_ptr<FrameBuffer> bloomBuffer;
+	unique_ptr<FrameBuffer> pingPongBuffer[2];
 
 	GLuint quadVAO;
+
+	bool horizontal = true;
 
 	int windowWidth = 1280;
 	int windowHeight = 720;
@@ -43,9 +45,9 @@ AppDisk::AppDisk()
 	pImpl->renderer = make_unique<Renderer>();
 	pImpl->gBuffer = make_unique<GBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 	pImpl->HDRBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
-	pImpl->lightBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 	pImpl->lightBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 2);
-	pImpl->bloomBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 2);
+	pImpl->pingPongBuffer[0] = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
+	pImpl->pingPongBuffer[1] = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 }
 
 
@@ -67,7 +69,8 @@ void AppDisk::Start()
 	pImpl->gBuffer->Init();
 	pImpl->HDRBuffer->Init();
 	pImpl->lightBuffer->Init();
-	pImpl->bloomBuffer->Init();
+	pImpl->pingPongBuffer[0]->Init();
+	pImpl->pingPongBuffer[1]->Init();
 }
 
 void AppDisk::Update(float dt)
@@ -95,7 +98,7 @@ void AppDisk::Render()
 	pImpl->RenderBloomPass();
 	/*-------------------------------*/
 
-	/*Do HDR Pass*/
+	/*Do HDR Pass to tone map*/
 	pImpl->RenderHDRPass();
 	/*-------------------------------*/
 	pImpl->RendererFinalImage();
@@ -240,12 +243,6 @@ void AppDisk::impl::RenderLightPass()
 	//shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
 
 	RenderQuad();
-
-	//gBuffer->BindForReading();
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); //Write to default
-
-	//glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void AppDisk::impl::PointLightPass()
@@ -290,27 +287,47 @@ void AppDisk::impl::RenderQuad()
 
 void AppDisk::impl::RenderBloomPass()
 {
-	bloomBuffer->BindForWriting();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glUseProgram(renderer->GetShader("BloomPass"));
-
-	vector<unsigned int >texture;
-
+	
 	ShaderManager* shaderManager = renderer->GetShaderManager();
 	unsigned int program = renderer->GetShader("BloomPass");
+
+	glUseProgram(program);
+
+	vector<unsigned int >texture;
 
 	// Read Lightbuffer data 
 	lightBuffer->BindForReading();
 	lightBuffer->GetTexture(texture);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture[1]);
+	bool firstIteration = true;
+	int count = 10;
 
-	shaderManager->SetUniformLocation1i(program, "Image", 0);
+	shaderManager->SetUniformLocation1i(program, "image", 0);
+
+	for (unsigned int i = 0; i < count; i++) {
+		pingPongBuffer[horizontal]->BindForWriting();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		shaderManager->SetUniformLocation1i(program, "Horizontal", horizontal);
+		
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, texture[1]);
+
+		GLuint tex = firstIteration ? texture[1] : pingPongBuffer[!horizontal]->GetTexture();
+		glBindTexture(GL_TEXTURE_2D, tex); // bind texture of other framebuffer (or scene if first iteration)
+		//glBindTexture(GL_TEXTURE_2D, texture[0]);
+		
+		RenderQuad();
+
+		horizontal = !horizontal;
+		if (firstIteration) {
+			firstIteration = false;
+		}
+	}
 }
 
 void AppDisk::impl::RenderHDRPass()
 {
+
 	HDRBuffer->BindForWriting();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(renderer->GetShader("HDRPass"));
@@ -320,16 +337,48 @@ void AppDisk::impl::RenderHDRPass()
 	ShaderManager* shaderManager = renderer->GetShaderManager();
 	unsigned int program = renderer->GetShader("HDRPass");
 
-
 	// Read Lightbuffer data 
 	lightBuffer->BindForReading();
 	lightBuffer->GetTexture(texture);
 
+	pingPongBuffer[horizontal]->GetTexture(texture);
+
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture[1]);
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
 
 	shaderManager->SetUniformLocation1i(program, "HDR", 0);
+
+	// Apply tone mapping.
+	
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//
+	//vector<unsigned int >texture;
+
+	//ShaderManager* shaderManager = renderer->GetShaderManager();
+	//unsigned int program = renderer->GetShader("HDRPass");
+	//
+	//HDRBuffer->BindForWriting();
+	//glUseProgram(program);
+
+	//// Read Lightbuffer data 
+	//lightBuffer->BindForReading();
+	//lightBuffer->GetTexture(texture);
+	//
+	//// Read pingPong buffer data
+	//pingPongBuffer[!horizontal]->BindForReading();
+
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, texture[1]);
+
+	//shaderManager->SetUniformLocation1i(program, "HDR", 0);
+
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, pingPongBuffer[!horizontal]->GetTexture());
+
+	//shaderManager->SetUniformLocation1i(program, "bloomBlur", 1);
+	
 	//shaderManager->SetUniformLocation1f(program, "exposure", 1.0f);
+	
 
 	RenderQuad();
 }

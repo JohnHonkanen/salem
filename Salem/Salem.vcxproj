@@ -148,6 +148,8 @@
     <ClInclude Include="TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\bloomPass.frag" />
+    <None Include="Shaders\bloomPass.vert" />
     <None Include="Shaders\geometryPass.frag" />
     <None Include="Shaders\geometryPass.vert" />
     <None Include="Shaders\geometryPassNoMap.frag" />

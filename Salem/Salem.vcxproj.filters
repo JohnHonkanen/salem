@@ -77,6 +77,12 @@
     <None Include="Shaders\geometryPassNoMap.frag">
       <Filter>Resources</Filter>
     </None>
+    <None Include="Shaders\bloomPass.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\bloomPass.frag">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">

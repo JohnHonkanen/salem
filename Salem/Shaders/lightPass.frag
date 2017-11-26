@@ -86,10 +86,13 @@ void main(void) {
 	
 	// If the color exceeds a certain threshold, we output the color to the second colorbuffer that holds all bright regions.
 	if(brightness > 1.0f){
-		out_BrightColor = vec4(out_Color.rgb, 1.0f);
-	} else {
+	  out_BrightColor = vec4(out_Color.rgb, 1.0f);
+	} 
+	else {
 		out_BrightColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
+
+	//out_Color = vec4(result , 1.0f);
 }
 
 
