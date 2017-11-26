@@ -317,10 +317,17 @@ void AppDisk::impl::RenderShadowPass()
 	lightBuffer->BindForReading();
 	lightBuffer->GetTexture(texture);
 
+	glViewport(0, 0, shadowBuffer->GetWidth(), shadowBuffer->GetHeight());
 	shadowBuffer->BindForWriting();
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	/*Configure matrices and shader mat4 uniforms*/
+	/* 1) Configure matrices and shader mat4 uniforms*/
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture[0]); // bind texture of depth map.
+
+	/* 2) Render scene as normal with shadow mapping (using depth map)*/
+	glViewport(0, 0, 1080, 720); // Reset viewport to (Screen width and height)
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glBindTexture(GL_TEXTURE_2D, texture[0]); // bind texture of depth map.
 	RenderQuad(); // Render scene
@@ -396,41 +403,6 @@ void AppDisk::impl::RenderHDRPass()
 	glBindTexture(GL_TEXTURE_2D, texture2[0]);
 
 	shaderManager->SetUniformLocation1i(program, "bloomBlur", 1);
-
-
-
-
-	// Apply tone mapping.
-
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//
-	//vector<unsigned int >texture;
-
-	//ShaderManager* shaderManager = renderer->GetShaderManager();
-	//unsigned int program = renderer->GetShader("HDRPass");
-	//
-	//HDRBuffer->BindForWriting();
-	//glUseProgram(program);
-
-	//// Read Lightbuffer data 
-	//lightBuffer->BindForReading();
-	//lightBuffer->GetTexture(texture);
-	//
-	//// Read pingPong buffer data
-	//pingPongBuffer[!horizontal]->BindForReading();
-
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, texture[1]);
-
-	//shaderManager->SetUniformLocation1i(program, "HDR", 0);
-
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, pingPongBuffer[!horizontal]->GetTexture());
-
-	//shaderManager->SetUniformLocation1i(program, "bloomBlur", 1);
-
-	//shaderManager->SetUniformLocation1f(program, "exposure", 1.0f);
-
 
 	RenderQuad();
 }
