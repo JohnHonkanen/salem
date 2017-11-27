@@ -167,12 +167,12 @@
     <None Include="Shaders\particles.vert" />
     <None Include="Shaders\shadowMapDepth.frag" />
     <None Include="Shaders\shadowMapDepth.vert" />
+    <None Include="Shaders\shadowMapping.frag" />
+    <None Include="Shaders\shadowMapping.vert" />
     <None Include="Shaders\skinnedInstancePass.vert" />
     <None Include="Shaders\skinnedMeshPass.vert" />
     <None Include="Shaders\textured.frag" />
     <None Include="Shaders\textured.vert" />
-    <None Include="shadowMapping.frag" />
-    <None Include="shadowMapping.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

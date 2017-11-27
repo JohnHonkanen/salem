@@ -184,7 +184,7 @@ int main(int argc, char* argv[]) {
 		shroom->AddInstance(mTransform * base);
 	}
 
-	shroom = (Instance*)salem->AddObject(shroom, true, "geometry_instance_no_map"); // All deferred shading needs to use geometry shader
+
 
 	
 
@@ -238,6 +238,12 @@ int main(int argc, char* argv[]) {
 	};
 	salem->AddPointLights(light2);
 
+	// Shadow test mushroom
+	mTransform = mat4(1.0);
+	mTransform = translate(mTransform, vec3(10.0f, -1.0f, -30.0f));
+	mTransform = scale(mTransform, vec3(1.0f));
+	shroom->AddInstance(mTransform * base);
+
 	//PointLight light3{
 	//	vec3(5.0f, 6.0f, -5.0f) + offset, // Position
 	//	vec3(0.2f, 10.5f, 1.0f), // Ambient
@@ -247,6 +253,7 @@ int main(int argc, char* argv[]) {
 	//};
 	//salem->AddPointLights(light3);
 
+	shroom = (Instance*)salem->AddObject(shroom, true, "geometry_instance_no_map"); // All deferred shading needs to use geometry shader
 
 	app.SetDisk(salem); 
 	app.Run();

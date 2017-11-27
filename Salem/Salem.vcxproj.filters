@@ -93,10 +93,10 @@
     <None Include="Shaders\shadowMapDepth.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="shadowMapping.vert">
+    <None Include="Shaders\shadowMapping.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="shadowMapping.frag">
+    <None Include="Shaders\shadowMapping.vert">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>

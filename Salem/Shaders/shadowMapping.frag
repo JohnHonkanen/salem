@@ -14,7 +14,7 @@ void main(void) {
 	
 	float depthValue = texture(depthMap, out_UV).r;
 
-	result = vec3(LinearDepth(depthValue) / far_plane); // for perspective
+	vec3 result = vec3(LinearDepth(depthValue) / far_plane); // for perspective
 
 	out_Color = vec4(result, 1.0f);
 }
