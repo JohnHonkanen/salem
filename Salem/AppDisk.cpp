@@ -95,15 +95,15 @@ void AppDisk::Update(float dt)
 
 void AppDisk::Render()
 {
+	/*Do Shadow Pass*/
+	pImpl->RenderShadowPass();
+
 	/* Do Deferred Rendering Passes */
 	/* Do Geometry Pass*/
 	pImpl->RenderGeometryPass();
 	/* Do Light Pass */
 	pImpl->RenderLightPass();
 	/*-------------------------------*/
-
-	/*Do Shadow Pass*/
-	pImpl->RenderShadowPass();
 
 	/*Do Bloom Pass*/
 	pImpl->RenderBloomPass();
@@ -167,6 +167,7 @@ void AppDisk::AddPointLights(PointLight light)
 void AppDisk::impl::RenderGeometryPass()
 {
 	gBuffer->BindForWriting();
+	glViewport(0, 0, windowWidth, windowHeight);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -330,38 +331,58 @@ void AppDisk::impl::RenderQuad()
 
 void AppDisk::impl::RenderShadowPass()
 {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glViewport(0, 0, shadowBuffer->GetWidth(), shadowBuffer->GetHeight());
+
+	shadowBuffer->BindForWriting();
+
 	ShaderManager* shaderManager = renderer->GetShaderManager();
 	unsigned int program = renderer->GetShader("depthMap");
 
 	glUseProgram(program);
 
-	vector<unsigned int >texture;
-
-	// Read Lightbuffer data 
-	lightBuffer->BindForReading();
-	lightBuffer->GetTexture(texture);
-
-	glViewport(0, 0, shadowBuffer->GetWidth(), shadowBuffer->GetHeight());
-	shadowBuffer->BindForWriting();
-	glClear(GL_DEPTH_BUFFER_BIT);
-
 	/* 1) Configure matrices and shader mat4 uniforms*/
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture[0]); // bind texture of depth map.
+	
 	mat4 lightProjection, lightView;
 	float near_plane = 1.0f, far_plane = 2.5f;
 	vec3 lightPos(10.0f, 0.0f, -30.0); // Need to update once test is completed
 	lightProjection = glm::perspective(glm::radians(45.0f), (GLfloat)shadowBuffer->GetWidth() / (GLfloat)shadowBuffer->GetHeight(), near_plane, far_plane);
-	lightView - glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	lightView = glm::lookAt(lightPos, glm::normalize(vec3(12.0f, -1.0f, -30.0f) - lightPos), glm::vec3(0.0f, 1.0f, 0.0f));
 	mat4 lightSpaceMatrix = lightProjection * lightView;
 
 	shaderManager->SetUniformMatrix4fv(program, "lightSpaceMatrix", lightSpaceMatrix);
 
+	for (int i = 0; i < objects.size(); i++) {
+		objects[i]->Render(renderer.get());
+	}
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// to be fixed
+
 	/* 2) Render scene as normal with shadow mapping (using depth map)*/
 	glViewport(0, 0, 1280, 720); // Reset viewport to (Screen width and height)
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glBindTexture(GL_TEXTURE_2D, texture[0]); // bind texture of depth map.
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+
+	// Render depth map to quad for visual debugging
+	program = renderer->GetShader("shadowMapping");
+	glUseProgram(program);
+
+	shaderManager->SetUniformLocation1f(program, "near_plane", near_plane);
+	shaderManager->SetUniformLocation1f(program, "far_plane", far_plane);
+	
+	unsigned int tex;
+
+	tex = shadowBuffer->GetTexture();
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex); // bind texture of depth map.
+
+	shaderManager->SetUniformLocation1i(program, "depthMap", 0);
+
 	RenderQuad(); // Render scene
 }
 
@@ -441,8 +462,9 @@ void AppDisk::impl::RenderHDRPass()
 
 void AppDisk::impl::RendererFinalImage()
 {
-
+	
 	HDRBuffer->BindForReading();
+	//shadowBuffer->BindForReading();
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); //Write to default
 
 	ShaderManager* shaderManager = renderer->GetShaderManager();
@@ -454,6 +476,7 @@ void AppDisk::impl::RendererFinalImage()
 
 	// Read HDRBuffer data 
 	texture = HDRBuffer->GetTexture();
+	//texture = shadowBuffer->GetTexture();
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);

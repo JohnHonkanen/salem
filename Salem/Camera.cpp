@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <iostream>
 
+
 struct Camera::impl {
 	glm::mat4 view;
 	glm::vec3 up;
@@ -37,7 +38,14 @@ Camera::~Camera()
 
 glm::mat4 Camera::GetView()
 {
-	return glm::lookAt(glm::vec3(transformMatrix[3]), glm::vec3(transformMatrix[3]) - Front(), Up());
+	mat4 lightProjection, lightView;
+	float near_plane = 1.0f, far_plane = 2.5f;
+	vec3 lightPos(12.0f, 0.0f, -0.0); // Need to update once test is completed
+	lightProjection = glm::perspective(glm::radians(45.0f), 1.0f, near_plane, far_plane);
+	lightView = glm::lookAt(lightPos, glm::normalize(vec3(12.0f, -1.0f, -30.0f) - lightPos), glm::vec3(0.0f, 1.0f, 0.0f));
+	return lightView;
+	
+	//return glm::lookAt(glm::vec3(transformMatrix[3]), glm::vec3(transformMatrix[3]) - Front(), Up());
 }
 
 void Camera::Input(SDL_Event* sdlEvent)
