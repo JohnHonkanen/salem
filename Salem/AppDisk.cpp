@@ -358,7 +358,7 @@ void AppDisk::impl::RenderShadowPass()
 	shaderManager->SetUniformMatrix4fv(program, "lightSpaceMatrix", lightSpaceMatrix);
 
 	/* 2) Render scene as normal with shadow mapping (using depth map)*/
-	glViewport(0, 0, 1080, 720); // Reset viewport to (Screen width and height)
+	glViewport(0, 0, 1280, 720); // Reset viewport to (Screen width and height)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glBindTexture(GL_TEXTURE_2D, texture[0]); // bind texture of depth map.

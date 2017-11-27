@@ -87,16 +87,16 @@
     <None Include="Shaders\particles.vert">
       <Filter>Resources</Filter>
     </None>
-    <None Include="Shaders\bloomPass.vert">
-      <Filter>Resources</Filter>
-    </None>
-    <None Include="Shaders\bloomPass.frag">
-      <Filter>Resources</Filter>
-    </None>
     <None Include="Shaders\shadowMapDepth.vert">
       <Filter>Resources</Filter>
     </None>
     <None Include="Shaders\shadowMapDepth.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="shadowMapping.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="shadowMapping.frag">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>
