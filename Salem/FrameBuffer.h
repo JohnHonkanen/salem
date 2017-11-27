@@ -19,8 +19,8 @@ public:
 	void BindForReading();
 
 	void GetTexture(vector<unsigned int>& textures);
-	GLuint GetHeight(unsigned int SHADOW_HEIGHT);
-	GLuint GetWidth(unsigned int SHADOW_WIDTH);
+	const unsigned int GetHeight();
+	const unsigned int GetWidth();
 	unsigned int GetTexture();
 private:
 	struct impl;

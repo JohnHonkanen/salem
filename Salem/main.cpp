@@ -229,14 +229,14 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	
-	//PointLight light2{
-	//	vec3(5.0f, 6.0f, -15.0f) + offset, // Position
-	//	vec3(10.2f, 0.5f, 1.0f), // Ambient
-	//	vec3(0.5f), // Diffuse
-	//	vec3(0.15f), // Specular
-	//	1.0f, 0.1f, 3.0f // constant, linear, quadratic
-	//};
-	//salem->AddPointLights(light2);
+	PointLight light2{
+		vec3(10.0f, 0.0f, -10.0f) + vec3(0.0f, 0.0f, -20.0f), // Position
+		vec3(10.2f, 0.5f, 1.0f), // Ambient
+		vec3(0.5f), // Diffuse
+		vec3(0.15f), // Specular
+		1.0f, 0.1f, 3.0f // constant, linear, quadratic
+	};
+	salem->AddPointLights(light2);
 
 	//PointLight light3{
 	//	vec3(5.0f, 6.0f, -5.0f) + offset, // Position
@@ -246,6 +246,7 @@ int main(int argc, char* argv[]) {
 	//	1.0f, 0.1f, 3.0f // constant, linear, quadratic
 	//};
 	//salem->AddPointLights(light3);
+
 
 	app.SetDisk(salem); 
 	app.Run();

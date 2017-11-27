@@ -178,7 +178,6 @@ void AppDisk::impl::RenderGeometryPass()
 
 void AppDisk::impl::RenderLightPass()
 {
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0); //Bind Default FrameBuffer
 	lightBuffer->BindForWriting();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -273,10 +272,10 @@ void AppDisk::impl::RenderLightPass()
 	shaderManager->SetUniformLocation1f(program, "spotLight.cutOff", glm::cos(glm::radians(12.5f))); //glm::cos(glm::radians(5.5f * 1.2f))); // 12.5
 	shaderManager->SetUniformLocation1f(program, "spotLight.outerCutOff", glm::cos(glm::radians(17.5f))); //glm::cos(glm::radians(12.5f * 1.2f))); // 17.5
 
-																										  // Material Uniforms + Properties
+	// Material Uniforms + Properties
 
-																										  //shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
-																										  //shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
+	//shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
+	//shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
 
 	RenderQuad();
 }
@@ -349,6 +348,14 @@ void AppDisk::impl::RenderShadowPass()
 	/* 1) Configure matrices and shader mat4 uniforms*/
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture[0]); // bind texture of depth map.
+	mat4 lightProjection, lightView;
+	float near_plane = 1.0f, far_plane = 2.5f;
+	vec3 lightPos(10.0f, 0.0f, -30.0); // Need to update once test is completed
+	lightProjection = glm::perspective(glm::radians(45.0f), (GLfloat)shadowBuffer->GetWidth() / (GLfloat)shadowBuffer->GetHeight(), near_plane, far_plane);
+	lightView - glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	mat4 lightSpaceMatrix = lightProjection * lightView;
+
+	shaderManager->SetUniformMatrix4fv(program, "lightSpaceMatrix", lightSpaceMatrix);
 
 	/* 2) Render scene as normal with shadow mapping (using depth map)*/
 	glViewport(0, 0, 1080, 720); // Reset viewport to (Screen width and height)

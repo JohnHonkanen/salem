@@ -68,16 +68,15 @@ void FrameBuffer::GetTexture(vector<unsigned int>& textures)
 	textures = pImpl->textureBuffer;
 }
 
-GLuint FrameBuffer::GetHeight()
+const unsigned int FrameBuffer::GetHeight()
 {
 	return pImpl->SHADOW_HEIGHT;
 }
 
-GLuint FrameBuffer::GetWidth()
+const unsigned int FrameBuffer::GetWidth()
 {
 	return pImpl->SHADOW_WIDTH;
 }
-
 
 unsigned int FrameBuffer::GetTexture()
 {

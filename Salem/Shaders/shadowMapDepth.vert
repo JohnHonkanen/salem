@@ -2,7 +2,7 @@
 layout (location = 0) in vec3 in_Position;
 
 uniform mat4 model;
-uniform lightSpaceMatrix;
+uniform mat4 lightSpaceMatrix;
 
 void main()
 {
