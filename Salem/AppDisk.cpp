@@ -331,19 +331,21 @@ void AppDisk::impl::RenderQuad()
 
 void AppDisk::impl::RenderShadowPass()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 
 	glViewport(0, 0, shadowBuffer->GetWidth(), shadowBuffer->GetHeight());
 
 	shadowBuffer->BindForWriting();
 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	/* 1) Configure matrices and shader mat4 uniforms*/
+	
 	ShaderManager* shaderManager = renderer->GetShaderManager();
 	unsigned int program = renderer->GetShader("depthMap");
 
 	glUseProgram(program);
 
-	/* 1) Configure matrices and shader mat4 uniforms*/
-	
 	mat4 lightProjection, lightView;
 	float near_plane = 1.0f, far_plane = 2.5f;
 	vec3 lightPos(10.0f, 0.0f, -30.0); // Need to update once test is completed
