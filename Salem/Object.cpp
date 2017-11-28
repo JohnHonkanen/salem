@@ -40,6 +40,11 @@ void Object::Render(Renderer *r)
 	pImpl->model->Render(r, modelMatrix);
 }
 
+void Object::Render(Renderer * r, const char * shader)
+{
+	pImpl->model->Render(r, modelMatrix, shader);
+}
+
 void Object::Translate(vec3 translation)
 {
 	transformMatrix = translate(transformMatrix, translation);

@@ -100,22 +100,22 @@ void AppDisk::Render()
 
 	/* Do Deferred Rendering Passes */
 	/* Do Geometry Pass*/
-	pImpl->RenderGeometryPass();
-	/* Do Light Pass */
-	pImpl->RenderLightPass();
-	/*-------------------------------*/
+	//pImpl->RenderGeometryPass();
+	///* Do Light Pass */
+	//pImpl->RenderLightPass();
+	///*-------------------------------*/
 
-	/*Do Bloom Pass*/
-	pImpl->RenderBloomPass();
-	/*-------------------------------*/
+	///*Do Bloom Pass*/
+	//pImpl->RenderBloomPass();
+	///*-------------------------------*/
 
-	/*Do HDR Pass to tone map*/
-	pImpl->RenderHDRPass();
-	/*-------------------------------*/
-	pImpl->RendererFinalImage();
+	///*Do HDR Pass to tone map*/
+	//pImpl->RenderHDRPass();
+	///*-------------------------------*/
+	//pImpl->RendererFinalImage();
 
-	/* Do Forward Rendering Passes  */
-	pImpl->RenderForward();
+	///* Do Forward Rendering Passes  */
+	//pImpl->RenderForward();
 	/*-------------------------------*/
 }
 
@@ -348,18 +348,23 @@ void AppDisk::impl::RenderShadowPass()
 
 	mat4 lightProjection, lightView;
 	float near_plane = 1.0f, far_plane = 2.5f;
-	vec3 lightPos(10.0f, 0.0f, -30.0); // Need to update once test is completed
+	
+	vec3 lightPos(10.0f, 5.0f, -20.0); // Need to update once test is completed
+	vec3 objPosi(10.0f, 2.0f, -15.0f);
+	vec3 vectorDif = glm::normalize(objPosi - lightPos);
+
 	lightProjection = glm::perspective(glm::radians(45.0f), (GLfloat)shadowBuffer->GetWidth() / (GLfloat)shadowBuffer->GetHeight(), near_plane, far_plane);
-	lightView = glm::lookAt(lightPos, glm::normalize(vec3(12.0f, -1.0f, -30.0f) - lightPos), glm::vec3(0.0f, 1.0f, 0.0f));
+	lightView = glm::lookAt(lightPos, lightPos + vectorDif, glm::vec3(0.0f, 1.0f, 0.0f));
+	
 	mat4 lightSpaceMatrix = lightProjection * lightView;
 
 	shaderManager->SetUniformMatrix4fv(program, "lightSpaceMatrix", lightSpaceMatrix);
 
 	for (int i = 0; i < objects.size(); i++) {
-		objects[i]->Render(renderer.get());
+		objects[i]->Render(renderer.get(), "depthMap");
 	}
 	
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
 
 	// to be fixed
 
@@ -368,7 +373,7 @@ void AppDisk::impl::RenderShadowPass()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// Render depth map to quad for visual debugging
 	program = renderer->GetShader("shadowMapping");
 	glUseProgram(program);
@@ -386,6 +391,14 @@ void AppDisk::impl::RenderShadowPass()
 	shaderManager->SetUniformLocation1i(program, "depthMap", 0);
 
 	RenderQuad(); // Render scene
+
+	// Attach uniforms to pass data to instance.vert (for storing in gBuffer)
+	//program = renderer->GetShader("instance_shader");
+	//glUseProgram(program);
+
+	//shaderManager->SetUniformLocation1i(program, "depthMap", 0);
+	//shaderManager->SetUniformMatrix4fv(program, "lightSpaceMatrix", lightSpaceMatrix);
+
 }
 
 void AppDisk::impl::RenderBloomPass()

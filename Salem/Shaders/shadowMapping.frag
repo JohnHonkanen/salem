@@ -18,6 +18,7 @@ void main(void) {
 	vec3 result = vec3(LinearDepth(depthValue) / far_plane); // for perspective
 
 	out_Color = vec4(result, 1.0f);
+	//out_Color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }
 
 float LinearDepth(float depth){

@@ -40,6 +40,17 @@ Instance::~Instance()
 
 void Instance::Render(Renderer * r)
 {
+	vector<Material> materials = pImpl->instance->GetMaterial();
+
+	ShaderManager * shaderManager = r->GetShaderManager();
+	GLuint program = r->GetShader(materials[0].shader.c_str());
+	glUseProgram(program);
+
+	Render(r, materials[0].shader.c_str());
+}
+
+void Instance::Render(Renderer * r, const char * shader)
+{
 	glm::mat4 projection, view;
 
 	r->GetProjection(projection, view);
@@ -50,18 +61,17 @@ void Instance::Render(Renderer * r)
 	vector<Material> materials = pImpl->instance->GetMaterial();
 
 	ShaderManager * shaderManager = r->GetShaderManager();
-	GLuint program = r->GetShader(materials[0].shader);
-	glUseProgram(program);
+	GLuint program = r->GetShader(shader);
 
 	TextureManager* textureManager = r->GetTextureManager();
 
 	pImpl->instance->SetBoneUniforms(program, shaderManager);
 	for (int i = 0; i < VAOs.size(); i++) {
-		
+
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
 		shaderManager->SetUniformMatrix4fv(program, "model", mat4(1.0));
-		
+
 		// Bind Map textures to texture units
 		shaderManager->SetUniformLocation1i(program, "diffuseMap", 0);
 		shaderManager->SetUniformLocation1i(program, "specularMap", 1);
