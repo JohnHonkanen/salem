@@ -38,13 +38,13 @@ Camera::~Camera()
 
 glm::mat4 Camera::GetView()
 {
-	vec3 lightPos(10.0f, 5.0f, -20.0); // Need to update once test is completed
-	vec3 objPosi(10.0f, 2.0f, -15.0f);
-	vec3 vectorDif = glm::normalize(objPosi - lightPos);
+	//vec3 lightPos(10.0f, 5.0f, -20.0); // Need to update once test is completed
+	//vec3 objPosi(10.0f, 2.0f, -15.0f);
+	//vec3 vectorDif = glm::normalize(objPosi - lightPos);
 
-	return glm::lookAt(lightPos, lightPos + vectorDif, vec3(0.0f, 1.0f, 0.0f));
+	//return glm::lookAt(lightPos, lightPos + vectorDif, vec3(0.0f, 1.0f, 0.0f));
 
-	//return glm::lookAt(glm::vec3(transformMatrix[3]), glm::vec3(transformMatrix[3]) - Front(), Up());
+	return glm::lookAt(glm::vec3(transformMatrix[3]), glm::vec3(transformMatrix[3]) - Front(), Up());
 }
 
 void Camera::Input(SDL_Event* sdlEvent)

@@ -96,26 +96,26 @@ void AppDisk::Update(float dt)
 void AppDisk::Render()
 {
 	/*Do Shadow Pass*/
-	pImpl->RenderShadowPass();
+//	pImpl->RenderShadowPass();
 
 	/* Do Deferred Rendering Passes */
 	/* Do Geometry Pass*/
-	//pImpl->RenderGeometryPass();
-	///* Do Light Pass */
-	//pImpl->RenderLightPass();
-	///*-------------------------------*/
+	pImpl->RenderGeometryPass();
+	/* Do Light Pass */
+	pImpl->RenderLightPass();
+	/*-------------------------------*/
 
-	///*Do Bloom Pass*/
-	//pImpl->RenderBloomPass();
-	///*-------------------------------*/
+	/*Do Bloom Pass*/
+	pImpl->RenderBloomPass();
+	/*-------------------------------*/
 
-	///*Do HDR Pass to tone map*/
-	//pImpl->RenderHDRPass();
-	///*-------------------------------*/
-	//pImpl->RendererFinalImage();
+	/*Do HDR Pass to tone map*/
+	pImpl->RenderHDRPass();
+	/*-------------------------------*/
+	pImpl->RendererFinalImage();
 
-	///* Do Forward Rendering Passes  */
-	//pImpl->RenderForward();
+	/* Do Forward Rendering Passes  */
+	pImpl->RenderForward();
 	/*-------------------------------*/
 }
 
@@ -331,12 +331,6 @@ void AppDisk::impl::RenderQuad()
 
 void AppDisk::impl::RenderShadowPass()
 {
-	
-
-	glViewport(0, 0, shadowBuffer->GetWidth(), shadowBuffer->GetHeight());
-
-	shadowBuffer->BindForWriting();
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	/* 1) Configure matrices and shader mat4 uniforms*/
@@ -363,17 +357,18 @@ void AppDisk::impl::RenderShadowPass()
 	for (int i = 0; i < objects.size(); i++) {
 		objects[i]->Render(renderer.get(), "depthMap");
 	}
-	
-	
 
-	// to be fixed
+	glViewport(0, 0, shadowBuffer->GetWidth(), shadowBuffer->GetHeight());
+
+	shadowBuffer->BindForWriting();
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	/* 2) Render scene as normal with shadow mapping (using depth map)*/
 	glViewport(0, 0, 1280, 720); // Reset viewport to (Screen width and height)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	// Render depth map to quad for visual debugging
 	program = renderer->GetShader("shadowMapping");
 	glUseProgram(program);
