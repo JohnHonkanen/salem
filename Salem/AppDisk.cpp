@@ -61,7 +61,6 @@ AppDisk::AppDisk()
 	pImpl->lightBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 2);
 	pImpl->pingPongBuffer[0] = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 	pImpl->pingPongBuffer[1] = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
-	//pImpl->shadowBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 1, true);
 	pImpl->shadowBuffer = make_unique<FrameBuffer>(pImpl->shadowWidth, pImpl->shadowHeight, 1, true);
 }
 
@@ -270,13 +269,16 @@ void AppDisk::impl::RenderLightPass()
 	// Shadow/DepthMap 
 
 	shadowBuffer->BindForReading();
-	unsigned int tex = shadowBuffer->GetTexture();
 
 	shaderManager->SetUniformLocation1f(program, "near_plane", near_plane);
-	shaderManager->SetUniformLocation1f(program, "near_plane", far_plane);
+	shaderManager->SetUniformLocation1f(program, "far_plane", far_plane);
+
+	unsigned int tex;
+
+	tex = shadowBuffer->GetTexture();
 
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, tex);
+	glBindTexture(GL_TEXTURE_2D, tex); // bind texture of depth map.
 
 	shaderManager->SetUniformLocation1i(program, "shadowMap", 4);
 
@@ -363,10 +365,33 @@ void AppDisk::impl::RenderShadowPass()
 		objects[i]->Render(renderer.get(), "depthMap");
 	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	/* 2) Render scene as normal with shadow mapping (using depth map)*/
+	glViewport(0, 0, windowWidth, windowHeight); // Reset viewport to (Screen width and height)
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//// Render depth map to quad for visual debugging
+	//program = renderer->GetShader("shadowMapping");
+	//glUseProgram(program);
+
+	//shaderManager->SetUniformLocation1f(program, "near_plane", near_plane);
+	//shaderManager->SetUniformLocation1f(program, "far_plane", far_plane);
+
+	//unsigned int tex;
+
+	//tex = shadowBuffer->GetTexture();
+
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, tex); // bind texture of depth map.
+
+	//shaderManager->SetUniformLocation1i(program, "depthMap", 0);
+
+	//RenderQuad(); // Render scene
 
 	// Re-correct viewport to window resolution.
-	glViewport(0, 0, windowWidth, windowHeight);
+	//glViewport(0, 0, windowWidth, windowHeight);
 }
 
 void AppDisk::impl::RenderBloomPass()

@@ -59,10 +59,6 @@ float calculateShadows(vec4 fragPosLightSpace);
 float LinearDepth(float depth);
 
 void main(void) {
-	
-	out_Color = texture(shadowMap, out_UV);
-
-	return;
 
 	// Retrieve information from G-Buffer
 	vec3 FragPos = texture(gPosition, out_UV).rgb;
@@ -97,6 +93,7 @@ void main(void) {
 	result += Emission;
 
 	// Phase 4: Output results
+
 	out_Color = vec4(result , 1.0f);
 
 	// Phase 5: Check for brightness
@@ -133,6 +130,7 @@ vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, v
 
 	// Calculate Shadow
 	float shadow = calculateShadows(fragPosLightSpace);
+	shadow = 1.0f - shadow;
 
 	// Attenuation
 	float Distance = length(light.position - FragPos);
@@ -140,15 +138,15 @@ vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, v
 
 	// Combine results
 	vec3 ambient = light.ambient * Diffuse;
-	vec3 diffuse = light.diffuse * diff *  Diffuse;
-	vec3 specular = light.specular * spec * Specular;
+	vec3 diffuse = (light.diffuse * diff ) * shadow *  Diffuse;
+	vec3 specular = (light.specular * spec) * shadow  * Specular;
 
 	ambient *= attenuation;
 	diffuse *= attenuation;
 	specular *= attenuation;
 
 	// Combine results
-	return (ambient + (1.0f -shadow) * (diffuse + specular));
+	return (ambient + diffuse + specular);
 }
 
 vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess, vec4 fragPosLightSpace) {
@@ -207,7 +205,7 @@ float calculateShadows(vec4 fragPosLightSpace){
 
 	// now check whether current fragPos is in shadow
 
-	float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+	float shadow = currentDepth > closestDepth ? 1.0f : 0.0f;
 
 	return shadow;
 
