@@ -104,7 +104,6 @@ void FrameBuffer::impl::ConfigureFBO()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		// attach depth texture as FBO's depth buffer
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, textureBuffer[0], 0);
 
 		// we only need the depth information when rendering the scene from the light's perspective, so there is no need for a color buffer to render any color data.

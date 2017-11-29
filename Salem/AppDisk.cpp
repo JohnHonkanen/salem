@@ -31,6 +31,9 @@ struct AppDisk::impl {
 	int windowWidth = 1280;
 	int windowHeight = 720;
 
+	int shadowWidth = 1024;
+	int shadowHeight = 1024;
+
 	void RenderGeometryPass();
 	void RenderLightPass();
 	void PointLightPass();
@@ -54,7 +57,8 @@ AppDisk::AppDisk()
 	pImpl->lightBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 2);
 	pImpl->pingPongBuffer[0] = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 	pImpl->pingPongBuffer[1] = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
-	pImpl->shadowBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 1, true);
+	//pImpl->shadowBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 1, true);
+	pImpl->shadowBuffer = make_unique<FrameBuffer>(pImpl->shadowWidth, pImpl->shadowHeight, 1, true);
 }
 
 
@@ -335,7 +339,7 @@ void AppDisk::impl::RenderShadowPass()
 
 	shadowBuffer->BindForWriting();
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT);
 
 	/* 1) Configure matrices and shader mat4 uniforms*/
 	
@@ -351,7 +355,7 @@ void AppDisk::impl::RenderShadowPass()
 	vec3 objPosi(10.0f, 2.0f, -15.0f);
 	vec3 vectorDif = glm::normalize(objPosi - lightPos);
 
-	lightProjection = glm::perspective(glm::radians(45.0f), 1.0f, near_plane, far_plane);
+	lightProjection = glm::perspective(glm::radians(45.0f), (float)(shadowWidth / shadowHeight), near_plane, far_plane);
 	lightView = glm::lookAt(lightPos, lightPos + vectorDif, glm::vec3(0.0f, 1.0f, 0.0f));
 	
 	mat4 lightSpaceMatrix = lightProjection * lightView;
@@ -365,7 +369,7 @@ void AppDisk::impl::RenderShadowPass()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	/* 2) Render scene as normal with shadow mapping (using depth map)*/
-	glViewport(0, 0, 1280, 720); // Reset viewport to (Screen width and height)
+	glViewport(0, 0, windowWidth, windowHeight); // Reset viewport to (Screen width and height)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
