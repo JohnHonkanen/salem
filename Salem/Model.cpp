@@ -134,6 +134,12 @@ void Model::Update(float dt)
 
 void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 {
+
+	ShaderManager * shaderManager = r->GetShaderManager();
+	GLuint program = r->GetShader(pImpl->materials[0].shader.c_str()); // <---- May need to change Material[0] when we do deferred shading.
+										   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+										   //glDisable(GL_CULL_FACE);
+	glUseProgram(program);
 	Render(r, modelMatrix, pImpl->materials[0].shader.c_str());
 }
 

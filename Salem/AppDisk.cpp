@@ -96,27 +96,27 @@ void AppDisk::Update(float dt)
 void AppDisk::Render()
 {
 	/*Do Shadow Pass*/
-//	pImpl->RenderShadowPass();
+	pImpl->RenderShadowPass();
 
-	/* Do Deferred Rendering Passes */
-	/* Do Geometry Pass*/
-	pImpl->RenderGeometryPass();
-	/* Do Light Pass */
-	pImpl->RenderLightPass();
-	/*-------------------------------*/
+	///* Do Deferred Rendering Passes */
+	///* Do Geometry Pass*/
+	//pImpl->RenderGeometryPass();
+	///* Do Light Pass */
+	//pImpl->RenderLightPass();
+	///*-------------------------------*/
 
-	/*Do Bloom Pass*/
-	pImpl->RenderBloomPass();
-	/*-------------------------------*/
+	///*Do Bloom Pass*/
+	//pImpl->RenderBloomPass();
+	///*-------------------------------*/
 
-	/*Do HDR Pass to tone map*/
-	pImpl->RenderHDRPass();
-	/*-------------------------------*/
-	pImpl->RendererFinalImage();
+	///*Do HDR Pass to tone map*/
+	//pImpl->RenderHDRPass();
+	///*-------------------------------*/
+	//pImpl->RendererFinalImage();
 
-	/* Do Forward Rendering Passes  */
-	pImpl->RenderForward();
-	/*-------------------------------*/
+	///* Do Forward Rendering Passes  */
+	//pImpl->RenderForward();
+	///*-------------------------------*/
 }
 
 void AppDisk::Input(SDL_Event* sdlEvent)
@@ -331,6 +331,10 @@ void AppDisk::impl::RenderQuad()
 
 void AppDisk::impl::RenderShadowPass()
 {
+	glViewport(0, 0, shadowBuffer->GetWidth(), shadowBuffer->GetHeight());
+
+	shadowBuffer->BindForWriting();
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	/* 1) Configure matrices and shader mat4 uniforms*/
@@ -341,13 +345,13 @@ void AppDisk::impl::RenderShadowPass()
 	glUseProgram(program);
 
 	mat4 lightProjection, lightView;
-	float near_plane = 1.0f, far_plane = 2.5f;
+	float near_plane = 1.0f, far_plane = 50.5f;
 	
 	vec3 lightPos(10.0f, 5.0f, -20.0); // Need to update once test is completed
 	vec3 objPosi(10.0f, 2.0f, -15.0f);
 	vec3 vectorDif = glm::normalize(objPosi - lightPos);
 
-	lightProjection = glm::perspective(glm::radians(45.0f), (GLfloat)shadowBuffer->GetWidth() / (GLfloat)shadowBuffer->GetHeight(), near_plane, far_plane);
+	lightProjection = glm::perspective(glm::radians(45.0f), 1.0f, near_plane, far_plane);
 	lightView = glm::lookAt(lightPos, lightPos + vectorDif, glm::vec3(0.0f, 1.0f, 0.0f));
 	
 	mat4 lightSpaceMatrix = lightProjection * lightView;
@@ -358,10 +362,6 @@ void AppDisk::impl::RenderShadowPass()
 		objects[i]->Render(renderer.get(), "depthMap");
 	}
 
-	glViewport(0, 0, shadowBuffer->GetWidth(), shadowBuffer->GetHeight());
-
-	shadowBuffer->BindForWriting();
-	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	/* 2) Render scene as normal with shadow mapping (using depth map)*/

@@ -98,8 +98,6 @@ void main(void) {
 	else {
 		out_BrightColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
-
-	//out_Color = vec4(result , 1.0f);
 }
 
 
