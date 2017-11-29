@@ -345,9 +345,9 @@ void AppDisk::impl::RenderShadowPass()
 
 	mat4 lightProjection, lightView;
 
-	vec3 lightPos(10.0f, 5.0f, -20.0); // Need to update once test is completed
+	vec3 lightPos(10.0f, 5.0f, -20.0); // renderer->camera.GetModelMatrix()[3]; 
 	vec3 objPosi(10.0f, 2.0f, -15.0f);
-	vec3 vectorDif = glm::normalize(objPosi - lightPos);
+	vec3 vectorDif = glm::normalize(objPosi - lightPos); // renderer->camera.Front();
 
 	lightProjection = glm::perspective(glm::radians(45.0f), (float)(shadowWidth / shadowHeight), near_plane, far_plane);
 	lightView = glm::lookAt(lightPos, lightPos + vectorDif, glm::vec3(0.0f, 1.0f, 0.0f));

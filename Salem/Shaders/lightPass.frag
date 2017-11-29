@@ -55,7 +55,7 @@ uniform mat4 lightSpaceMatrix;
 // Function prototypes
 vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess, vec4 fragPosLightSpace);
 vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess, vec4 fragPosLightSpace);
-float calculateShadows(vec4 fragPosLightSpace);
+float calculateShadows(vec4 fragPosLightSpace, vec3 Normal, vec3 FragPos, vec3 lightPos);
 
 void main(void) {
 
@@ -127,24 +127,25 @@ vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, v
 	// Blinn-Phong specular shading 
 	float spec = pow(max(dot(Normal, halfwayDir), 0.0f), Shininess);
 
-	// Calculate Shadow
-	float shadow = calculateShadows(fragPosLightSpace);
-
 	// Attenuation
 	float Distance = length(light.position - FragPos);
 	float attenuation = 1.0f / (light.constant + light.linear * Distance + light.quadratic * (Distance * Distance));
 
 	// Combine results
 	vec3 ambient = light.ambient * Diffuse;
-	vec3 diffuse = light.diffuse * diff * Diffuse;
+	vec3 diffuse = light.diffuse * diff;
 	vec3 specular = light.specular * spec * Specular;
 
 	ambient *= attenuation;
 	diffuse *= attenuation;
 	specular *= attenuation;
 
+	// Calculate Shadow
+	float shadow = calculateShadows(fragPosLightSpace, Normal, FragPos, light.position.xyz);
+
 	// Combine results
-	return (ambient + (1.0f - shadow) * (diffuse + specular));
+	//return (ambient + diffuse + specular);
+	return (ambient + (1.0f - shadow) * (diffuse + specular)) * Diffuse;
 }
 
 vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess, vec4 fragPosLightSpace) {
@@ -161,9 +162,6 @@ vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec
 	// Specular
 	// Blinn-Phong specular shading 
 	float spec = pow(max(dot(Normal, halfwayDir), 0.0f), Shininess);
-	
-	// Calculate Shadow
-	float shadow = calculateShadows(fragPosLightSpace);
 
 	// Attenuation
 	float Distance = length(light.position - FragPos);
@@ -176,23 +174,23 @@ vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec
 	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0); // We clamp the first argument between the values 0.0 and 1.0 to make sure that the intensity values don't end up outside the [0, 1] interval.
 
 	// Combine results
-	//vec3 ambient = light.ambient * Diffuse;
-	//vec3 diffuse = light.diffuse * diff * Diffuse;
-	//vec3 specular = light.specular * spec * Specular;
 	
 	vec3 ambient = light.ambient * Diffuse;
-	vec3 diffuse = light.diffuse * diff  * Diffuse;
+	vec3 diffuse = light.diffuse * diff * Diffuse;
 	vec3 specular = light.specular * spec * Specular;
 
 	ambient *= attenuation * intensity; // If prefered. Remove ambient attenuation to ensure that light in spotlight isn't too dark when we move too far away.
 	diffuse *= attenuation * intensity;
 	specular *= attenuation * intensity;
 
-	//return (ambient + diffuse + specular);
-	return (ambient +  (1.0f - shadow) * (diffuse + specular));
+	// Calculate Shadow
+	//float shadow = calculateShadows(fragPosLightSpace, Normal, FragPos, light.position.xyz);
+
+	return (ambient + diffuse + specular);
+	//return (ambient +  (1.0f - shadow) * (diffuse + specular)) * Diffuse;
 }
 
-float calculateShadows(vec4 fragPosLightSpace){
+float calculateShadows(vec4 fragPosLightSpace, vec3 Normal, vec3 FragPos, vec3 lightPos){
 	// perspecitve divide to transform the NDC coordinates to the range of [0,1]
 	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 
@@ -205,10 +203,32 @@ float calculateShadows(vec4 fragPosLightSpace){
 	// get depth of current fragment from light's perspective
 	float currentDepth = projCoords.z;
 
+	// Calculate the bias ( based on the depth map resolution and slope)
+	vec3 normal = normalize(Normal);
+	vec3 lightDir = normalize(lightPos - FragPos);
+	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005f);
+
 	// now check whether current fragPos is in shadow
 
-	float shadow = currentDepth > closestDepth ? 1.0f : 0.0f;
 
+	// PCF (percentage-closer filtering) to sample the surrounding texels of the depth map and average the results
+	//float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+	float shadow = 0.0f; 
+	vec2 texelSize = 1.0f / textureSize(depthMap, 0);
+
+	for(int x = -1; x <= 1; ++x){
+		for(int y = -1; y <= 1; ++y){
+			float pcfDepth = texture(depthMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+			shadow += currentDepth - bias > pcfDepth ? 1.0f : 0.0f;
+		}
+	}
+	// shadow = shadow/9.0f
+	shadow /= 9.0f;
+
+	// Force shadow value to 0.0f whenever the projected vector's z coord is larger than 1.0f (when outside the far_plane region of the light's frustrum).
+	if(projCoords.z > 1.0f){
+		shadow = 0.0f;
+	}
 	return shadow;
 
 }
