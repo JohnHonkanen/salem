@@ -155,4 +155,8 @@ void ShaderManager::impl::Init()
 	CreateShader("HDRPass", "Shaders/HDRPass.vert", "Shaders/HDRPass.frag");
 	CreateShader("BloomPass", "Shaders/bloomPass.vert", "Shaders/bloomPass.frag");
 	CreateShader("particles", "Shaders/particles.vert", "Shaders/particles.frag");
+	//Shadows
+	CreateShader("depthShader", "Shaders/depthShader.vert", "Shaders/depthShader.frag");
+	CreateShader("depthShader_instance", "Shaders/depthShaderInstanced.vert", "Shaders/depthShader.frag");
+	CreateShader("depthDebug", "Shaders/depthDebug.vert", "Shaders/depthDebug.frag");
 }

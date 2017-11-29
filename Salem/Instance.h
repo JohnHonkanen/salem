@@ -13,6 +13,7 @@ public:
 	Instance(string path);
 	~Instance();
 	void Render(Renderer *r);
+	void Render(Renderer *r, const char *shader);
 	void AddInstance(glm::mat4 transform);
 	void Init(InstanceManager *manager);
 	void Update(float dt);

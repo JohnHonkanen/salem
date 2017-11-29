@@ -87,6 +87,18 @@
     <None Include="Shaders\particles.vert">
       <Filter>Resources</Filter>
     </None>
+    <None Include="Shaders\depthShader.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\depthShader.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\depthDebug.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Shaders\depthDebug.vert">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">

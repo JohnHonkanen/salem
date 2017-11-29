@@ -10,6 +10,7 @@ public:
 	FrameBuffer();
 	FrameBuffer(unsigned int width, unsigned int height);
 	FrameBuffer(unsigned int width, unsigned int height, unsigned int attachmentCount);
+	FrameBuffer(unsigned int width, unsigned int height, unsigned int attachmentCount, bool depthOnly);
 	~FrameBuffer();
 
 	void Init();

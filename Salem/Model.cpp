@@ -134,17 +134,24 @@ void Model::Update(float dt)
 
 void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 {
+	ShaderManager * shaderManager = r->GetShaderManager();
+	GLuint program = r->GetShader(pImpl->materials[0].shader);
+	glUseProgram(program);
+
+	Render(r, modelMatrix, pImpl->materials[0].shader.c_str());
+}
+
+void Model::Render(Renderer * r, glm::mat4 modelMatrix, const char * shader)
+{
 	glm::mat4 projection, view;
 
 	r->GetProjection(projection, view);
 
 	ShaderManager * shaderManager = r->GetShaderManager();
-	GLuint program = r->GetShader(pImpl->materials[0].shader); // <---- May need to change Material[0] when we do deferred shading.
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//glDisable(GL_CULL_FACE);
+	GLuint program = r->GetShader(shader); // <---- May need to change Material[0] when we do deferred shading.
+															   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+															   //glDisable(GL_CULL_FACE);
 	TextureManager* textureManager = r->GetTextureManager();
-
-	glUseProgram(program);
 
 	for (uint i = 0; i < pImpl->boneTransforms.size(); i++) {
 		string location = "bones[" + to_string(i) + "]";
@@ -152,7 +159,7 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 	}
 
 	for (int i = 0; i < pImpl->meshes.size(); i++) {
-		
+
 		shaderManager->SetUniformMatrix4fv(program, "projection", projection);
 		shaderManager->SetUniformMatrix4fv(program, "view", view);
 		shaderManager->SetUniformMatrix4fv(program, "model", modelMatrix);
@@ -163,7 +170,7 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 		shaderManager->SetUniformLocation1i(program, "emissionMap", 2);
 		shaderManager->SetUniformLocation1i(program, "normalMap", 3);
 
-		
+
 
 		if (pImpl->materials[i].diffuseMap != "") {
 			unsigned int diffuseMap = textureManager->GetTexture(pImpl->materials[i].diffuseMap);
@@ -175,7 +182,7 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
-		
+
 		if (pImpl->materials[i].specularMap != "") {
 			unsigned int specularMap = textureManager->GetTexture(pImpl->materials[i].specularMap);
 			// Bind specular map
@@ -186,7 +193,7 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
-		
+
 		if (pImpl->materials[i].emissionMap != "") {
 			unsigned int emissionMap = textureManager->GetTexture(pImpl->materials[i].emissionMap);
 			// Bind emission map
@@ -197,7 +204,7 @@ void Model::Render(Renderer *r, glm::mat4 modelMatrix)
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
-			
+
 		if (pImpl->materials[i].normalMap != "") {
 			unsigned int normalMap = textureManager->GetTexture(pImpl->materials[i].normalMap);
 			// Bind specular map
@@ -334,6 +341,7 @@ void Model::impl::GenerateVAO()
 			glVertexAttribPointer(STORED_BONES_WEIGHT, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
 			meshBuffers[7] = boneBuffer;
 		}
+
 
 
 

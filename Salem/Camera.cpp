@@ -37,6 +37,12 @@ Camera::~Camera()
 
 glm::mat4 Camera::GetView()
 {
+	//vec3 pos1(10.0f, 5.0f, -20.0f);
+	//vec3 pos2(10.0f, 2.0f, -15.0f);
+	//vec3 pos3 = normalize(pos2 - pos1);
+
+	//return glm::lookAt(pos1, pos1 + pos3, vec3(0,1,0));
+
 	return glm::lookAt(glm::vec3(transformMatrix[3]), glm::vec3(transformMatrix[3]) - Front(), Up());
 }
 

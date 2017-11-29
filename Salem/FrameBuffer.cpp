@@ -7,6 +7,8 @@ struct FrameBuffer::impl {
 	unsigned int fbo;
 	unsigned int depthBuffer;
 	unsigned int screenWidth, screenHeight, attachmentCount;
+
+	bool depthOnly;
 	void ConfigureFBO();
 
 	vector<unsigned int> colorBuffer;
@@ -23,13 +25,19 @@ FrameBuffer::FrameBuffer(unsigned int width, unsigned int height) : FrameBuffer(
 }
 
 
-FrameBuffer::FrameBuffer(unsigned int width, unsigned int height, unsigned int count)
+FrameBuffer::FrameBuffer(unsigned int width, unsigned int height, unsigned int count) : FrameBuffer(width, height, count, false)
+{
+	
+}
+
+FrameBuffer::FrameBuffer(unsigned int width, unsigned int height, unsigned int attachmentCount, bool depthOnly)
 {
 	pImpl = new impl;
 	pImpl->screenWidth = width;
 	pImpl->screenHeight = height;
-	pImpl->attachmentCount = count;
-	pImpl->colorBuffer.resize(count);
+	pImpl->attachmentCount = attachmentCount;
+	pImpl->colorBuffer.resize(attachmentCount);
+	pImpl->depthOnly = depthOnly;
 }
 
 
@@ -74,24 +82,42 @@ void FrameBuffer::impl::ConfigureFBO()
 
 	vector<unsigned int> attachments;
 	attachments.resize(attachmentCount);
-	for (int i = 0; i < attachmentCount; i++) {
 
-		
-		glBindTexture(GL_TEXTURE_2D, colorBuffer[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+	if (!depthOnly) {
+		for (int i = 0; i < attachmentCount; i++) {
+
+			glBindTexture(GL_TEXTURE_2D, colorBuffer[i]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBuffer[i], 0);
+
+			// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+			attachments[i] = GL_COLOR_ATTACHMENT0 + i;
+		}
+		glDrawBuffers(attachmentCount, &attachments[0]);
+
+		glGenRenderbuffers(1, &depthBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenWidth, screenHeight);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+	}
+	else {
+		glBindTexture(GL_TEXTURE_2D, colorBuffer[0]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+			screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBuffer[i], 0);
-		
-		// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
-		attachments[i] = GL_COLOR_ATTACHMENT0 + i;
-	}
-	glDrawBuffers(attachmentCount, &attachments[0]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	glGenRenderbuffers(1, &depthBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenWidth, screenHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, colorBuffer[0], 0);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+	}
+	
 
 
 

@@ -20,6 +20,7 @@ struct AppDisk::impl {
 	unique_ptr<FrameBuffer> HDRBuffer;
 	unique_ptr<FrameBuffer> lightBuffer;
 	unique_ptr<FrameBuffer> pingPongBuffer[2];
+	unique_ptr<FrameBuffer> depthBuffer;
 
 	vector<PointLight> pointLights;
 
@@ -29,7 +30,12 @@ struct AppDisk::impl {
 
 	int windowWidth = 1280;
 	int windowHeight = 720;
+
+	int shadowWidth = 1024;
+	int shadowHeight = 1024;
+	glm::mat4 lightSpaceMatrix;
 	
+	void RenderDepthPass();
 	void RenderGeometryPass();
 	void RenderLightPass();
 	void PointLightPass();
@@ -52,6 +58,7 @@ AppDisk::AppDisk()
 	pImpl->lightBuffer = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight, 2);
 	pImpl->pingPongBuffer[0] = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
 	pImpl->pingPongBuffer[1] = make_unique<FrameBuffer>(pImpl->windowWidth, pImpl->windowHeight);
+	pImpl->depthBuffer = make_unique<FrameBuffer>(pImpl->shadowWidth, pImpl->shadowHeight, 1, true);
 }
 
 
@@ -75,6 +82,7 @@ void AppDisk::Start()
 	pImpl->lightBuffer->Init();
 	pImpl->pingPongBuffer[0]->Init();
 	pImpl->pingPongBuffer[1]->Init();
+	pImpl->depthBuffer->Init();
 }
 
 void AppDisk::Update(float dt)
@@ -91,6 +99,7 @@ void AppDisk::Update(float dt)
 
 void AppDisk::Render()
 {
+	pImpl->RenderDepthPass();
 	/* Do Deferred Rendering Passes */
 	/* Do Geometry Pass*/
 	pImpl->RenderGeometryPass();
@@ -157,6 +166,51 @@ void AppDisk::AddPointLights(PointLight light)
 	pImpl->pointLights.push_back(light);
 }
 
+void AppDisk::impl::RenderDepthPass()
+{
+	glm::mat4 lightProjection, lightView;
+	float near_plane = 1.0f, far_plane = 20.0f;
+	lightProjection = glm::perspective(radians(45.0f), 1.0f, near_plane, far_plane);
+	//lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+	vec3 pos1 = renderer->camera.GetModelMatrix()[3];
+	vec3 pos2(10.0f, 2.0f, -10.0f);
+	vec3 pos3 = renderer->camera.Front();//normalize(pos2 - pos1);
+	vec3 up = renderer->camera.Up();
+	lightView = glm::lookAt(pos1, pos1 - pos3, up);
+	lightSpaceMatrix = lightProjection * lightView;
+
+	ShaderManager *shader = renderer->GetShaderManager();
+	unsigned int program = renderer->GetShader("depthShader");
+	glUseProgram(program);
+
+	shader->SetUniformMatrix4fv(program, "lightSpaceMatrix", lightSpaceMatrix);
+
+	glViewport(0,0, shadowWidth, shadowHeight);
+	depthBuffer->BindForWriting();
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	for (int i = 0; i < objects.size(); i++) {
+		objects[i]->Render(renderer.get(), "depthShader");
+	}
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//Debug for Maps
+	glViewport(0, 0, windowWidth, windowHeight);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//program = renderer->GetShader("depthDebug");
+	//glUseProgram(program);
+
+	//glActiveTexture(GL_TEXTURE0);
+	//unsigned int texture = depthBuffer->GetTexture();
+	//glBindTexture(GL_TEXTURE_2D, texture);
+	//shader->SetUniformLocation1i(program, "depthMap", 0);
+	//shader->SetUniformLocation1f(program, "near_plane", near_plane);
+	//shader->SetUniformLocation1f(program, "far_plane", far_plane);
+	//RenderQuad();
+}
+
 void AppDisk::impl::RenderGeometryPass()
 {
 	gBuffer->BindForWriting();
@@ -194,6 +248,14 @@ void AppDisk::impl::RenderLightPass()
 	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, gEmission);
+	
+	glActiveTexture(GL_TEXTURE4);
+	unsigned int shadowMap = depthBuffer->GetTexture();
+	glBindTexture(GL_TEXTURE_2D, shadowMap);
+	shaderManager->SetUniformLocation1i(program, "shadowMap", 4);
+
+	shaderManager->SetUniformMatrix4fv(program, "lightSpaceMatrix", lightSpaceMatrix);
+
 
 	// View position of camera
 
@@ -227,7 +289,6 @@ void AppDisk::impl::RenderLightPass()
 	//shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 3.0f);
 
 	shaderManager->SetUniformLocation1i(program, "totalLights", pointLights.size());
-
 	for (int i = 0; i < pointLights.size(); i++) {
 		shaderManager->SetUniformLocation3f(program, "pointLight["+ std::to_string(i) +"].position",
 			pointLights[i].position.x, pointLights[i].position.y, pointLights[i].position.z);
@@ -446,7 +507,6 @@ void AppDisk::impl::RendererFinalImage()
 
 	// Read HDRBuffer data 
 	texture = HDRBuffer->GetTexture();
-
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 

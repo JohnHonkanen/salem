@@ -152,6 +152,10 @@
     <ClInclude Include="TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\depthDebug.frag" />
+    <None Include="Shaders\depthDebug.vert" />
+    <None Include="Shaders\depthShader.frag" />
+    <None Include="Shaders\depthShader.vert" />
     <None Include="Shaders\geometryPass.frag" />
     <None Include="Shaders\geometryPass.vert" />
     <None Include="Shaders\geometryPassNoMap.frag" />

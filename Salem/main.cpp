@@ -24,51 +24,52 @@ int main(int argc, char* argv[]) {
 			transform = mat4(1.0);
 			transform = translate(transform, vec3(2.0f * x, -2.0f, -2.0f * z));
 			instance->AddInstance(transform);
+
+			if (x == 12) {
+				for (int y = 0; y < 5; y++) {
+					transform = mat4(1.0);
+					transform = translate(transform, vec3(2.0f * x, -2.0f + y, -2.0f * z));
+					instance->AddInstance(transform);
+				}
+			}
 		}
 	}
-	instance = (Instance*)salem->AddObject(instance, true, "geometry_instance_no_map"); // All deferred shading needs to use geometry shader
-	instance->SetMaterialMaps("Assets/Textures/wall.jpg", "Assets/Textures/container2_specular.bmp", "");
 
 	PointLight light0{
-		vec3(10.0f, 5.0f, -20.0f), // Position
-		vec3(10.0f), // Ambient
-		vec3(0.5f), // Diffuse
+		vec3(5.0f, 5.0f, -12.0f), // Position
+		vec3(1.0f), // Ambient
+		vec3(1.0f), // Diffuse
 		vec3(0.15f), // Specular
 		1.0f, 0.1f, 3.0f // constant, linear, quadratic
 	};
 
 	salem->AddPointLights(light0);
+	transform = mat4(1.0);
+	transform = translate(transform, vec3(5.0f, 5.0f, -12.0f));
+	instance->AddInstance(transform);
 
-	Instance *shroom = new Instance("boletus/boletus.dae");
+	transform = mat4(1.0);
+	transform = translate(transform, vec3(10.0f, -0.0f, -10.0f));
+	instance->AddInstance(transform);
 
-	mat4 base = mat4(1.0);
-	base = scale(base,  vec3(0.02f));
-	base = rotate(base, radians(-90.0f), vec3(1,0,0));
+	transform = mat4(1.0);
+	transform = translate(transform, vec3(14.0f, -0.0f, -10.0f));
+	instance->AddInstance(transform);
 
-	mat4 mTransform(1.0);
-	mTransform = translate(mTransform, vec3(10.0f, 5.0f, -20.0f));
+	instance = (Instance*)salem->AddObject(instance, true, "geometry_instance_no_map"); // All deferred shading needs to use geometry shader
+	instance->SetMaterialMaps("Assets/Textures/wall.jpg", "Assets/Textures/container2_specular.bmp", "");
 
-	shroom->AddInstance(mTransform * base);
 
-	mTransform = mat4(1.0);
-	mTransform = translate(mTransform, vec3(12.0f, -1.0f, -9.0f));
-	shroom->AddInstance(mTransform * base);
-
-	mTransform = mat4(1.0);
-	mTransform = translate(mTransform, vec3(8.0f, 2.0f, -12.0f));
-	shroom->AddInstance(mTransform * base);
-
-	mTransform = mat4(1.0);
-	mTransform = translate(mTransform, vec3(10.0f, 2.0f, -15.0f));
-	shroom->AddInstance(mTransform * base);
-
-	mTransform = mat4(1.0);
-	mTransform = translate(mTransform, vec3(10.0f, 0.0f, -5.0f));
-	shroom->AddInstance(mTransform * base);
-
-	shroom = (Instance*)salem->AddObject(shroom, true, "geometry_instance_no_map"); // All deferred shading needs to use geometry shader
 
 	vec3 camerPos(3.0f, 0.0f, -5.0f);
+
+	////gangnam
+	//Object * object = salem->AddObject("nightshade/nightshade.dae", true, "skinned");
+	//object->Translate(vec3(10.0f, 2.0f, -5.0f));
+	//object->Scale(vec3(0.0003f));
+	//object->SetMaterialMaps("Assets/Textures/nightshade_diffuse.png",
+	//	"Assets/Textures/nightshade_specular.png",
+	//	"Assets/Textures/nightshade_normal.png");
 
 
 	////////////////////////////////////ROOM 1/////////////////////////////////////////
@@ -194,13 +195,13 @@ int main(int argc, char* argv[]) {
 	////	"Assets/Textures/parasiteZombie_specular.png",
 	////	"Assets/Textures/parasiteZombie_normal.png");
 
-	////gangnam
-	//Object * object = salem->AddObject("nightshade/nightshade.dae", true, "skinned");
-	//object->Translate(vec3(7.0f, -1.0f, -27.0f));
-	//object->Scale(vec3(0.0003f));
-	//object->SetMaterialMaps("Assets/Textures/nightshade_diffuse.png",
-	//	"Assets/Textures/nightshade_specular.png",
-	//	"Assets/Textures/nightshade_normal.png");
+	//gangnam
+	/*Object * object = salem->AddObject("nightshade/nightshade.dae", true, "skinned");
+	object->Translate(vec3(7.0f, -1.0f, -27.0f));
+	object->Scale(vec3(0.0003f));
+	object->SetMaterialMaps("Assets/Textures/nightshade_diffuse.png",
+		"Assets/Textures/nightshade_specular.png",
+		"Assets/Textures/nightshade_normal.png");*/
 
 
 	//Instance *shroom = new Instance("boletus/boletus.dae");
