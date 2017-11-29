@@ -33,6 +33,8 @@ struct AppDisk::impl {
 
 	int shadowWidth = 1024;
 	int shadowHeight = 1024;
+
+	float angle = 0;
 	glm::mat4 lightSpaceMatrix;
 	
 	void RenderDepthPass();
@@ -87,6 +89,18 @@ void AppDisk::Start()
 
 void AppDisk::Update(float dt)
 {
+	//Move PointLight
+	vec3 center = vec3(5.0f, 5.0f, -12.0f);
+	float dist = 5.0f;
+	float PI = 3.14;
+	
+	float x = cos(pImpl->angle) * dist;
+	float z = sin(pImpl->angle) *dist;
+
+	pImpl->pointLights[0].position = vec3(x, 0, z) + center;
+
+	pImpl->angle += 1.0f * dt;
+
 	pImpl->renderer->camera.Update(dt);
 	for (int i = 0; i < pImpl->objects.size(); i++) {
 		pImpl->objects[i]->Update(dt);
@@ -170,13 +184,12 @@ void AppDisk::impl::RenderDepthPass()
 {
 	glm::mat4 lightProjection, lightView;
 	float near_plane = 1.0f, far_plane = 20.0f;
-	lightProjection = glm::perspective(radians(45.0f), 1.0f, near_plane, far_plane);
-	//lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
-	vec3 pos1 = renderer->camera.GetModelMatrix()[3];
+	//lightProjection = glm::perspective(radians(45.0f), 1.0f, near_plane, far_plane);
+	lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+	vec3 pos1 = pointLights[0].position;
 	vec3 pos2(10.0f, 2.0f, -10.0f);
-	vec3 pos3 = renderer->camera.Front();//normalize(pos2 - pos1);
-	vec3 up = renderer->camera.Up();
-	lightView = glm::lookAt(pos1, pos1 - pos3, up);
+	vec3 pos3 = normalize(pos2 - pos1);
+	lightView = glm::lookAt(pos1, pos1 + pos3, vec3(0,1,0));
 	lightSpaceMatrix = lightProjection * lightView;
 
 	ShaderManager *shader = renderer->GetShaderManager();

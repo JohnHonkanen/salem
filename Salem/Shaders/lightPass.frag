@@ -111,7 +111,7 @@ void main(void) {
 	}
 
 	// Phase 2: Calculate Spot Light
-	result += calcSpotLight(spotLight, Normal, FragPos, viewDir, Diffuse, Specular, Shininess, fragPosLightSpace);
+	//result += calcSpotLight(spotLight, Normal, FragPos, viewDir, Diffuse, Specular, Shininess, fragPosLightSpace);
 	
 	// Phase 3: Apply Emission / Glow
 	result += Emission;
@@ -178,10 +178,10 @@ vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, v
 	diffuse *= attenuation;
 	specular *= attenuation;
 
-	//float shadow = ShadowCalculation(fragPosLightSpace, Normal, FragPos,light.position.xyz);
+	float shadow = ShadowCalculation(fragPosLightSpace, Normal, FragPos,light.position.xyz);
 
-	//return (ambient + (1.0 - shadow) * (diffuse + specular)) * Diffuse;
-	return (ambient + diffuse + specular);
+	return (ambient + (1.0 - shadow) * (diffuse + specular)) * Diffuse;
+	//return (ambient + diffuse + specular);
 }
 
 vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess, vec4 fragPosLightSpace) {
