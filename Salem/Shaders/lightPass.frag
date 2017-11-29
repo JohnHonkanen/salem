@@ -29,6 +29,8 @@ struct SpotLight {
 
 in vec2 out_UV;
 
+vec4 fragPosLightSpace;
+
 //out vec4 out_Color;
 layout (location = 0) out vec4 out_Color;
 layout (location = 1) out vec4 out_BrightColor;
@@ -37,6 +39,7 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 uniform sampler2D gEmission;
+uniform sampler2D shadowMap;
  
 const int MAX_LIGHTS = 100;
 uniform int totalLights;
@@ -44,14 +47,23 @@ uniform PointLight pointLight[MAX_LIGHTS];
 uniform SpotLight spotLight;
 uniform vec3 viewPosi; 
 
+// Shadows
+uniform float near_plane;
+uniform float far_plane;
 uniform mat4 lightSpaceMatrix;
 
 // Function prototypes
-vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess);
-vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess);
+vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess, vec4 fragPosLightSpace);
+vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess, vec4 fragPosLightSpace);
+float calculateShadows(vec4 fragPosLightSpace);
+float LinearDepth(float depth);
 
 void main(void) {
 	
+	out_Color = texture(shadowMap, out_UV);
+
+	return;
+
 	// Retrieve information from G-Buffer
 	vec3 FragPos = texture(gPosition, out_UV).rgb;
 	vec3 Normal = texture(gNormal, out_UV).rgb;
@@ -60,31 +72,29 @@ void main(void) {
 	vec3 Emission = texture(gEmission, out_UV).rgb;
 	float Shininess = texture(gEmission, out_UV).a;
 
+	// Retrieve Depthmap information and configure for perspective camera
+	float depthValue = texture(shadowMap, out_UV).r;
+	vec3 result = vec3(LinearDepth(depthValue) / far_plane); // for perspective
+
 	// Transform the world-space vertex position to light space. 
-	vec4 FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0f);
+	fragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0f);
 
 	// Properties:
 	vec3 viewDir = normalize(viewPosi - FragPos);
 
 	// Phase 1: Calculate Point Light
-	vec3 result;
-	
+
 	int numLight = 0;
 	numLight = min(totalLights, MAX_LIGHTS);
 	for(int i = 0; i < numLight; i++){
-		result += calcPointLight(pointLight[i], Normal, FragPos, viewDir, Diffuse, Specular, Shininess);
+		result += calcPointLight(pointLight[i], Normal, FragPos, viewDir, Diffuse, Specular, Shininess, fragPosLightSpace);
 	}
 
 	// Phase 2: Calculate Spot Light
-	result += calcSpotLight(spotLight, Normal, FragPos, viewDir, Diffuse, Specular, Shininess);
+	result += calcSpotLight(spotLight, Normal, FragPos, viewDir, Diffuse, Specular, Shininess, fragPosLightSpace);
 	
 	// Phase 3: Apply Emission / Glow
 	result += Emission;
-
-	// Phase 4: Apply Gamma Correction
-	//float gammaValue = 1 / 2.2f;
-
-	//result += pow(result, vec3(gammaValue));
 
 	// Phase 4: Output results
 	out_Color = vec4(result , 1.0f);
@@ -106,7 +116,7 @@ void main(void) {
 }
 
 
-vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess){
+vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess, vec4 fragPosLightSpace){
 
 	// Normalize the resulting direction vector
 	vec3 lightDir = normalize(light.position.xyz - FragPos.xyz);
@@ -121,6 +131,9 @@ vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, v
 	// Blinn-Phong specular shading 
 	float spec = pow(max(dot(Normal, halfwayDir), 0.0f), Shininess);
 
+	// Calculate Shadow
+	float shadow = calculateShadows(fragPosLightSpace);
+
 	// Attenuation
 	float Distance = length(light.position - FragPos);
 	float attenuation = 1.0f / (light.constant + light.linear * Distance + light.quadratic * (Distance * Distance));
@@ -130,21 +143,15 @@ vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, v
 	vec3 diffuse = light.diffuse * diff *  Diffuse;
 	vec3 specular = light.specular * spec * Specular;
 
-	//Debug
-	//diffuse = vec3(diff, Diffuse.y, Diffuse.z);
-
-	//return diffuse;
-
-	//end of Debug
-
 	ambient *= attenuation;
 	diffuse *= attenuation;
 	specular *= attenuation;
 
-	return (ambient + diffuse + specular);
+	// Combine results
+	return (ambient + (1.0f -shadow) * (diffuse + specular));
 }
 
-vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess) {
+vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess, vec4 fragPosLightSpace) {
 
 	// Normalize the resulting direction vector
 	vec3 lightDir = normalize(light.position.xyz - FragPos.xyz);
@@ -159,6 +166,9 @@ vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec
 	// Blinn-Phong specular shading 
 	float spec = pow(max(dot(Normal, halfwayDir), 0.0f), Shininess);
 	
+	// Calculate Shadow
+	float shadow = calculateShadows(fragPosLightSpace);
+
 	// Attenuation
 	float Distance = length(light.position - FragPos);
 	float attenuation = 1.0f / (light.constant + light.linear * Distance + light.quadratic * (Distance * Distance));
@@ -178,5 +188,33 @@ vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec
 	diffuse *= attenuation * intensity;
 	specular *= attenuation * intensity;
 
-	return (ambient + diffuse + specular);
+	//return (ambient + diffuse + specular);
+	return (ambient + (1.0f -shadow) * (diffuse + specular));
+}
+
+float calculateShadows(vec4 fragPosLightSpace){
+	// perspecitve divide to transform the NDC coordinates to the range of [0,1]
+	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+	// transform to [0,1] range
+	projCoords = projCoords * 0.5 + 0.5;
+
+	// get the closest value from the light's perspective (using the [0,1] range fragPosLight as the coords)
+	float closestDepth = texture(shadowMap, projCoords.xy).r;
+
+	// get depth of current fragment from light's perspective
+	float currentDepth = projCoords.z;
+
+	// now check whether current fragPos is in shadow
+
+	float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+
+	return shadow;
+
+}
+
+float LinearDepth(float depth){
+	float z = depth * 2.0f - 1.0f; 
+	
+	return (2.0f * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane));
 }

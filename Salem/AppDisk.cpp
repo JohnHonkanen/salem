@@ -34,7 +34,8 @@ struct AppDisk::impl {
 	int shadowWidth = 1024;
 	int shadowHeight = 1024;
 
-	float near_plane, far_plane;
+	float near_plane = 1.0f;
+	float far_plane = 50.0f;
 	mat4 lightSpaceMatrix;
 
 	void RenderGeometryPass();
@@ -268,6 +269,16 @@ void AppDisk::impl::RenderLightPass()
 
 	// Shadow/DepthMap 
 
+	shadowBuffer->BindForReading();
+	unsigned int tex = shadowBuffer->GetTexture();
+
+	shaderManager->SetUniformLocation1f(program, "near_plane", near_plane);
+	shaderManager->SetUniformLocation1f(program, "near_plane", far_plane);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, tex);
+
+	shaderManager->SetUniformLocation1i(program, "shadowMap", 4);
 
 	RenderQuad();
 }
@@ -336,9 +347,7 @@ void AppDisk::impl::RenderShadowPass()
 	glUseProgram(program);
 
 	mat4 lightProjection, lightView;
-	near_plane = 1.0f; 
-	far_plane = 50.5f;
-	
+
 	vec3 lightPos(10.0f, 5.0f, -20.0); // Need to update once test is completed
 	vec3 objPosi(10.0f, 2.0f, -15.0f);
 	vec3 vectorDif = glm::normalize(objPosi - lightPos);
