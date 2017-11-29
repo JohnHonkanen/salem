@@ -197,8 +197,11 @@ void AppDisk::impl::RenderLightPass()
 	unsigned int program = renderer->GetShader("lightPass");
 
 	gBuffer->BindForReading();
-
 	gBuffer->GetTextures(gPosition, gNormal, gAlbedoSpec, gEmission);
+
+	shadowBuffer->BindForReading();
+	unsigned int tex;
+	tex = shadowBuffer->GetTexture();
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gPosition);
@@ -208,6 +211,8 @@ void AppDisk::impl::RenderLightPass()
 	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, gEmission);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, tex);
 
 	// View position of camera
 
@@ -267,20 +272,10 @@ void AppDisk::impl::RenderLightPass()
 	shaderManager->SetUniformLocation1f(program, "spotLight.outerCutOff", glm::cos(glm::radians(17.5f))); //glm::cos(glm::radians(12.5f * 1.2f))); // 17.5
 
 	// Shadow/DepthMap 
-
-	shadowBuffer->BindForReading();
-
 	shaderManager->SetUniformLocation1f(program, "near_plane", near_plane);
 	shaderManager->SetUniformLocation1f(program, "far_plane", far_plane);
-
-	unsigned int tex;
-
-	tex = shadowBuffer->GetTexture();
-
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, tex); // bind texture of depth map.
-
-	shaderManager->SetUniformLocation1i(program, "shadowMap", 4);
+	shaderManager->SetUniformLocation1i(program, "depthMap", 4);
+	shaderManager->SetUniformMatrix4fv(program, "lightSpaceMatrix", lightSpaceMatrix);
 
 	RenderQuad();
 }
@@ -365,33 +360,7 @@ void AppDisk::impl::RenderShadowPass()
 		objects[i]->Render(renderer.get(), "depthMap");
 	}
 
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	/* 2) Render scene as normal with shadow mapping (using depth map)*/
 	glViewport(0, 0, windowWidth, windowHeight); // Reset viewport to (Screen width and height)
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//// Render depth map to quad for visual debugging
-	//program = renderer->GetShader("shadowMapping");
-	//glUseProgram(program);
-
-	//shaderManager->SetUniformLocation1f(program, "near_plane", near_plane);
-	//shaderManager->SetUniformLocation1f(program, "far_plane", far_plane);
-
-	//unsigned int tex;
-
-	//tex = shadowBuffer->GetTexture();
-
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, tex); // bind texture of depth map.
-
-	//shaderManager->SetUniformLocation1i(program, "depthMap", 0);
-
-	//RenderQuad(); // Render scene
-
-	// Re-correct viewport to window resolution.
-	//glViewport(0, 0, windowWidth, windowHeight);
 }
 
 void AppDisk::impl::RenderBloomPass()

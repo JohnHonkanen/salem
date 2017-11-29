@@ -39,7 +39,7 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 uniform sampler2D gEmission;
-uniform sampler2D shadowMap;
+uniform sampler2D depthMap;
  
 const int MAX_LIGHTS = 100;
 uniform int totalLights;
@@ -56,7 +56,6 @@ uniform mat4 lightSpaceMatrix;
 vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess, vec4 fragPosLightSpace);
 vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess, vec4 fragPosLightSpace);
 float calculateShadows(vec4 fragPosLightSpace);
-float LinearDepth(float depth);
 
 void main(void) {
 
@@ -69,8 +68,7 @@ void main(void) {
 	float Shininess = texture(gEmission, out_UV).a;
 
 	// Retrieve Depthmap information and configure for perspective camera
-	float depthValue = texture(shadowMap, out_UV).r;
-	vec3 result = vec3(LinearDepth(depthValue) / far_plane); // for perspective
+	float depthValue = texture(depthMap, out_UV).r;
 
 	// Transform the world-space vertex position to light space. 
 	fragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0f);
@@ -79,6 +77,7 @@ void main(void) {
 	vec3 viewDir = normalize(viewPosi - FragPos);
 
 	// Phase 1: Calculate Point Light
+	vec3 result;
 
 	int numLight = 0;
 	numLight = min(totalLights, MAX_LIGHTS);
@@ -130,7 +129,6 @@ vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, v
 
 	// Calculate Shadow
 	float shadow = calculateShadows(fragPosLightSpace);
-	shadow = 1.0f - shadow;
 
 	// Attenuation
 	float Distance = length(light.position - FragPos);
@@ -138,15 +136,15 @@ vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, v
 
 	// Combine results
 	vec3 ambient = light.ambient * Diffuse;
-	vec3 diffuse = (light.diffuse * diff ) * shadow *  Diffuse;
-	vec3 specular = (light.specular * spec) * shadow  * Specular;
+	vec3 diffuse = light.diffuse * diff * Diffuse;
+	vec3 specular = light.specular * spec * Specular;
 
 	ambient *= attenuation;
 	diffuse *= attenuation;
 	specular *= attenuation;
 
 	// Combine results
-	return (ambient + diffuse + specular);
+	return (ambient + (1.0f - shadow) * (diffuse + specular));
 }
 
 vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess, vec4 fragPosLightSpace) {
@@ -178,16 +176,20 @@ vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec
 	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0); // We clamp the first argument between the values 0.0 and 1.0 to make sure that the intensity values don't end up outside the [0, 1] interval.
 
 	// Combine results
-	vec3 ambient = light.ambient * Diffuse;
-	vec3 diffuse = light.diffuse * diff * Diffuse;
-	vec3 specular = light.specular * spec * Specular;
+	//vec3 ambient = light.ambient * Diffuse;
+	//vec3 diffuse = light.diffuse * diff * Diffuse;
+	//vec3 specular = light.specular * spec * Specular;
 	
+	vec3 ambient = light.ambient * Diffuse;
+	vec3 diffuse = light.diffuse * diff  * Diffuse;
+	vec3 specular = light.specular * spec * Specular;
+
 	ambient *= attenuation * intensity; // If prefered. Remove ambient attenuation to ensure that light in spotlight isn't too dark when we move too far away.
 	diffuse *= attenuation * intensity;
 	specular *= attenuation * intensity;
 
 	//return (ambient + diffuse + specular);
-	return (ambient + (1.0f -shadow) * (diffuse + specular));
+	return (ambient +  (1.0f - shadow) * (diffuse + specular));
 }
 
 float calculateShadows(vec4 fragPosLightSpace){
@@ -198,7 +200,7 @@ float calculateShadows(vec4 fragPosLightSpace){
 	projCoords = projCoords * 0.5 + 0.5;
 
 	// get the closest value from the light's perspective (using the [0,1] range fragPosLight as the coords)
-	float closestDepth = texture(shadowMap, projCoords.xy).r;
+	float closestDepth = texture(depthMap, projCoords.xy).r;
 
 	// get depth of current fragment from light's perspective
 	float currentDepth = projCoords.z;
@@ -209,10 +211,4 @@ float calculateShadows(vec4 fragPosLightSpace){
 
 	return shadow;
 
-}
-
-float LinearDepth(float depth){
-	float z = depth * 2.0f - 1.0f; 
-	
-	return (2.0f * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane));
 }
