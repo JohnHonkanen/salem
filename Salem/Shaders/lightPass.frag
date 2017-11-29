@@ -44,6 +44,8 @@ uniform PointLight pointLight[MAX_LIGHTS];
 uniform SpotLight spotLight;
 uniform vec3 viewPosi; 
 
+uniform mat4 lightSpaceMatrix;
+
 // Function prototypes
 vec3 calcPointLight(PointLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess);
 vec3 calcSpotLight(SpotLight light, vec3 Normal, vec3 FragPos, vec3 viewDir, vec3 Diffuse, float Specular, float Shininess);
@@ -57,6 +59,9 @@ void main(void) {
 	float Specular = texture(gAlbedoSpec, out_UV).a;
 	vec3 Emission = texture(gEmission, out_UV).rgb;
 	float Shininess = texture(gEmission, out_UV).a;
+
+	// Transform the world-space vertex position to light space. 
+	vec4 FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0f);
 
 	// Properties:
 	vec3 viewDir = normalize(viewPosi - FragPos);

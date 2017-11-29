@@ -34,6 +34,9 @@ struct AppDisk::impl {
 	int shadowWidth = 1024;
 	int shadowHeight = 1024;
 
+	float near_plane, far_plane;
+	mat4 lightSpaceMatrix;
+
 	void RenderGeometryPass();
 	void RenderLightPass();
 	void PointLightPass();
@@ -102,25 +105,25 @@ void AppDisk::Render()
 	/*Do Shadow Pass*/
 	pImpl->RenderShadowPass();
 
-	///* Do Deferred Rendering Passes */
-	///* Do Geometry Pass*/
-	//pImpl->RenderGeometryPass();
-	///* Do Light Pass */
-	//pImpl->RenderLightPass();
-	///*-------------------------------*/
+	/* Do Deferred Rendering Passes */
+	/* Do Geometry Pass*/
+	pImpl->RenderGeometryPass();
+	/* Do Light Pass */
+	pImpl->RenderLightPass();
+	/*-------------------------------*/
 
-	///*Do Bloom Pass*/
-	//pImpl->RenderBloomPass();
-	///*-------------------------------*/
+	/*Do Bloom Pass*/
+	pImpl->RenderBloomPass();
+	/*-------------------------------*/
 
-	///*Do HDR Pass to tone map*/
-	//pImpl->RenderHDRPass();
-	///*-------------------------------*/
-	//pImpl->RendererFinalImage();
+	/*Do HDR Pass to tone map*/
+	pImpl->RenderHDRPass();
+	/*-------------------------------*/
+	pImpl->RendererFinalImage();
 
-	///* Do Forward Rendering Passes  */
-	//pImpl->RenderForward();
-	///*-------------------------------*/
+	/* Do Forward Rendering Passes  */
+	pImpl->RenderForward();
+	/*-------------------------------*/
 }
 
 void AppDisk::Input(SDL_Event* sdlEvent)
@@ -223,20 +226,6 @@ void AppDisk::impl::RenderLightPass()
 
 	/**********POINTLIGHT PROPERTIES**********/
 
-	//// Camera
-	//shaderManager->SetUniformLocation3f(program, "pointLight.position",
-	//	15.0f, 6.0f, -5.0f);
-
-	//// Pointlight Uniforms 
-	//shaderManager->SetUniformLocation3f(program, "pointLight.ambient", 0.5f, 0.5f, 0.5f);
-	//shaderManager->SetUniformLocation3f(program, "pointLight.diffuse", 0.5f, 0.5f, 0.5f);
-	//shaderManager->SetUniformLocation3f(program, "pointLight.specular", 0.15f, 0.15f, 0.15f);
-
-	//// Pointlight Attenuation
-	//shaderManager->SetUniformLocation1f(program, "pointLight.constant", 1.0f);
-	//shaderManager->SetUniformLocation1f(program, "pointLight.linear", 0.1f);
-	//shaderManager->SetUniformLocation1f(program, "pointLight.quadratic", 3.0f);
-
 	shaderManager->SetUniformLocation1i(program, "totalLights", pointLights.size());
 
 	for (int i = 0; i < pointLights.size(); i++) {
@@ -277,10 +266,8 @@ void AppDisk::impl::RenderLightPass()
 	shaderManager->SetUniformLocation1f(program, "spotLight.cutOff", glm::cos(glm::radians(12.5f))); //glm::cos(glm::radians(5.5f * 1.2f))); // 12.5
 	shaderManager->SetUniformLocation1f(program, "spotLight.outerCutOff", glm::cos(glm::radians(17.5f))); //glm::cos(glm::radians(12.5f * 1.2f))); // 17.5
 
-	// Material Uniforms + Properties
+	// Shadow/DepthMap 
 
-	//shaderManager->SetUniformLocation3f(program, "diffuse", 1.0f, 0.5f, 0.31f);
-	//shaderManager->SetUniformLocation3f(program, "specular", 0.5f, 0.5f, 0.5f);
 
 	RenderQuad();
 }
@@ -349,7 +336,8 @@ void AppDisk::impl::RenderShadowPass()
 	glUseProgram(program);
 
 	mat4 lightProjection, lightView;
-	float near_plane = 1.0f, far_plane = 50.5f;
+	near_plane = 1.0f; 
+	far_plane = 50.5f;
 	
 	vec3 lightPos(10.0f, 5.0f, -20.0); // Need to update once test is completed
 	vec3 objPosi(10.0f, 2.0f, -15.0f);
@@ -358,7 +346,7 @@ void AppDisk::impl::RenderShadowPass()
 	lightProjection = glm::perspective(glm::radians(45.0f), (float)(shadowWidth / shadowHeight), near_plane, far_plane);
 	lightView = glm::lookAt(lightPos, lightPos + vectorDif, glm::vec3(0.0f, 1.0f, 0.0f));
 	
-	mat4 lightSpaceMatrix = lightProjection * lightView;
+	lightSpaceMatrix = lightProjection * lightView;
 
 	shaderManager->SetUniformMatrix4fv(program, "lightSpaceMatrix", lightSpaceMatrix);
 
@@ -368,36 +356,8 @@ void AppDisk::impl::RenderShadowPass()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	/* 2) Render scene as normal with shadow mapping (using depth map)*/
-	glViewport(0, 0, windowWidth, windowHeight); // Reset viewport to (Screen width and height)
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Render depth map to quad for visual debugging
-	program = renderer->GetShader("shadowMapping");
-	glUseProgram(program);
-
-	shaderManager->SetUniformLocation1f(program, "near_plane", near_plane);
-	shaderManager->SetUniformLocation1f(program, "far_plane", far_plane);
-	
-	unsigned int tex;
-
-	tex = shadowBuffer->GetTexture();
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex); // bind texture of depth map.
-
-	shaderManager->SetUniformLocation1i(program, "depthMap", 0);
-
-	RenderQuad(); // Render scene
-
-	// Attach uniforms to pass data to instance.vert (for storing in gBuffer)
-	//program = renderer->GetShader("instance_shader");
-	//glUseProgram(program);
-
-	//shaderManager->SetUniformLocation1i(program, "depthMap", 0);
-	//shaderManager->SetUniformMatrix4fv(program, "lightSpaceMatrix", lightSpaceMatrix);
-
+	// Re-correct viewport to window resolution.
+	glViewport(0, 0, windowWidth, windowHeight);
 }
 
 void AppDisk::impl::RenderBloomPass()
