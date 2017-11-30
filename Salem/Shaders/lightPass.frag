@@ -41,7 +41,7 @@ uniform sampler2D gAlbedoSpec;
 uniform sampler2D gEmission;
 uniform sampler2D depthMap;
  
-const int MAX_LIGHTS = 100;
+const int MAX_LIGHTS = 200;
 uniform int totalLights;
 uniform PointLight pointLight[MAX_LIGHTS];
 uniform SpotLight spotLight;

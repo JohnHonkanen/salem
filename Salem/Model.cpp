@@ -253,6 +253,16 @@ void Model::SetMaterialMaps(const char * diffuseMap, const char * specularMap, c
 	pImpl->materials[0].normalMap = normalMap;
 }
 
+
+void Model::SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap, const char * emission)
+{
+	pImpl->materials[0].textureDirectory = "Assets/Textures/";
+	pImpl->materials[0].diffuseMap = diffuseMap;
+	pImpl->materials[0].specularMap = specularMap;
+	pImpl->materials[0].normalMap = normalMap;
+	pImpl->materials[0].emissionMap = emission;
+}
+
 void Model::SetShader(const char * shader)
 {
 	pImpl->materials[0].shader = shader;

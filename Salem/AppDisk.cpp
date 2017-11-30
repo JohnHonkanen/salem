@@ -35,12 +35,15 @@ struct AppDisk::impl {
 	int shadowHeight = 1024;
 
 	float near_plane = 1.0f;
-	float far_plane = 50.0f;
+	float far_plane = 25.0f;
 	mat4 lightSpaceMatrix;
+
+	float angle = 0;
+
+	bool showSpotLight = true;
 
 	void RenderGeometryPass();
 	void RenderLightPass();
-	void PointLightPass();
 
 	void RenderForward();
 
@@ -90,6 +93,18 @@ void AppDisk::Start()
 
 void AppDisk::Update(float dt)
 {
+	/*Light for Shadow*/
+	//Move PointLight
+	vec3 center = vec3(10.0f, 0.0f, 25.0f);
+	float dist = 8.0f;
+
+	float x = cos(pImpl->angle) * dist;
+	float z = sin(pImpl->angle) *dist;
+
+	pImpl->pointLights[0].position = vec3(x, 10, z) + center;
+
+	pImpl->angle += 1.0f * dt;
+	/*Light for Shadow*/
 	pImpl->renderer->camera.Update(dt);
 	for (int i = 0; i < pImpl->objects.size(); i++) {
 		pImpl->objects[i]->Update(dt);
@@ -104,7 +119,6 @@ void AppDisk::Render()
 {
 	/*Do Shadow Pass*/
 	pImpl->RenderShadowPass();
-
 	/* Do Deferred Rendering Passes */
 	/* Do Geometry Pass*/
 	pImpl->RenderGeometryPass();
@@ -131,6 +145,21 @@ void AppDisk::Input(SDL_Event* sdlEvent)
 	pImpl->renderer->camera.Input(sdlEvent);
 	for (int i = 0; i < pImpl->objects.size(); i++) {
 		pImpl->objects[i]->Input();
+	}
+
+	const Uint8 *keys = SDL_GetKeyboardState(NULL);
+	if (keys[SDL_SCANCODE_F]) {
+		pImpl->showSpotLight = true;
+	}
+	if (keys[SDL_SCANCODE_G]) {
+		pImpl->showSpotLight = false;
+	}
+
+	if (keys[SDL_SCANCODE_R]) {
+		for (int i = 1; i < pImpl->pointLights.size()-1; i++) {
+			pImpl->pointLights[i].ambient = vec3((rand() % 100) / 10.0f, (rand() % 100) / 10.0f, (rand() % 100) / 10.0f);
+			pImpl->pointLights[i].diffuse = pImpl->pointLights[i].ambient;
+		}
 	}
 }
 
@@ -264,12 +293,16 @@ void AppDisk::impl::RenderLightPass()
 	//shaderManager->SetUniformLocation3f(program, "spotLight.diffuse", 0.8f, 0.8f, 0.8f);
 	shaderManager->SetUniformLocation3f(program, "spotLight.specular", 0.5f, 0.5f, 0.5f);
 
-	// Spotlight Attenuation + inner/outer cutoff: Range currently set at: 3250
+	float cutOff = 12.5f, outerCutoff = 17.5f;
+	if (!showSpotLight) {
+		cutOff = 0.0f, outerCutoff = 0.0f;
+	}
+	// Spotlight Attenuation + inner/outer cutoff
 	shaderManager->SetUniformLocation1f(program, "spotLight.constant", 1.0f);
-	shaderManager->SetUniformLocation1f(program, "spotLight.linear", 0.9f); // 0.0014f
-	shaderManager->SetUniformLocation1f(program, "spotLight.quadratic", 0.32f); // 0.000007f
-	shaderManager->SetUniformLocation1f(program, "spotLight.cutOff", glm::cos(glm::radians(12.5f))); //glm::cos(glm::radians(5.5f * 1.2f))); // 12.5
-	shaderManager->SetUniformLocation1f(program, "spotLight.outerCutOff", glm::cos(glm::radians(17.5f))); //glm::cos(glm::radians(12.5f * 1.2f))); // 17.5
+	shaderManager->SetUniformLocation1f(program, "spotLight.linear", 0.9f);
+	shaderManager->SetUniformLocation1f(program, "spotLight.quadratic", 0.32f);
+	shaderManager->SetUniformLocation1f(program, "spotLight.cutOff", glm::cos(glm::radians(cutOff)));
+	shaderManager->SetUniformLocation1f(program, "spotLight.outerCutOff", glm::cos(glm::radians(outerCutoff)));
 
 	// Shadow/DepthMap 
 	shaderManager->SetUniformLocation1f(program, "near_plane", near_plane);
@@ -278,10 +311,6 @@ void AppDisk::impl::RenderLightPass()
 	shaderManager->SetUniformMatrix4fv(program, "lightSpaceMatrix", lightSpaceMatrix);
 
 	RenderQuad();
-}
-
-void AppDisk::impl::PointLightPass()
-{
 }
 
 void AppDisk::impl::RenderForward()
@@ -345,20 +374,21 @@ void AppDisk::impl::RenderShadowPass()
 
 	mat4 lightProjection, lightView;
 
-	vec3 lightPos(10.0f, 5.0f, -20.0); // renderer->camera.GetModelMatrix()[3]; 
-	vec3 objPosi(10.0f, 2.0f, -15.0f);
-	vec3 vectorDif = glm::normalize(objPosi - lightPos); // renderer->camera.Front();
+	vec3 lightPos = pointLights[0].position; 
+	vec3 objPosi = vec3(10.0f, 0.0f, 25.0f);
+	vec3 vectorDif = normalize(objPosi - lightPos);
 
-	lightProjection = glm::perspective(glm::radians(45.0f), (float)(shadowWidth / shadowHeight), near_plane, far_plane);
+	//lightProjection = glm::perspective(glm::radians(45.0f), (float)(shadowWidth / shadowHeight), near_plane, far_plane);
+	lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
 	lightView = glm::lookAt(lightPos, lightPos + vectorDif, glm::vec3(0.0f, 1.0f, 0.0f));
 	
 	lightSpaceMatrix = lightProjection * lightView;
 
 	shaderManager->SetUniformMatrix4fv(program, "lightSpaceMatrix", lightSpaceMatrix);
 
-	for (int i = 0; i < objects.size(); i++) {
-		objects[i]->Render(renderer.get(), "depthMap");
-	}
+	
+	objects[0]->Render(renderer.get(), "depthMap");
+
 
 	glViewport(0, 0, windowWidth, windowHeight); // Reset viewport to (Screen width and height)
 }

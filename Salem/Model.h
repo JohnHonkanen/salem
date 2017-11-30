@@ -75,6 +75,7 @@ public:
 	vector<Material> GetMaterial();
 	vector<GLuint> GetVAO();
 	void SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap);
+	void SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap, const char *emissionMap);
 	void SetShader(const char * shader);
 
 	void SetBoneUniforms(unsigned int shader, ShaderManager *shaderM);

@@ -18,7 +18,7 @@ public:
 	void Init(InstanceManager *manager);
 	void Update(float dt);
 
-	void SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap);
+	void SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap, const char *emission);
 	void SetShader(const char * shader);
 private:
 	struct impl;

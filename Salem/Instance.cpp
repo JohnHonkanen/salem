@@ -150,9 +150,9 @@ void Instance::Update(float dt)
 {
 	pImpl->instance->Update(dt);
 }
-void Instance::SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap)
+void Instance::SetMaterialMaps(const char * diffuseMap, const char * specularMap, const char * normalMap, const char *emission)
 {
-	pImpl->instance->SetMaterialMaps(diffuseMap, specularMap, normalMap);
+	pImpl->instance->SetMaterialMaps(diffuseMap, specularMap, normalMap, emission);
 }
 void Instance::SetShader(const char * shader)
 {
