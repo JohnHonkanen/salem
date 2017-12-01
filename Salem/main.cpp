@@ -222,8 +222,8 @@ int main(int argc, char* argv[]) {
 		"Assets/Textures/nightshade_specular.png",
 		"Assets/Textures/nightshade_normal.png");
 
-	for (int x = 0; x < 10; x++) {
-		for (int z = 0; z < 10; z++) {
+	for (int x = 0; x < 9; x++) {
+		for (int z = 0; z < 9; z++) {
 			vec3 position = vec3(20.0f + 10.0f * x, 0.0f,  -20.0f + -10.0f * z) + offset;
 			vec3 ambient = vec3((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
 			vec3 diffuse = ambient;//vec3((rand() % 10) / 10.0f, (rand() % 10) / 10.0f, (rand() % 10) / 10.0f);

@@ -14,7 +14,6 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="TextureManager.cpp" />
-    <ClCompile Include="Collider.cpp" />
     <ClCompile Include="FireFly.cpp" />
     <ClCompile Include="PointLight.cpp" />
   </ItemGroup>
@@ -31,7 +30,6 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="TextureManager.h" />
-    <ClInclude Include="Collider.h" />
     <ClInclude Include="FireFly.h" />
     <ClInclude Include="PointLight.h" />
   </ItemGroup>
