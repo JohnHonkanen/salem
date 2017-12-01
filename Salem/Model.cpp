@@ -436,11 +436,6 @@ void Model::impl::LoadModel(Assimp::Importer &importer)
 
 mat4 Model::impl::AiToGLM(aiMatrix4x4 matrix)
 {
-	/*return mat4(matrix.a1, matrix.a2, matrix.a3, matrix.a4,
-		matrix.b1, matrix.b2, matrix.b3, matrix.b4,
-		matrix.c1, matrix.c2, matrix.c3, matrix.c4,
-		matrix.d1, matrix.d2, matrix.d3, matrix.d4);*/
-	//Need to Double check order
 	return mat4(matrix.a1, matrix.b1, matrix.c1, matrix.d1,
 				matrix.a2, matrix.b2, matrix.c2, matrix.d2, 
 				matrix.a3, matrix.b3, matrix.c3, matrix.d3, 

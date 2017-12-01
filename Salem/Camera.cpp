@@ -38,12 +38,6 @@ Camera::~Camera()
 
 glm::mat4 Camera::GetView()
 {
-	//vec3 lightPos(10.0f, 5.0f, -20.0); // Need to update once test is completed
-	//vec3 objPosi(10.0f, 2.0f, -15.0f);
-	//vec3 vectorDif = glm::normalize(objPosi - lightPos);
-
-	//return glm::lookAt(lightPos, lightPos + vectorDif, vec3(0.0f, 1.0f, 0.0f));
-
 	return glm::lookAt(glm::vec3(transformMatrix[3]), glm::vec3(transformMatrix[3]) - Front(), Up());
 }
 
@@ -93,8 +87,6 @@ void Camera::Input(SDL_Event* sdlEvent)
 		int mouseX, mouseY;
 		SDL_GetMouseState(&mouseX, &mouseY);
 
-		//std::cout << mouseX << "  , " << mouseY << std::endl;
-
 		float xoffset = mouseX - pImpl->lastX;
 		float yoffset = pImpl->lastY - mouseY; // Reversed since y-coordinate range from bottom to top.
 
@@ -109,44 +101,26 @@ void Camera::Input(SDL_Event* sdlEvent)
 		mouseDir = mouseDir * vec2(mouseSensitivity * smoothing);
 		glm::vec2 smoothV;
 
+		//Interpolation
 		smoothV.x = glm::lerp(smoothV.x, mouseDir.x, 1.0f / smoothing);
 		smoothV.y = glm::lerp(smoothV.y, mouseDir.y, 1.0f / smoothing);
-
-		//xoffset *= mouseSensitivity;
-		//yoffset *= mouseSensitivity;
 
 		pImpl->yaw -= smoothV.x;
 		pImpl->pitch += smoothV.y;
 
 		pImpl->pitch = glm::clamp(pImpl->pitch, -91.0f, 91.0f);
 		SetRotation(glm::vec3(glm::radians(pImpl->pitch), glm::radians(pImpl->yaw), 0.0f));
-		//Rotate(glm::vec3(xoffset, yoffset, 0.0f));
 
 		pImpl->lastX = 640.0f;
 		pImpl->lastY = 360.0f;
-
-		
-
-		//if (pImpl->pitch > 89.0f) {
-		//	pImpl->pitch = 89.0f;
-		//}
-
-		//if (pImpl->pitch < -89.0f) {
-		//	pImpl->pitch = -89.0f;
-		//}
-
-		//std::cout << pImpl->yaw << "  , " << pImpl->pitch << std::endl;
 
 	}
 
 
 	pImpl->movement = tempMovement;
-	pImpl->rotate = tempRotate;
 }
 
 void Camera::Update(float dt)
 {
 	Translate(((Front() * pImpl->movement.z) + (Right() * pImpl->movement.x)) * dt * pImpl->cameraSpeed);
-	
-	Rotate(glm::vec3(0.0f, 1.0f, 0.0f) * float(pImpl->rotate) * dt * pImpl->cameraRotateSpeed);
 }

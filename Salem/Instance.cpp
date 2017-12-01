@@ -126,6 +126,7 @@ void Instance::Render(Renderer * r, const char * shader)
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
+		/*Draw instance using glDrawElements*/
 		glBindVertexArray(VAOs[i]);
 		glDrawElementsInstanced(GL_TRIANGLES, data[i].indexCount, GL_UNSIGNED_INT, 0, pImpl->amount);
 		glBindVertexArray(0);

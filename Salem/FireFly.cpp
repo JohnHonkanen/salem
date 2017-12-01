@@ -97,6 +97,7 @@ void FireFly::Render(Renderer * r)
 
 void FireFly::Update(float dt)
 {
+	/*Random Movement for Firefly based on dt*/
 	for (int i = 0; i < pImpl->particles*3; i++) {
 		pImpl->timepassed[i] += dt;
 
